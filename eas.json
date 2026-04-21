@@ -1,0 +1,37 @@
+{
+  "cli": {
+    "version": ">= 7.6.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "channel": "staging",
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "ARC_API_KEY": "$ARC_API_KEY"
+      }
+    },
+    "preview": {
+      "channel": "staging",
+      "developmentClient": false,
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "ARC_API_KEY": "$ARC_API_KEY"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "developmentClient": false,
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "ARC_API_KEY": "$ARC_API_KEY"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

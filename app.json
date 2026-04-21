@@ -1,0 +1,84 @@
+{
+  "expo": {
+    "name": "Lightserve Connect",
+    "slug": "lightserve-connect",
+    "version": "25.12.2",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lightserve.LightserveConnect",
+      "minimumOsVersion": "16.0",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": [
+          "comgooglemaps",
+          "waze"
+        ]
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "81f9fe0c-733b-4c33-8753-a642cfb45407"
+      }
+    },
+    "android": {
+      "minSdkVersion": 34,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.lightserve.lightserveConnect",
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "owner": "lightserve",
+    "updates": {
+      "url": "https://u.expo.dev/81f9fe0c-733b-4c33-8753-a642cfb45407",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD"
+    },
+    "plugins": [
+      "expo-asset",
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you upload them to the work order.",
+          "cameraPermission": "The app accesses your camera so you can take photos to upload to the work order."
+        }
+      ],
+      "expo-web-browser",
+      "expo-font",
+      "expo-image",
+      "expo-sharing"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}
