@@ -297,8 +297,8 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                   uncheckedColor: "#ffffff",
                   icon: "image",
                   style: {
-                    borderColor: "#01ab52",
-                    backgroundColor: "#01ab52",
+                    borderColor: "#F47C20",
+                    backgroundColor: "#F47C20",
                   },
                   onPress: () => {
                     showModal("select");
@@ -310,7 +310,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                   checkedColor: "#ffffff",
                   uncheckedColor: "#ffffff",
                   icon: "camera",
-                  style: { borderColor: "#01ab52", backgroundColor: "#01ab52" },
+                  style: { borderColor: "#F47C20", backgroundColor: "#F47C20" },
                   onPress: () => {
                     showModal("take");
                   },
