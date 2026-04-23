@@ -207,7 +207,7 @@ export default function FinalCheckOut({
               style={StyleSheet.switch}
               value={workLog}
               onValueChange={(value) => setWorkLog(value)}
-              thumbColor={workLog ? "#01ab52" : "#f4f3f4"}
+              thumbColor={workLog ? "#F47C20" : "#f4f3f4"}
             />
           </View>
           {workLog && (
@@ -300,7 +300,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={materialInst}
                   onValueChange={(value) => setMaterialInst(value)}
-                  thumbColor={materialInst ? "#01ab52" : "#f4f3f4"}
+                  thumbColor={materialInst ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
               {materialInst && (
@@ -326,7 +326,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={walkthrough}
                   onValueChange={(value) => setWalkthrough(value)}
-                  thumbColor={walkthrough ? "#01ab52" : "#f4f3f4"}
+                  thumbColor={walkthrough ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
               {forceValidate && !walkthrough && (
@@ -341,7 +341,7 @@ export default function FinalCheckOut({
                 <Text style={StyleSheet.switchLabel}>Return Needed</Text>
                 <Switch
                   style={StyleSheet.switch}
-                  thumbColor={returnNeeded ? "#01ab52" : "#f4f3f4"}
+                  thumbColor={returnNeeded ? "#F47C20" : "#f4f3f4"}
                   onValueChange={(value) => setReturnNeeded(value)}
                   value={returnNeeded}
                 />
