@@ -62,7 +62,7 @@ const shadowStyle = {
 const styles = RNStyleSheet.create({
   sigClearBtn: {
     width: "25%",
-    backgroundColor: "#3e3e3e",
+    backgroundColor: "#2C3444",
     borderRadius: 20,
     marginTop: "5%",
     height: "35%",
@@ -82,7 +82,7 @@ const styles = RNStyleSheet.create({
   },
   sigCancelBtn: {
     width: "30%",
-    backgroundColor: "#3e3e3e",
+    backgroundColor: "#2C3444",
     borderRadius: 20,
     marginTop: 15,
     height: "15%",
