@@ -14,23 +14,12 @@ import OpenMap from "./OpenMap";
 
 export default function Contacts({ selectedJob, contacts }) {
   function CoordinatorCall() {
-    let number = "";
-    if (!contacts[0].job_coordinator_phone_nbr) {
-      number = "(800) 644-2566";
-    } else {
-      number = contacts[0].job_coordinator_phone_nbr;
-    }
+    const number = contacts[0].job_coordinator_phone_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
   function AftHrsCall() {
-    let number = "";
-    if (!contacts[0].job_coordinator_after_hours_nbr) {
-      number = "(866) 780-4500";
-    } else {
-      number = contacts[0].job_coordinator_after_hours_nbr;
-    }
-
+    const number = contacts[0].job_coordinator_after_hours_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
@@ -93,7 +82,7 @@ export default function Contacts({ selectedJob, contacts }) {
           <View style={StyleSheet.containerRowView}>
             <View style={StyleSheet.horizontalRule} />
           </View>
-          <Text style={StyleSheet.TextTitle}>Lightserve Contact</Text>
+          <Text style={StyleSheet.TextTitle}>Field Coordinator</Text>
           <View style={StyleSheet.containerRowView}>
             <View style={{ flex: 1 }}>
               <Text style={StyleSheet.TextDescript}>
@@ -103,7 +92,7 @@ export default function Contacts({ selectedJob, contacts }) {
                 {contacts?.[0]?.job_coordinator_email || ""}
                 {"\n"}
                 Phone:{" "}
-                {contacts?.[0]?.job_coordinator_phone_nbr || "(800) 644-2566"}
+                {contacts?.[0]?.job_coordinator_phone_nbr || ""}
                 {"\n"}
                 Fax: {contacts?.[0]?.job_coordinator_fax_nbr || ""}
               </Text>
@@ -128,8 +117,7 @@ export default function Contacts({ selectedJob, contacts }) {
               <Text style={StyleSheet.TextDescript}>
                 Call after 5:30 PM EST
                 {"\n"}
-                {contacts?.[0]?.job_coordinator_after_hours_nbr ||
-                  "(866) 780-4500"}
+                {contacts?.[0]?.job_coordinator_after_hours_nbr || "See coordinator above"}
               </Text>
             </View>
             <View style={StyleSheet.contactIcon}>
