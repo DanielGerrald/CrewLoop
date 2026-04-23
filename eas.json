@@ -7,28 +7,19 @@
     "development": {
       "channel": "staging",
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "ARC_API_KEY": "$ARC_API_KEY"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "channel": "staging",
       "developmentClient": false,
       "distribution": "store",
-      "autoIncrement": true,
-      "env": {
-        "ARC_API_KEY": "$ARC_API_KEY"
-      }
+      "autoIncrement": true
     },
     "production": {
       "channel": "production",
       "developmentClient": false,
       "distribution": "store",
-      "autoIncrement": true,
-      "env": {
-        "ARC_API_KEY": "$ARC_API_KEY"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {
