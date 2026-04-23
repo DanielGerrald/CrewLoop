@@ -163,7 +163,6 @@ export default function Login(props) {
           );
           if (contacts !== undefined) {
             contacts.job_purchase_order_id = job.work_order.id;
-
             await insertContactSqlite(db, contacts);
           }
           const checkinArray = await getCheckInOutApi(
@@ -229,7 +228,7 @@ export default function Login(props) {
                   contentFit={"contain"}
                   placeholder={BLURHASH}
                 />
-                <Text style={StyleSheet.loginTitle}>Lightserve Connect</Text>
+                <Text style={StyleSheet.loginTitle}>CrewLoop</Text>
               </View>
               <View style={StyleSheet.loginForm}>
                 <CustomInput
@@ -255,7 +254,7 @@ export default function Login(props) {
                   />
                   <IconButton
                     icon={showPassword ? "eye-off" : "eye"}
-                    color={"#25292e"}
+                    color={"#1E2530"}
                     size={20}
                     onPress={togglePasswordVisibility}
                     style={StyleSheet.passwordVisibilityButton}
