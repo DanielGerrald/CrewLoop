@@ -14,13 +14,21 @@ if (width >= 380 && width <= 600) {
   textStyle = largeScreenText;
 }
 
+// ─── CrewLoop Brand Colors ────────────────────────────────────────────────────
+// Primary:  #1B3A6B  (deep navy blue)
+// Accent:   #F47C20  (orange)
+// Dark bg:  #1E2530  (near-black blue-grey)
+// Surface:  #2C3444  (elevated surface)
+// Muted:    #8A95A3  (muted text / placeholders)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default StyleSheet.create({
   avatarIcon: {
-    backgroundColor: "#07743A",
+    backgroundColor: "#1B3A6B",
     marginRight: 10,
   },
   avatarIconBtn: {
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     elevation: 6,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },
@@ -28,15 +36,16 @@ export default StyleSheet.create({
     shadowOpacity: 0.25,
   },
   avatarIconImage: {
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
   },
   avatarIconCheckout: {
-    backgroundColor: "#07743A",
+    backgroundColor: "#1B3A6B",
     marginRight: width * 0.03,
   },
   buttonText: {
-    color: "#000000",
+    color: "#ffffff",
     fontSize: textStyle,
+    fontWeight: "600",
   },
   backButton: {
     position: "absolute",
@@ -54,7 +63,7 @@ export default StyleSheet.create({
   },
   checkInOutBtn: {
     width: width * 0.6,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -86,7 +95,7 @@ export default StyleSheet.create({
     margin: 20,
   },
   chip: {
-    backgroundColor: "#A7C7E7",
+    backgroundColor: "#1B3A6B",
     margin: "1%",
     borderRadius: 15,
   },
@@ -102,7 +111,7 @@ export default StyleSheet.create({
   },
   columnView: { flex: 1, flexDirection: "column" },
   compJobCard: {
-    backgroundColor: "#999",
+    backgroundColor: "#2C3444",
     marginBottom: height * 0.02,
     width: "100%",
     alignItems: "center",
@@ -129,7 +138,7 @@ export default StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#1E2530",
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -138,9 +147,8 @@ export default StyleSheet.create({
   },
   fileIconRow: { padding: 10 },
   fileTextRow: { width: "85%", paddingRight: 10 },
-
   formLine: {
-    borderBottomColor: "#999",
+    borderBottomColor: "#8A95A3",
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   fpForm: {
@@ -153,7 +161,7 @@ export default StyleSheet.create({
   },
   fpSubmitBtn: {
     width: width / 1.5,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     marginTop: height * 0.08,
     marginBottom: 25,
@@ -173,7 +181,7 @@ export default StyleSheet.create({
     marginTop: height * 0.05,
   },
   fpValMessageText: {
-    color: "#FF0000",
+    color: "#FF6B6B",
     width: width * 0.65,
     marginTop: height * 0.1,
   },
@@ -184,14 +192,14 @@ export default StyleSheet.create({
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "white",
+    backgroundColor: "#8A95A3",
     marginBottom: 10,
     marginTop: 15,
   },
   image: { height: height * 0.2 },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#999",
+    backgroundColor: "#2C3444",
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -201,7 +209,7 @@ export default StyleSheet.create({
   },
   inputAreaView: {
     width: width * 0.8,
-    backgroundColor: "#999",
+    backgroundColor: "#2C3444",
     borderRadius: 15,
     minHeight: height * 0.2,
     paddingLeft: width * 0.05,
@@ -211,7 +219,7 @@ export default StyleSheet.create({
     textAlignVertical: "top",
   },
   jobCard: {
-    backgroundColor: "#999",
+    backgroundColor: "#2C3444",
     marginBottom: height * 0.02,
     width: "100%",
     elevation: 6,
@@ -258,7 +266,7 @@ export default StyleSheet.create({
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#1E2530",
     alignItems: "center",
   },
   labelView: {
@@ -268,7 +276,7 @@ export default StyleSheet.create({
   },
   loginBtn: {
     width: width * 0.6,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -320,7 +328,7 @@ export default StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#3e3e3e",
+    backgroundColor: "#2C3444",
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -346,7 +354,7 @@ export default StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#3e3e3e",
+    backgroundColor: "#2C3444",
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -414,15 +422,15 @@ export default StyleSheet.create({
   },
   SafeArea: {
     flex: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#1E2530",
     paddingTop: 15,
     paddingBottom: 15,
   },
   segmentedBtn: {
     width: width * 0.7,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
-    borderColor: "#01ab52",
+    borderColor: "#F47C20",
     elevation: 6,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },
@@ -438,7 +446,7 @@ export default StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "grey",
+    backgroundColor: "#1E2530",
   },
   signatureView: {
     alignItems: "center",
@@ -446,7 +454,7 @@ export default StyleSheet.create({
     height: width,
     width: height,
     padding: 10,
-    backgroundColor: "#999",
+    backgroundColor: "#2C3444",
     transform: [{ rotate: "270deg" }],
   },
   signatureRow: {
@@ -457,21 +465,21 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   signupText: {
-    color: "#01ab52",
+    color: "#F47C20",
     fontSize: textStyle,
     justifyContent: "flex-start",
   },
-  stagingBannerText: { color: "black", fontSize: textStyle },
+  stagingBannerText: { color: "white", fontSize: textStyle },
   stagingBannerView: {
     top: 0,
-    backgroundColor: "#ff0000",
+    backgroundColor: "#1B3A6B",
     paddingTop: height / 20,
     alignItems: "center",
     justifyContent: "center",
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",
@@ -485,7 +493,7 @@ export default StyleSheet.create({
   },
   submitBtnAttachment: {
     width: width * 0.6,
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -498,9 +506,6 @@ export default StyleSheet.create({
     shadowRadius: 6,
     shadowOpacity: 0.25,
   },
-
-  // Note: trackColor and ios_backgroundColor are Switch component props, not style properties.
-  // They are applied directly on each <Switch> component instead.
   switch: {
     elevation: 6,
     shadowColor: "black",
@@ -515,18 +520,18 @@ export default StyleSheet.create({
     marginTop: height * 0.015,
   },
   tabNavIcons: {
-    tabBarIndicatorStyle: { backgroundColor: "#01ab52" },
-    tabBarActiveTintColor: "#01ab52",
-    tabBarInactiveTintColor: "#ffffff",
+    tabBarIndicatorStyle: { backgroundColor: "#F47C20" },
+    tabBarActiveTintColor: "#F47C20",
+    tabBarInactiveTintColor: "#8A95A3",
     tabBarStyle: {
-      backgroundColor: "#25292e",
+      backgroundColor: "#1E2530",
     },
     tabBarAllowFontScaling: true,
     tabBarLabelStyle: { fontSize: textStyle - 1 },
   },
   tabBarBadge: {
     color: "#ffffff",
-    backgroundColor: "#FF0000",
+    backgroundColor: "#FF6B6B",
     paddingHorizontal: textStyle * 0.3,
     borderRadius: 50,
   },
@@ -544,23 +549,23 @@ export default StyleSheet.create({
     color: "#D3D3D3",
     fontSize: textStyle,
   },
-  textMuted: { color: "#999" },
+  textMuted: { color: "#8A95A3" },
   thumbnailView: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
   },
   TextVersion: {
-    color: "#ffffff",
+    color: "#8A95A3",
     fontSize: 10,
     justifyContent: "flex-start",
   },
   valMessageText: {
-    color: "#FF0000",
+    color: "#FF6B6B",
   },
   workLogComment: {
     flexGrow: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#1E2530",
     alignSelf: "flex-start",
     marginBottom: 15,
   },

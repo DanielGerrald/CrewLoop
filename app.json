@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "Lightserve Connect",
-    "slug": "lightserve-connect",
-    "version": "25.12.2",
+    "name": "CrewLoop",
+    "slug": "crewloop",
+    "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1E2530"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lightserve.LightserveConnect",
+      "bundleIdentifier": "com.crewloop.fieldops",
       "minimumOsVersion": "16.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -31,24 +31,18 @@
     },
     "extra": {
       "eas": {
-        "projectId": "81f9fe0c-733b-4c33-8753-a642cfb45407"
+        "projectId": ""
       }
     },
     "android": {
-      "minSdkVersion": 34,
+      "minSdkVersion": 24,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.lightserve.lightserveConnect",
+      "package": "com.crewloop.fieldops",
       "softwareKeyboardLayoutMode": "pan"
-    },
-    "owner": "lightserve",
-    "updates": {
-      "url": "https://u.expo.dev/81f9fe0c-733b-4c33-8753-a642cfb45407",
-      "enabled": true,
-      "checkAutomatically": "ON_LOAD"
     },
     "plugins": [
       "expo-asset",
