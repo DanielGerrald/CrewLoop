@@ -1,16 +1,15 @@
 import axios from "axios";
 
-import { environment as Config } from "../Config"
-
+import { environment } from "../Config";
 
 const instance = axios.create({
-  baseURL: Config.apiUrl,
+  baseURL: environment.apiUrl,
   timeout: 30000,
   headers: {
     "Content-Type": "application/x-www-form-urlencoded",
   },
   params: {
-    apikey: Config.apikey,
+    apikey: environment.apikey,
   },
 });
 
@@ -18,7 +17,7 @@ export async function getWorkOrderApi(data) {
   try {
     const response = await instance.get("/contractorApi/workOrders", {
       headers: {
-        "ARCMC-TOKEN": data.access_token,
+        "CREWLOOP-TOKEN": data.access_token,
       },
     });
     return Promise.resolve(response.data.results);

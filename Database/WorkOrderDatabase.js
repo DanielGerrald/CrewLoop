@@ -57,58 +57,6 @@ export async function getCompletedWorkOrderApi(token) {
   }
 }
 
-//---------------AWS Functions---------------//
-/*
-export async function uploadToS3(results, selectedJob) {
-  if (!results.assets || results.assets.length === 0) {
-    console.error("No assets found in the results.");
-    return;
-  }
-
-  const options = {
-    keyPrefix: selectedJob + "/",
-    bucket: "lightserve-connect",
-    region: environment.region,
-    accessKey: environment.accessKeyId,
-    secretKey: environment.secretAccessKey,
-    successActionStatus: 201,
-  };
-
-  const uploadPromises = results.assets.map(async (asset) => {
-    const file = {
-      uri: asset.uri,
-      name: asset.fileName,
-      type: asset.mimeType,
-    };
-
-    try {
-      const response = await RNS3.put(file, options);
-      if (response.status === 201) {
-        console.log("Successfully uploaded:", response.headers.location);
-        const fileName = response.headers.location
-          .split("%2F")
-          .slice(1)
-          .join("%2F");
-        const data = {
-          location: response.headers.location,
-          fileName: fileName,
-        };
-        await updateAttachmentSqlite(data);
-        return response;
-      } else {
-        console.error(`Failed to upload ${asset.fileName}: `, response);
-        return null;
-      }
-    } catch (error) {
-      console.error(`ERROR uploading ${asset.fileName}:`, error);
-      return null;
-    }
-  });
-
-  return await Promise.all(uploadPromises);
-}
- */
-
 //---------------SQLITE Functions---------------//
 
 export async function insertWorkOrderSqlite(db, data) {
@@ -129,7 +77,7 @@ export async function insertWorkOrderSqlite(db, data) {
     const placeholders = columns.map(() => "?").join(", ");
     const values = columns.map((key) => newData[key]);
     await db.runAsync(
-      `INSERT OR REPLACE INTO  workorder (${columns.join(", ")}) VALUES (${placeholders})`,
+      `INSERT OR REPLACE INTO workorder (${columns.join(", ")}) VALUES (${placeholders})`,
       [...values],
     );
 
@@ -143,7 +91,6 @@ export async function selectWorkOrderSqlite(db, key, value) {
   try {
     const query = `SELECT * FROM workorder WHERE ${key} = ?`;
     const results = await db.getAllAsync(query, [value]);
-
     return results;
   } catch (error) {
     console.log("Select SQLITE work orders failed:", error);
