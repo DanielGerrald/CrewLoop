@@ -1,51 +1,49 @@
 import * as Updates from "expo-updates";
-import Constants from "expo-constants";
-
-const arcApiKey = Constants.expoConfig?.extra?.arcApiKey;
 
 export const environment = getEnvironment();
 
 function getEnvironment() {
-  //check release channel
   switch (Updates.channel) {
     case "production":
       return {
         envName: "production",
         icon: "✅",
-        apiUrl: "https://arc.light-serve.com/lightserveConnectApi",
+        apiUrl: "https://api.crewloop-demo.com/crewloopApi",
         enableHiddenFeatures: false,
-        apikey: arcApiKey,
+        apikey: null,
         staging: false,
-      }; // prod env settings
+      };
 
     case "staging":
       return {
         envName: "staging",
         icon: "🚧",
-        apiUrl: "https://staging.light-serve.dev/lightserveConnectApi",
+        apiUrl: "https://staging.crewloop-demo.com/crewloopApi",
         enableHiddenFeatures: true,
-        apikey: arcApiKey,
+        apikey: null,
         staging: true,
-      }; // stage env settings
+      };
 
     case "development":
       return {
         envName: "development",
         icon: "⚙️",
-        apiUrl: "https://staging.light-serve.dev/lightserveConnectApi",
+        // Point to local mock API server — run `npm run mock-api` before launching the app
+        apiUrl: "http://localhost:3001",
         enableHiddenFeatures: true,
-        apikey: arcApiKey,
+        apikey: null,
         staging: true,
-      }; // dev env settings
+      };
 
     default:
       return {
-        envName: "default",
-        icon: "📜",
-        apiUrl: "https://staging.light-serve.dev/lightserveConnectApi",
+        envName: "demo",
+        icon: "🎯",
+        // Default also points to local mock API for easy employer demos
+        apiUrl: "http://localhost:3001",
         enableHiddenFeatures: true,
-        apikey: arcApiKey,
+        apikey: null,
         staging: true,
-      }; // default env settings
+      };
   }
 }
