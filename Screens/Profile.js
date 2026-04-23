@@ -140,7 +140,7 @@ export default function Profile(props) {
             <Switch
               style={StyleSheet.switch}
               trackColor={{ false: "#999", true: "#F47C20" }}
-              ios_backgroundColor="#3e3e3e"
+              ios_backgroundColor="#2C3444"
               thumbColor={isEnabledEmail ? "#F47C20" : "#f4f3f4"}
               onValueChange={(value) => setIsEnabledEmail(value)}
               value={isEnabledEmail}
@@ -151,7 +151,7 @@ export default function Profile(props) {
             <Switch
               style={StyleSheet.switch}
               trackColor={{ false: "#999", true: "#F47C20" }}
-              ios_backgroundColor="#3e3e3e"
+              ios_backgroundColor="#2C3444"
               thumbColor={isEnabledSMS ? "#F47C20" : "#f4f3f4"}
               onValueChange={(value) => setIsEnabledSMS(value)}
               value={isEnabledSMS}
