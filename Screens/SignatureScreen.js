@@ -72,7 +72,7 @@ const styles = RNStyleSheet.create({
   },
   sigSaveBtn: {
     width: "25%",
-    backgroundColor: "#01ab52",
+    backgroundColor: "#F47C20",
     borderRadius: 20,
     marginTop: "5%",
     height: "35%",
