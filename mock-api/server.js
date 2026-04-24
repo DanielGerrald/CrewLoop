@@ -24,6 +24,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Log every incoming request so you can see what the app is sending
+app.use((req, res, next) => {
+  console.log(`→ ${req.method} ${req.path}  content-type: ${req.headers["content-type"] || "none"}  body: ${JSON.stringify(req.body)}`);
+  next();
+});
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function okResponse(res, results, message = "OK") {
