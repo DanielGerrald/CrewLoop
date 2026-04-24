@@ -17,14 +17,12 @@ const instance = axios.create({
 
 export async function getLoginApi(data) {
   try {
-    let response = await instance.get("/login", {
-      params: {
-        USERNAME: data.username,
-        PASSWORD: data.password,
-      },
+    let response = await instance.post("/contractorApi/login", {
+      username: data.username,
+      password: data.password,
     });
     if (response.data.info.status === "OK") {
-      return Promise.resolve(response.data.results.user);
+      return Promise.resolve(response.data.results);
     }
   } catch (error) {
     console.error("getLogin Error:", error);
