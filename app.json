@@ -71,8 +71,6 @@
       "expo-image",
       "expo-sharing"
     ],
-    "runtimeVersion": {
-      "policy": "appVersion"
-    }
+    "runtimeVersion": "1.0.0"
   }
 }
