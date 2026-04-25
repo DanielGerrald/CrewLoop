@@ -34,17 +34,17 @@ import { useJob } from "../Context";
 
 function SummaryRow({ icon, label, value }) {
   return (
-    <View style={[StyleSheet.workLogComment, { width: "100%" }]}>
+    <View style={StyleSheet.workLogComment}>
       <View style={StyleSheet.rowView}>
         <Avatar.Icon
           style={StyleSheet.avatarIconCheckout}
           icon={icon}
           size={30}
         />
-        <View style={{ flex: 1 }}>
-          <Text style={StyleSheet.textMuted}>{label}</Text>
-          <Text style={StyleSheet.TextDescript}>{value}</Text>
-        </View>
+        <Text style={StyleSheet.TextDescript}>
+          {label}:{"\n"}
+          {` ${value}`}
+        </Text>
       </View>
     </View>
   );
