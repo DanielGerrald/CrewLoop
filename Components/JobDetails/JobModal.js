@@ -23,6 +23,7 @@ import Photos from "./Photos";
 import FinalCheckOut from "./FinalCheckOut";
 import CheckInOut from "./CheckInOut";
 import { selectCheckInOutSqlite } from "../../Database/CheckInOutDatabase";
+import { selectFinalCheckOutSqlite } from "../../Database/FinalCheckOutDatabase";
 import { useSQLiteContext } from "expo-sqlite";
 import { selectAttachmentSqlite } from "../../Database/AttachmentDatabase";
 
@@ -44,6 +45,7 @@ export default function JobModal({
   const [checkInOutData, setCheckInOutData] = useState([]);
   const [photoAttachments, setPhotoAttachments] = useState([]);
   const [fileAttachments, setFileAttachments] = useState([]);
+  const [finalCheckoutData, setFinalCheckoutData] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -61,9 +63,16 @@ export default function JobModal({
           "DESC",
         );
 
+        const checkoutRows = await selectFinalCheckOutSqlite(
+          db,
+          "job_purchase_order_id",
+          selectedJob[0].id,
+        );
+
         if (!isMounted) return;
 
         setCheckInOutData(checkInInfo);
+        setFinalCheckoutData(checkoutRows?.[0] ?? null);
 
         if (checkInInfo.length > 0) {
           const lastObj = checkInInfo[0];
@@ -288,6 +297,7 @@ export default function JobModal({
                     checkoutFormVisible={checkoutFormVisible}
                     setCheckoutFormVisible={setCheckoutFormVisible}
                     checkInOutData={checkInOutData}
+                    finalCheckoutData={finalCheckoutData}
                     onDismiss={onDismiss}
                   />
                 )}
