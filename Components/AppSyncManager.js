@@ -170,6 +170,26 @@ export function useAppSync({
       }
     }
 
+    // The API doesn't know about locally-completed jobs, so INSERT OR REPLACE
+    // above can overwrite workflow_step_label back to "Scheduled". Re-apply
+    // "Completed" for any work order that has a final_checkout record.
+    try {
+      const completedIds = await db.getAllAsync(
+        "SELECT DISTINCT job_purchase_order_id FROM final_checkout",
+      );
+      for (const { job_purchase_order_id } of completedIds) {
+        await updateWorkOrderSqlite(
+          db,
+          "workflow_step_label",
+          "Completed",
+          "id",
+          job_purchase_order_id,
+        );
+      }
+    } catch (e) {
+      console.warn("restoreCompletedStatus error:", e);
+    }
+
     const sqliteJobs = await selectWorkOrderSqlite(db, "user_id", user.user_id);
     setJobResult(sqliteJobs);
     incrementSyncVersion();

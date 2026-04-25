@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   ScrollView,
@@ -31,10 +32,29 @@ import { useSQLiteContext } from "expo-sqlite";
 import * as Network from "expo-network";
 import { useJob } from "../Context";
 
+function SummaryRow({ icon, label, value }) {
+  return (
+    <View style={StyleSheet.workLogComment}>
+      <View style={StyleSheet.rowView}>
+        <Avatar.Icon
+          style={StyleSheet.avatarIconCheckout}
+          icon={icon}
+          size={30}
+        />
+        <Text style={StyleSheet.TextDescript}>
+          {label}:{"\n"}
+          {` ${value}`}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 export default function FinalCheckOut({
   checkoutFormVisible,
   setCheckoutFormVisible,
   checkInOutData,
+  finalCheckoutData,
   selectedJob,
   onDismiss,
 }) {
@@ -207,6 +227,7 @@ export default function FinalCheckOut({
               style={StyleSheet.switch}
               value={workLog}
               onValueChange={(value) => setWorkLog(value)}
+              trackColor={{ false: "#999", true: "#F47C20" }}
               thumbColor={workLog ? "#F47C20" : "#f4f3f4"}
             />
           </View>
@@ -267,6 +288,104 @@ export default function FinalCheckOut({
             </>
           )}
 
+          {!checkoutFormVisible && finalCheckoutData && (
+            <>
+              <View style={StyleSheet.horizontalRule} />
+              <Text style={StyleSheet.TextTitle}>Final Checkout Summary</Text>
+              <View style={StyleSheet.horizontalRule} />
+
+              {finalCheckoutData.modified_date ? (
+                <SummaryRow
+                  icon="calendar-check"
+                  label="Completed"
+                  value={format(
+                    fromUnixTime(finalCheckoutData.modified_date),
+                    "MMM d, yyyy h:mm a",
+                  )}
+                />
+              ) : null}
+
+              <SummaryRow
+                icon="wrench"
+                label="Service Performed"
+                value={finalCheckoutData.service_perf === "1" ? "Yes" : "No"}
+              />
+              {finalCheckoutData.service_perf === "1" &&
+                finalCheckoutData.desc_service_perf ? (
+                <SummaryRow
+                  icon="text"
+                  label="Service Description"
+                  value={finalCheckoutData.desc_service_perf}
+                />
+              ) : null}
+
+              <SummaryRow
+                icon="package-variant-closed"
+                label="Material Installed"
+                value={finalCheckoutData.material_inst === "1" ? "Yes" : "No"}
+              />
+              {finalCheckoutData.material_inst === "1" &&
+                finalCheckoutData.desc_material_inst ? (
+                <SummaryRow
+                  icon="text"
+                  label="Material Description"
+                  value={finalCheckoutData.desc_material_inst}
+                />
+              ) : null}
+
+              <SummaryRow
+                icon="walk"
+                label="Walkthrough Complete"
+                value={
+                  finalCheckoutData.walkThrough_comp === "1" ? "Yes" : "No"
+                }
+              />
+
+              <SummaryRow
+                icon="keyboard-return"
+                label="Return Needed"
+                value={finalCheckoutData.return_needed === "1" ? "Yes" : "No"}
+              />
+              {finalCheckoutData.return_needed === "1" &&
+                finalCheckoutData.desc_return_needed ? (
+                <SummaryRow
+                  icon="text"
+                  label="Return Reason"
+                  value={finalCheckoutData.desc_return_needed}
+                />
+              ) : null}
+
+              {finalCheckoutData.desc_misc_notes ? (
+                <SummaryRow
+                  icon="note-text"
+                  label="Misc Notes"
+                  value={finalCheckoutData.desc_misc_notes}
+                />
+              ) : null}
+
+              <View style={StyleSheet.horizontalRule} />
+
+              <SummaryRow
+                icon="account-tie"
+                label="Manager Sign-off"
+                value={finalCheckoutData.manager_name}
+              />
+
+              {finalCheckoutData.signature_base64 ? (
+                <View style={{ alignItems: "center", marginTop: 10, width: "100%" }}>
+                  <Text style={StyleSheet.textMuted}>Signature</Text>
+                  <View style={{ width: "90%", backgroundColor: "#ffffff", borderRadius: 8, marginTop: 8, padding: 4 }}>
+                    <Image
+                      source={{ uri: finalCheckoutData.signature_base64 }}
+                      style={{ width: "100%", height: 120 }}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </View>
+              ) : null}
+            </>
+          )}
+
           {checkoutFormVisible && (
             <>
               <View style={StyleSheet.rowView}>
@@ -275,7 +394,8 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={servicePerf}
                   onValueChange={(value) => setServicePerf(value)}
-                  thumbColor={servicePerf ? "#01ab52" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
+                  thumbColor={servicePerf ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
               {servicePerf && (
@@ -300,6 +420,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={materialInst}
                   onValueChange={(value) => setMaterialInst(value)}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={materialInst ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
@@ -326,6 +447,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={walkthrough}
                   onValueChange={(value) => setWalkthrough(value)}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={walkthrough ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
@@ -341,6 +463,7 @@ export default function FinalCheckOut({
                 <Text style={StyleSheet.switchLabel}>Return Needed</Text>
                 <Switch
                   style={StyleSheet.switch}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={returnNeeded ? "#F47C20" : "#f4f3f4"}
                   onValueChange={(value) => setReturnNeeded(value)}
                   value={returnNeeded}

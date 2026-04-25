@@ -1,7 +1,7 @@
 import { environment } from "../Config";
 
 export default async function setupDatabase(db) {
-  const DATABASE_VERSION = 6;
+  const DATABASE_VERSION = 7;
 
   try {
     let { user_version: currentDbVersion } = await db.getFirstAsync(
@@ -95,7 +95,8 @@ export default async function setupDatabase(db) {
                   type                    TEXT,
                   user_id                 INTEGER,
                   workflow_step_label     TEXT,
-                  zip                     INTEGER
+                  zip                     INTEGER,
+                  company_name            TEXT
                 )
               `);
 
@@ -104,6 +105,7 @@ export default async function setupDatabase(db) {
                 (
                   id                              INTEGER PRIMARY KEY,
                   job_purchase_order_id           INTEGER,
+                  company_info_id                 INTEGER,
                   company_info_first_name         TEXT,
                   company_info_last_name          TEXT,
                   company_info_phone_nbr          TEXT,
