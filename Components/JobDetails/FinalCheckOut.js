@@ -373,11 +373,13 @@ export default function FinalCheckOut({
               {finalCheckoutData.signature_base64 ? (
                 <View style={{ alignItems: "center", marginTop: 10, width: "100%" }}>
                   <Text style={StyleSheet.textMuted}>Signature</Text>
-                  <Image
-                    source={{ uri: finalCheckoutData.signature_base64 }}
-                    style={{ width: "90%", height: 120, marginTop: 8 }}
-                    resizeMode="contain"
-                  />
+                  <View style={{ width: "90%", backgroundColor: "#ffffff", borderRadius: 8, marginTop: 8, padding: 4 }}>
+                    <Image
+                      source={{ uri: finalCheckoutData.signature_base64 }}
+                      style={{ width: "100%", height: 120 }}
+                      resizeMode="contain"
+                    />
+                  </View>
                 </View>
               ) : null}
             </>
