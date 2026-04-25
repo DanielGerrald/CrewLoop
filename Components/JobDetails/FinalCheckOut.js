@@ -372,9 +372,9 @@ export default function FinalCheckOut({
               />
 
               {finalCheckoutData.signature_base64 ? (
-                <View style={{ alignItems: "center", marginTop: 10, width: "100%" }}>
+                <View style={{ marginTop: 10 }}>
                   <Text style={StyleSheet.textMuted}>Signature</Text>
-                  <View style={{ width: "90%", backgroundColor: "#ffffff", borderRadius: 8, marginTop: 8, padding: 4 }}>
+                  <View style={{ backgroundColor: "#ffffff", borderRadius: 8, marginTop: 8, padding: 4 }}>
                     <Image
                       source={{ uri: finalCheckoutData.signature_base64 }}
                       style={{ width: "100%", height: 120 }}
