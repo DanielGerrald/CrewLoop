@@ -227,6 +227,7 @@ export default function FinalCheckOut({
               style={StyleSheet.switch}
               value={workLog}
               onValueChange={(value) => setWorkLog(value)}
+              trackColor={{ false: "#999", true: "#F47C20" }}
               thumbColor={workLog ? "#F47C20" : "#f4f3f4"}
             />
           </View>
@@ -393,7 +394,8 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={servicePerf}
                   onValueChange={(value) => setServicePerf(value)}
-                  thumbColor={servicePerf ? "#01ab52" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
+                  thumbColor={servicePerf ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
               {servicePerf && (
@@ -418,6 +420,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={materialInst}
                   onValueChange={(value) => setMaterialInst(value)}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={materialInst ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
@@ -444,6 +447,7 @@ export default function FinalCheckOut({
                   style={StyleSheet.switch}
                   value={walkthrough}
                   onValueChange={(value) => setWalkthrough(value)}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={walkthrough ? "#F47C20" : "#f4f3f4"}
                 />
               </View>
@@ -459,6 +463,7 @@ export default function FinalCheckOut({
                 <Text style={StyleSheet.switchLabel}>Return Needed</Text>
                 <Switch
                   style={StyleSheet.switch}
+                  trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={returnNeeded ? "#F47C20" : "#f4f3f4"}
                   onValueChange={(value) => setReturnNeeded(value)}
                   value={returnNeeded}
