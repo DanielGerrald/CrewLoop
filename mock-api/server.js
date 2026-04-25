@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function okResponse(res, results, message = "OK") {
-  return res.json({ info: { status: "OK", message }, results });
+  return res.json({ info: { status: "OK", code: 200, message }, results });
 }
 
 function errorResponse(res, message, statusCode = 400) {
@@ -477,70 +477,82 @@ app.get("/workOrderCheckins", (req, res) => {
   okResponse(res, checkinoutLog.filter((r) => r.job_purchase_order_id === id));
 });
 
-app.post("/contractorApi/checkin", (req, res) => {
-  const { job_purchase_order_id, contractor_tech_id, comment } = req.body;
+// Single endpoint handles both check-in and check-out (checking_out field distinguishes them)
+app.post("/workOrderCheckin", (req, res) => {
+  if (!requireToken(req, res)) return;
+  const jobId = parseInt(req.query.id);
+  const checkingOut = req.body["WorkOrderCheckin[checking_out]"];
   const record = {
     id: checkinoutLog.length + 1,
-    job_purchase_order_id: parseInt(job_purchase_order_id),
-    contractor_tech_id,
-    comment: comment || "",
-    checkin_date: Math.floor(Date.now() / 1000),
-    checking_out: 0,
+    job_purchase_order_id: jobId,
+    contractor_tech_id: req.body["WorkOrderCheckin[contractor_tech_id]"],
+    comment: req.body["WorkOrderCheckin[comment]"] || "",
+    checkin_date: req.body["WorkOrderCheckin[checkin_date]"] || Math.floor(Date.now() / 1000),
+    checking_out: parseInt(checkingOut) || 0,
     work_completed: 0,
     submittedToARC: "Y",
   };
   checkinoutLog.push(record);
-  console.log(`✅ Check-in recorded for job ${job_purchase_order_id}`);
-  okResponse(res, record, "Check-in recorded successfully.");
-});
-
-app.post("/contractorApi/checkout", (req, res) => {
-  const { job_purchase_order_id, contractor_tech_id, work_completed, comment } = req.body;
-  const record = {
-    id: checkinoutLog.length + 1,
-    job_purchase_order_id: parseInt(job_purchase_order_id),
-    contractor_tech_id,
-    comment: comment || "",
-    checkin_date: Math.floor(Date.now() / 1000),
-    checking_out: 1,
-    work_completed: work_completed || 0,
-    submittedToARC: "Y",
-  };
-  checkinoutLog.push(record);
-  console.log(`✅ Check-out recorded for job ${job_purchase_order_id}`);
-  okResponse(res, record, "Check-out recorded successfully.");
+  const action = record.checking_out ? "Check-out" : "Check-in";
+  console.log(`✅ ${action} recorded for job ${jobId}`);
+  okResponse(res, record, `${action} recorded successfully.`);
 });
 
 // ── Attachments ───────────────────────────────────────────────────────────────
 
-app.post("/contractorApi/attachments", (req, res) => {
-  const { job_purchase_order_id, label, type, fileName } = req.body;
+app.post("/uploadWorkOrderPhoto", (req, res) => {
+  if (!requireToken(req, res)) return;
+  const jobId = req.query.id;
   const record = {
     id: attachmentLog.length + 1,
-    job_purchase_order_id,
-    label: label || "Unlabeled",
-    type: type || "photo",
-    fileName: fileName || `attachment_${Date.now()}`,
+    job_purchase_order_id: parseInt(jobId),
+    type: "photo",
+    fileName: `photo_${Date.now()}.jpg`,
     date: Math.floor(Date.now() / 1000),
     submittedToARC: "Y",
   };
   attachmentLog.push(record);
-  console.log(`📎 Attachment received for job ${job_purchase_order_id}: ${record.fileName}`);
-  okResponse(res, record, "Attachment uploaded successfully.");
+  console.log(`📸 Photo uploaded for job ${jobId}`);
+  okResponse(res, record, "Photo uploaded successfully.");
+});
+
+app.post("/uploadWorkOrderDocument", (req, res) => {
+  if (!requireToken(req, res)) return;
+  const jobId = req.query.id;
+  const record = {
+    id: attachmentLog.length + 1,
+    job_purchase_order_id: parseInt(jobId),
+    type: "document",
+    fileName: `document_${Date.now()}`,
+    date: Math.floor(Date.now() / 1000),
+    submittedToARC: "Y",
+  };
+  attachmentLog.push(record);
+  console.log(`📄 Document uploaded for job ${jobId}`);
+  okResponse(res, record, "Document uploaded successfully.");
 });
 
 // ── Final Checkout ────────────────────────────────────────────────────────────
 
-app.post("/contractorApi/finalCheckout", (req, res) => {
-  const { job_purchase_order_id, manager_name } = req.body;
+app.post("/updateWorkOrderCheckList", (req, res) => {
+  if (!requireToken(req, res)) return;
+  const jobId = req.query.id;
+  console.log(`📋 Checklist submitted for job ${jobId}`);
+  okResponse(res, { job_purchase_order_id: parseInt(jobId) }, "Checklist updated.");
+});
+
+app.post("/finalCheckout", (req, res) => {
+  if (!requireToken(req, res)) return;
+  const jobId = req.query.id;
   const record = {
     id: finalCheckoutLog.length + 1,
-    ...req.body,
+    job_purchase_order_id: parseInt(jobId),
+    comment: req.body["WorkOrderCheckin[comment]"] || "",
     modified_date: Math.floor(Date.now() / 1000),
     submittedToARC: "Y",
   };
   finalCheckoutLog.push(record);
-  console.log(`🏁 Final checkout submitted for job ${job_purchase_order_id} — signed by ${manager_name}`);
+  console.log(`🏁 Final checkout submitted for job ${jobId}`);
   okResponse(res, record, "Final checkout submitted successfully.");
 });
 
