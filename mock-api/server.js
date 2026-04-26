@@ -402,7 +402,7 @@ app.get("/version", (req, res) => {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
-app.post("/contractorApi/login", (req, res) => {
+app.post("/login", (req, res) => {
   const { username } = req.body;
   const user = USERS.find((u) => u.username?.toLowerCase() === username?.toLowerCase());
   if (!user) return errorResponse(res, "Invalid username or password.", 401);
@@ -558,7 +558,7 @@ app.post("/finalCheckout", (req, res) => {
 
 // ── Offline Sync ──────────────────────────────────────────────────────────────
 
-app.post("/contractorApi/sync", (req, res) => {
+app.post("/sync", (req, res) => {
   const { checkinout, attachments, finalCheckouts } = req.body;
   let synced = 0;
   if (Array.isArray(checkinout))     { checkinoutLog.push(...checkinout);       synced += checkinout.length; }
@@ -589,21 +589,22 @@ app.listen(PORT, () => {
   console.log("Demo credentials:  username=demo  password=<any>");
   console.log("");
   console.log("Endpoints:");
-  console.log("  GET  /                        health check");
-  console.log("  GET  /version                 update gate");
-  console.log("  POST /contractorApi/login     authenticate");
-  console.log("  GET  /userProfile             user profile      (TOKEN header)");
-  console.log("  POST /recoverPassword         password reset");
-  console.log("  GET  /workOrders              open jobs         (TOKEN header)");
-  console.log("  GET  /workOrderDetails?id=    job details       (TOKEN header)");
-  console.log("  GET  /completedWorkOrders     completed jobs    (TOKEN header)");
-  console.log("  GET  /workOrderContacts?id=   contacts for job  (TOKEN header)");
-  console.log("  GET  /workOrderCheckins?id=   checkins for job  (TOKEN header)");
-  console.log("  POST /contractorApi/checkin");
-  console.log("  POST /contractorApi/checkout");
-  console.log("  POST /contractorApi/attachments");
-  console.log("  POST /contractorApi/finalCheckout");
-  console.log("  POST /contractorApi/sync");
-  console.log("  POST /updateUserProfile                         (TOKEN header)");
+  console.log("  GET  /                           health check");
+  console.log("  GET  /version                    update gate");
+  console.log("  POST /login                      authenticate");
+  console.log("  GET  /userProfile                user profile         (TOKEN header)");
+  console.log("  POST /recoverPassword            password reset");
+  console.log("  GET  /workOrders                 open jobs            (TOKEN header)");
+  console.log("  GET  /workOrderDetails?id=       job details          (TOKEN header)");
+  console.log("  GET  /completedWorkOrders        completed jobs       (TOKEN header)");
+  console.log("  GET  /workOrderContacts?id=      contacts for job     (TOKEN header)");
+  console.log("  GET  /workOrderCheckins?id=      checkins for job     (TOKEN header)");
+  console.log("  POST /workOrderCheckin?id=       record check-in/out  (TOKEN header)");
+  console.log("  POST /uploadWorkOrderPhoto?id=   upload photo         (TOKEN header)");
+  console.log("  POST /uploadWorkOrderDocument?id= upload document     (TOKEN header)");
+  console.log("  POST /updateWorkOrderCheckList?id= final checklist    (TOKEN header)");
+  console.log("  POST /finalCheckout?id=          final checkout       (TOKEN header)");
+  console.log("  POST /sync                       offline sync batch");
+  console.log("  POST /updateUserProfile          update profile       (TOKEN header)");
   console.log("");
 });
