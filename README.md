@@ -199,16 +199,21 @@ The mock server at `http://localhost:3001` provides:
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/version` | App version / update gate check |
-| `POST` | `/contractorApi/login` | Authenticate and return user token |
-| `GET` | `/contractorApi/workOrders` | All assigned work orders |
-| `GET` | `/contractorApi/workOrders/:id` | Single work order detail |
-| `GET` | `/contractorApi/contacts/:jobId` | Site and coordinator contacts for a job |
-| `POST` | `/contractorApi/checkin` | Record a check-in |
-| `POST` | `/contractorApi/checkout` | Record a checkout |
-| `POST` | `/contractorApi/attachments` | Upload photo or document |
-| `POST` | `/contractorApi/finalCheckout` | Submit completed job form + signature |
-| `POST` | `/contractorApi/sync` | Batch sync offline records |
-| `GET` | `/contractorApi/categoryTypes` | Job category and label types |
+| `POST` | `/login` | Authenticate and return user token |
+| `GET` | `/userProfile` | Fetch logged-in user profile |
+| `POST` | `/recoverPassword` | Send password reset |
+| `GET` | `/workOrders` | All open work orders |
+| `GET` | `/workOrderDetails?id=` | Contractor requirements and work description |
+| `GET` | `/completedWorkOrders` | Completed work orders |
+| `GET` | `/workOrderContacts?id=` | Site and coordinator contacts for a job |
+| `GET` | `/workOrderCheckins?id=` | Check-in/out history for a job |
+| `POST` | `/workOrderCheckin?id=` | Record a check-in or check-out |
+| `POST` | `/uploadWorkOrderPhoto?id=` | Upload a photo attachment |
+| `POST` | `/uploadWorkOrderDocument?id=` | Upload a document attachment |
+| `POST` | `/updateWorkOrderCheckList?id=` | Submit final checkout checklist |
+| `POST` | `/finalCheckout?id=` | Submit final checkout |
+| `POST` | `/sync` | Batch sync offline records |
+| `POST` | `/updateUserProfile` | Update user profile |
 
 All data is in-memory. Restarting the server resets to the default sample dataset.
 

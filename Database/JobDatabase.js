@@ -15,7 +15,7 @@ const instance = axios.create({
 
 export async function getWorkOrderApi(data) {
   try {
-    const response = await instance.get("/contractorApi/workOrders", {
+    const response = await instance.get("/workOrders", {
       headers: {
         "CREWLOOP-TOKEN": data.access_token,
       },
