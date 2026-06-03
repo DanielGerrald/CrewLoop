@@ -18,7 +18,7 @@ if (width >= 380 && width <= 600) {
 // Primary:  #1B3A6B  (deep navy blue)
 // Accent:   #F47C20  (orange)
 // Dark bg:  #1E2530  (near-black blue-grey)
-// Surface:  #2C3444  (elevated surface)
+// Surface:  #6A89A7  (blue-gray)
 // Muted:    #8A95A3  (muted text / placeholders)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -111,7 +111,7 @@ export default StyleSheet.create({
   },
   columnView: { flex: 1, flexDirection: "column" },
   compJobCard: {
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     marginBottom: height * 0.02,
     width: "100%",
     alignItems: "center",
@@ -199,7 +199,7 @@ export default StyleSheet.create({
   image: { height: height * 0.2 },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -209,7 +209,7 @@ export default StyleSheet.create({
   },
   inputAreaView: {
     width: width * 0.8,
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     borderRadius: 15,
     minHeight: height * 0.2,
     paddingLeft: width * 0.05,
@@ -219,7 +219,7 @@ export default StyleSheet.create({
     textAlignVertical: "top",
   },
   jobCard: {
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     marginBottom: height * 0.02,
     width: "100%",
     elevation: 6,
@@ -328,7 +328,7 @@ export default StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -354,7 +354,7 @@ export default StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -454,7 +454,7 @@ export default StyleSheet.create({
     height: width,
     width: height,
     padding: 10,
-    backgroundColor: "#2C3444",
+    backgroundColor: "#6A89A7",
     transform: [{ rotate: "270deg" }],
   },
   signatureRow: {
