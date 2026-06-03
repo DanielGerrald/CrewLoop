@@ -45,7 +45,16 @@ CrewLoop handles the full field technician workflow:
 
 ## Running the Demo Locally
 
-You will need **Node.js** and **Expo CLI** installed.
+### Prerequisites
+
+| Tool | Notes |
+|---|---|
+| **Node.js 18+** | [nodejs.org](https://nodejs.org) |
+| **Expo Go** (physical device) | [iOS App Store](https://apps.apple.com/app/expo-go/id982107779) · [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent) |
+| **Xcode** (iOS simulator, Mac only) | Install from the Mac App Store, then open it once to accept the license |
+| **Android Studio** (Android emulator) | Install and create a virtual device via the AVD Manager |
+
+---
 
 ### Step 1 — Clone the repo
 
@@ -54,20 +63,22 @@ git clone https://github.com/DanielGerrald/CrewLoop.git
 cd CrewLoop
 ```
 
-### Step 2 — Install app dependencies
+### Step 2 — Install dependencies
 
 ```bash
+# App dependencies
 npm install
+
+# Mock API dependencies
+cd mock-api && npm install && cd ..
 ```
 
 ### Step 3 — Start the mock API server
 
-The mock API runs locally and serves all the data the app needs — 5 realistic job records with contacts, addresses, and full job details.
+The mock API serves all the data the app needs — 5 realistic job records with contacts, addresses, and full job details.
 
 ```bash
-cd mock-api
-npm install
-node server.js
+npm run mock-api
 ```
 
 You should see:
@@ -83,9 +94,36 @@ Demo credentials:
   Password: any value accepted
 ```
 
-Keep this terminal running.
+Keep this terminal open and running.
 
-### Step 4 — Start the Expo app
+### Step 4 — Configure the API URL
+
+> **Simulator / emulator:** `localhost` works out of the box — skip to Step 5.
+
+> **Physical device:** Your phone can't reach your computer's `localhost`. You need to point the app at your machine's local network IP.
+
+Find your IP address:
+
+```bash
+# macOS
+ipconfig getifaddr en0
+
+# Windows (look for "IPv4 Address" under your Wi-Fi adapter)
+ipconfig
+
+# Linux
+hostname -I
+```
+
+Open `Config.js` and update the `apiUrl` in both the `development` and `default` cases:
+
+```js
+apiUrl: "http://YOUR_LOCAL_IP:3001",  // e.g. "http://192.168.1.42:3001"
+```
+
+Make sure your phone and computer are on the **same Wi-Fi network**.
+
+### Step 5 — Start the Expo dev server
 
 Open a new terminal in the project root:
 
@@ -93,9 +131,15 @@ Open a new terminal in the project root:
 npx expo start
 ```
 
-Scan the QR code with **Expo Go** on your phone, or press `i` for iOS simulator / `a` for Android emulator.
+Then choose how to run the app:
 
-### Step 5 — Log in
+| Target | How |
+|---|---|
+| **iOS Simulator** | Press `i` in the terminal (Mac + Xcode required) |
+| **Android Emulator** | Press `a` in the terminal (Android Studio AVD required) |
+| **Physical device** | Scan the QR code with the **Expo Go** app |
+
+### Step 6 — Log in
 
 ```
 Username: demo
@@ -155,16 +199,21 @@ The mock server at `http://localhost:3001` provides:
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/version` | App version / update gate check |
-| `POST` | `/contractorApi/login` | Authenticate and return user token |
-| `GET` | `/contractorApi/workOrders` | All assigned work orders |
-| `GET` | `/contractorApi/workOrders/:id` | Single work order detail |
-| `GET` | `/contractorApi/contacts/:jobId` | Site and coordinator contacts for a job |
-| `POST` | `/contractorApi/checkin` | Record a check-in |
-| `POST` | `/contractorApi/checkout` | Record a checkout |
-| `POST` | `/contractorApi/attachments` | Upload photo or document |
-| `POST` | `/contractorApi/finalCheckout` | Submit completed job form + signature |
-| `POST` | `/contractorApi/sync` | Batch sync offline records |
-| `GET` | `/contractorApi/categoryTypes` | Job category and label types |
+| `POST` | `/login` | Authenticate and return user token |
+| `GET` | `/userProfile` | Fetch logged-in user profile |
+| `POST` | `/recoverPassword` | Send password reset |
+| `GET` | `/workOrders` | All open work orders |
+| `GET` | `/workOrderDetails?id=` | Contractor requirements and work description |
+| `GET` | `/completedWorkOrders` | Completed work orders |
+| `GET` | `/workOrderContacts?id=` | Site and coordinator contacts for a job |
+| `GET` | `/workOrderCheckins?id=` | Check-in/out history for a job |
+| `POST` | `/workOrderCheckin?id=` | Record a check-in or check-out |
+| `POST` | `/uploadWorkOrderPhoto?id=` | Upload a photo attachment |
+| `POST` | `/uploadWorkOrderDocument?id=` | Upload a document attachment |
+| `POST` | `/updateWorkOrderCheckList?id=` | Submit final checkout checklist |
+| `POST` | `/finalCheckout?id=` | Submit final checkout |
+| `POST` | `/sync` | Batch sync offline records |
+| `POST` | `/updateUserProfile` | Update user profile |
 
 All data is in-memory. Restarting the server resets to the default sample dataset.
 

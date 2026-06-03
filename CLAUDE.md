@@ -40,7 +40,7 @@ SQLite is always the source of truth — screens never read directly from the AP
 
 **`Components/Context.js`** — Global state via `JobContext`. Provides `jobResult` (active job list) and `syncVersion` / `incrementSyncVersion` (a counter used to trigger re-fetches across components).
 
-**`Components/AppSyncManager.js`** — Core sync orchestration. On mount/focus, detects network state via `expo-network`, fetches from API when online, writes to SQLite, then triggers a context update. When offline, operations are queued in SQLite with a `pending` status and batch-POSTed to `POST /contractorApi/sync` on reconnect.
+**`Components/AppSyncManager.js`** — Core sync orchestration. On mount/focus, detects network state via `expo-network`, fetches from API when online, writes to SQLite, then triggers a context update. When offline, operations are queued in SQLite with a `pending` status and batch-POSTed to `POST /sync` on reconnect.
 
 **`Components/SessionManager.js`** — Auth token lifecycle; handles expiry and re-authentication.
 
@@ -79,7 +79,7 @@ Login
 
 ### Offline Queue Pattern
 
-Operations that mutate data (check-in, photo upload, final checkout) are written to SQLite immediately with a `status: 'pending'` flag. `AppSyncManager` processes the queue and POSTs to `/contractorApi/sync` when network is available. `BannerOnPendingSync.js` shows a UI indicator when the queue is non-empty.
+Operations that mutate data (check-in, photo upload, final checkout) are written to SQLite immediately with a `status: 'pending'` flag. `AppSyncManager` processes the queue and POSTs to `/sync` when network is available. `BannerOnPendingSync.js` shows a UI indicator when the queue is non-empty.
 
 ## Pending Work (PATCH_NOTES.md)
 
