@@ -7,6 +7,13 @@ CrewLoop is a cross-platform iOS/Android field service app that connects subcont
 > This repository is a portfolio demo. It uses a local mock API server with realistic sample data so you can run the full app without any account or backend dependency.
 
 ---
+## Background
+
+This app was originally built for production use at a field services company, where subcontractors use it daily to manage lighting retrofit jobs across warehouse, industrial, and commercial sites. The production version connects to a live CRM backend.
+
+This demo version replaces the proprietary API with a local mock server and uses fictional company and job data. The core application code — including the offline-first SQLite architecture, job workflow, signature capture, and photo documentation — is identical to the production implementation.
+
+---
 
 ## App Preview
 
@@ -284,13 +291,6 @@ All data is in-memory. Restarting the server resets to the default sample datase
 
 ---
 
-## Background
-
-This app was originally built for production use at a field services company, where subcontractors use it daily to manage lighting retrofit jobs across warehouse, industrial, and commercial sites. The production version connects to a live CRM backend.
-
-This demo version replaces the proprietary API with a local mock server and uses fictional company and job data. The core application code — including the offline-first SQLite architecture, job workflow, signature capture, and photo documentation — is identical to the production implementation.
-
----
 
 ## What I'd Build Next
 
