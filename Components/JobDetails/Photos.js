@@ -38,7 +38,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
   const [labels, setLabels] = useState([]);
   const [actionType, setActionType] = useState(null);
   const [buttonValue, setButtonValue] = React.useState("");
-  const workOrderId = selectedJob[0].expanded_id.split("-")[1];
+  const workOrderId = selectedJob[0].reference_code.split("-")[1];
   const [token, setToken] = useState([]);
 
   useEffect(() => {
@@ -94,12 +94,12 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
           uri: asset.uri,
           fileName: generateUniqueFileName(),
           label: label,
-          job_purchase_order_id: selectedJob[0].id,
+          assignment_id: selectedJob[0].id,
           type: "Photo",
           mimeType: asset.mimeType || "image/jpeg",
-          workord_id: workOrderId,
+          assignment_ref_id: workOrderId,
           date: moment().unix(),
-          submittedToARC: "No",
+          syncStatus: "No",
         }));
 
         const updatedImages = await saveImage(selectedImages);
@@ -186,12 +186,12 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
             uri: result.assets[0].uri,
             fileName: generateUniqueFileName(),
             label: label,
-            job_purchase_order_id: selectedJob[0].id,
+            assignment_id: selectedJob[0].id,
             type: "Photo",
             mimeType: result.assets[0].mimeType || "image/jpeg",
-            workord_id: workOrderId,
+            assignment_ref_id: workOrderId,
             date: moment().unix(),
-            submittedToARC: "No",
+            syncStatus: "No",
           },
         ];
 
@@ -231,17 +231,17 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
   };
 
   const notSubmittedImages = useMemo(() => {
-    return images.filter((image) => image?.submittedToARC === "No");
+    return images.filter((image) => image?.syncStatus === "No");
   }, [images]);
 
   const submittedImages = useMemo(() => {
     return images.filter(
       (image) =>
-        image?.submittedToARC === "Yes" || image?.submittedToARC === "Pending",
+        image?.syncStatus === "Yes" || image?.syncStatus === "Pending",
     );
   }, [images]);
 
-  if (selectedJob[0].workflow_step_label !== "Completed") {
+  if (selectedJob[0].status_label !== "Completed") {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
         <ScrollView contentContainerStyle={StyleSheet.container}>
@@ -401,7 +401,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                             {moment.unix(image.date).format("L")}
                           </Text>
                         </Chip>
-                        {image.submittedToARC === "Pending" && (
+                        {image.syncStatus === "Pending" && (
                           <Chip style={StyleSheet.chip} icon="cloud-upload">
                             Pending
                           </Chip>

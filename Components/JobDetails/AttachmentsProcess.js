@@ -14,7 +14,7 @@ export function attachmentsProcess(db, token, attachments, refreshAttachments) {
 
   const processPendingAttachments = useCallback(async () => {
     const pendingAttachments = attachments.filter(
-      (att) => att.submittedToARC === "No" || att.submittedToARC === "Pending",
+      (att) => att.syncStatus === "No" || att.syncStatus === "Pending",
     );
 
     if (syncLock.isProcessing || pendingAttachments.length === 0) return;
@@ -30,8 +30,8 @@ export function attachmentsProcess(db, token, attachments, refreshAttachments) {
       if (!hasInternet) {
         await Promise.all(
           pendingAttachments.map(async (att) => {
-            if (att.submittedToARC !== "Pending") {
-              att.submittedToARC = "Pending";
+            if (att.syncStatus !== "Pending") {
+              att.syncStatus = "Pending";
               await updateAttachmentSqlite(db, att);
             }
           }),
@@ -49,7 +49,7 @@ export function attachmentsProcess(db, token, attachments, refreshAttachments) {
 
       for (const att of pendingAttachments) {
         try {
-          att.submittedToARC = "Uploading";
+          att.syncStatus = "Uploading";
           await updateAttachmentSqlite(db, att);
 
           networkState = await Network.getNetworkStateAsync();
@@ -58,7 +58,7 @@ export function attachmentsProcess(db, token, attachments, refreshAttachments) {
             networkState.isInternetReachable === true;
 
           if (!hasInternet) {
-            att.submittedToARC = "Pending";
+            att.syncStatus = "Pending";
             await updateAttachmentSqlite(db, att);
             break;
           }
@@ -68,12 +68,12 @@ export function attachmentsProcess(db, token, attachments, refreshAttachments) {
               ? await postPhotosApi(token, att)
               : await postDocumentsApi(token, att);
 
-          att.submittedToARC = response?.status === 200 ? "Yes" : "Pending";
+          att.syncStatus = response?.status === 200 ? "Yes" : "Pending";
           await updateAttachmentSqlite(db, att);
         } catch (error) {
           console.log(`Upload failed for attachment ID ${att.id}:`, error);
 
-          att.submittedToARC = "Pending";
+          att.syncStatus = "Pending";
           try {
             await updateAttachmentSqlite(db, att);
           } catch (dbErr) {

@@ -1,7 +1,7 @@
 import { environment } from "../Config";
 
 export default async function setupDatabase(db) {
-  const DATABASE_VERSION = 8;
+  const DATABASE_VERSION = 9;
 
   try {
     let { user_version: currentDbVersion } = await db.getFirstAsync(
@@ -25,11 +25,14 @@ export default async function setupDatabase(db) {
       try {
         await db.execAsync("DROP TABLE IF EXISTS user");
         await db.execAsync("DROP TABLE IF EXISTS workorder");
+        await db.execAsync("DROP TABLE IF EXISTS assignment");
         await db.execAsync("DROP TABLE IF EXISTS contact");
         await db.execAsync("DROP TABLE IF EXISTS category_type");
         await db.execAsync("DROP TABLE IF EXISTS attachment");
         await db.execAsync("DROP TABLE IF EXISTS checkinout");
+        await db.execAsync("DROP TABLE IF EXISTS visit");
         await db.execAsync("DROP TABLE IF EXISTS final_checkout");
+        await db.execAsync("DROP TABLE IF EXISTS completion");
 
         console.log("Dropped tables successfully.");
       } catch (error) {
@@ -41,7 +44,7 @@ export default async function setupDatabase(db) {
                 CREATE TABLE IF NOT EXISTS user
                 (
                   user_id           INTEGER PRIMARY KEY,
-                  contractor_id     INTEGER,
+                  vendor_id         INTEGER,
                   company_name      TEXT,
                   username          TEXT,
                   first_name        TEXT,
@@ -64,78 +67,78 @@ export default async function setupDatabase(db) {
               `);
 
         await db.execAsync(`
-                CREATE TABLE IF NOT EXISTS workorder
+                CREATE TABLE IF NOT EXISTS assignment
                 (
-                  id                      INTEGER PRIMARY KEY,
-                  addr_1                  TEXT,
-                  addr_2                  TEXT,
-                  addr_3                  TEXT,
-                  category                TEXT,
-                  checked_in              INTEGER,
-                  city                    TEXT,
-                  completed               INTEGER DEFAULT 0,
-                  contractor_id           INTEGER,
-                  contractor_name         TEXT,
-                  contractor_requirements TEXT,
-                  created_date            TEXT,
-                  desc_of_work            TEXT,
-                  due_date                TEXT,
-                  entered_date            TEXT,
-                  expanded_id             TEXT,
-                  job_id                  INTEGER,
-                  latitude                NUMERIC,
-                  location_name           TEXT,
-                  longitude               NUMERIC,
-                  name                    TEXT,
-                  phone_nbr               TEXT,
-                  scheduled_date          INTEGER,
-                  start_date              TEXT,
-                  state                   TEXT,
-                  store_nbr               TEXT,
-                  type                    TEXT,
-                  user_id                 INTEGER,
-                  workflow_step_label     TEXT,
-                  zip                     INTEGER,
-                  company_name            TEXT
+                  id                  INTEGER PRIMARY KEY,
+                  addr_1              TEXT,
+                  addr_2              TEXT,
+                  addr_3              TEXT,
+                  category            TEXT,
+                  checked_in          INTEGER,
+                  city                TEXT,
+                  completed           INTEGER DEFAULT 0,
+                  vendor_id           INTEGER,
+                  vendor_name         TEXT,
+                  vendor_requirements TEXT,
+                  created_date        TEXT,
+                  desc_of_work        TEXT,
+                  due_date            TEXT,
+                  entered_date        TEXT,
+                  reference_code      TEXT,
+                  site_id             INTEGER,
+                  latitude            NUMERIC,
+                  location_name       TEXT,
+                  longitude           NUMERIC,
+                  name                TEXT,
+                  phone_nbr           TEXT,
+                  scheduled_date      INTEGER,
+                  start_date          TEXT,
+                  state               TEXT,
+                  store_nbr           TEXT,
+                  type                TEXT,
+                  user_id             INTEGER,
+                  status_label        TEXT,
+                  zip                 INTEGER,
+                  company_name        TEXT
                 )
               `);
 
         await db.execAsync(`
                 CREATE TABLE IF NOT EXISTS contact
                 (
-                  job_purchase_order_id           INTEGER PRIMARY KEY,
-                  company_info_id                 INTEGER,
-                  company_info_first_name         TEXT,
-                  company_info_last_name          TEXT,
-                  company_info_phone_nbr          TEXT,
-                  company_info_phone_nbr_ext      TEXT,
-                  company_info_fax_nbr            TEXT,
-                  company_info_mobile_nbr         TEXT,
-                  company_info_email              TEXT,
-                  company_info_is_employee        TEXT,
-                  company_info_after_hours_nbr    TEXT,
-                  company_info_contact_type       TEXT,
-                  store_contacts_id               TEXT,
-                  store_contacts_first_name       TEXT,
-                  store_contacts_last_name        TEXT,
-                  store_contacts_phone_nbr        TEXT,
-                  store_contacts_phone_nbr_ext    TEXT,
-                  store_contacts_fax_nbr          TEXT,
-                  store_contacts_mobile_nbr       TEXT,
-                  store_contacts_email            TEXT,
-                  store_contacts_is_employee      TEXT,
-                  store_contacts_after_hours_nbr  TEXT,
-                  store_contacts_contact_type     TEXT,
-                  job_coordinator_id              TEXT,
-                  job_coordinator_first_name      TEXT,
-                  job_coordinator_last_name       TEXT,
-                  job_coordinator_phone_nbr       TEXT,
-                  job_coordinator_phone_nbr_ext   TEXT,
-                  job_coordinator_fax_nbr         TEXT,
-                  job_coordinator_mobile_nbr      TEXT,
-                  job_coordinator_email           TEXT,
-                  job_coordinator_is_employee     TEXT,
-                  job_coordinator_after_hours_nbr TEXT
+                  assignment_id                   INTEGER PRIMARY KEY,
+                  vendor_contact_id                TEXT,
+                  vendor_contact_first_name        TEXT,
+                  vendor_contact_last_name         TEXT,
+                  vendor_contact_phone_nbr         TEXT,
+                  vendor_contact_phone_nbr_ext     TEXT,
+                  vendor_contact_fax_nbr           TEXT,
+                  vendor_contact_mobile_nbr        TEXT,
+                  vendor_contact_email             TEXT,
+                  vendor_contact_is_employee       TEXT,
+                  vendor_contact_after_hours_nbr   TEXT,
+                  vendor_contact_contact_type      TEXT,
+                  site_contact_id                  TEXT,
+                  site_contact_first_name          TEXT,
+                  site_contact_last_name           TEXT,
+                  site_contact_phone_nbr           TEXT,
+                  site_contact_phone_nbr_ext       TEXT,
+                  site_contact_fax_nbr             TEXT,
+                  site_contact_mobile_nbr          TEXT,
+                  site_contact_email               TEXT,
+                  site_contact_is_employee         TEXT,
+                  site_contact_after_hours_nbr     TEXT,
+                  site_contact_contact_type        TEXT,
+                  account_manager_id               TEXT,
+                  account_manager_first_name       TEXT,
+                  account_manager_last_name        TEXT,
+                  account_manager_phone_nbr        TEXT,
+                  account_manager_phone_nbr_ext    TEXT,
+                  account_manager_fax_nbr          TEXT,
+                  account_manager_mobile_nbr       TEXT,
+                  account_manager_email            TEXT,
+                  account_manager_is_employee      TEXT,
+                  account_manager_after_hours_nbr  TEXT
                 )
               `);
 
@@ -153,45 +156,45 @@ export default async function setupDatabase(db) {
         await db.execAsync(`
                 CREATE TABLE IF NOT EXISTS attachment
                 (
-                  id                    INTEGER PRIMARY KEY NOT NULL,
-                  date                  INTEGER,
-                  fileName              TEXT,
-                  label                 TEXT,
-                  label_id              TEXT,
-                  uri                   BLOB,
-                  type                  TEXT,
-                  job_purchase_order_id INTEGER,
-                  workord_id            INTEGER,
-                  base64                BLOB,
-                  location              TEXT,
-                  mimeType              TEXT,
-                  submittedToARC        TEXT
+                  id                INTEGER PRIMARY KEY NOT NULL,
+                  date              INTEGER,
+                  fileName          TEXT,
+                  label             TEXT,
+                  label_id          TEXT,
+                  uri               BLOB,
+                  type              TEXT,
+                  assignment_id     INTEGER,
+                  assignment_ref_id INTEGER,
+                  base64            BLOB,
+                  location          TEXT,
+                  mimeType          TEXT,
+                  syncStatus        TEXT
                 )
               `);
 
         await db.execAsync(`
-                CREATE TABLE IF NOT EXISTS checkinout
+                CREATE TABLE IF NOT EXISTS visit
                 (
-                  id                    INTEGER PRIMARY KEY NOT NULL,
-                  contractor_tech_id    INTEGER,
-                  job_purchase_order_id INTEGER,
-                  comment               TEXT,
-                  checkin_date          INTEGER,
-                  checking_out          INTEGER,
-                  work_completed        INTEGER,
-                  submittedToARC        TEXT
+                  id                INTEGER PRIMARY KEY NOT NULL,
+                  crew_member_id    INTEGER,
+                  assignment_id     INTEGER,
+                  comment           TEXT,
+                  visit_date        INTEGER,
+                  departing         INTEGER,
+                  work_completed    INTEGER,
+                  syncStatus        TEXT
                 )
               `);
 
         await db.execAsync(`
-                CREATE TABLE IF NOT EXISTS final_checkout
+                CREATE TABLE IF NOT EXISTS completion
                 (
                   id                          INTEGER PRIMARY KEY,
                   service_perf                TEXT,
                   desc_service_perf           TEXT,
                   material_inst               TEXT,
                   desc_material_inst          TEXT,
-                  workOrder_100               TEXT,
+                  assignment_100              TEXT,
                   walkThrough_comp            TEXT,
                   return_needed               TEXT,
                   desc_return_needed          TEXT,
@@ -201,9 +204,9 @@ export default async function setupDatabase(db) {
                   signature_size              INTEGER,
                   signature_md5               INTEGER,
                   signature_modification_time INTEGER,
-                  job_purchase_order_id       INTEGER,
+                  assignment_id               INTEGER,
                   modified_date               INTEGER,
-                  submittedToARC              TEXT
+                  syncStatus                  TEXT
                 )
               `);
 

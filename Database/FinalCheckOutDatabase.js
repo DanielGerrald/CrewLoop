@@ -16,27 +16,27 @@ const instance = axios.create({
 export async function postFinalCheckListApi(token, data) {
   try {
     const result = await instance.post(
-      "/updateWorkOrderCheckList",
+      "/updateAssignmentChecklist",
       {
-        "WorkOrderCheckList[service_performed]": data.service_perf,
-        "WorkOrderCheckList[service_performed_desc]": data.desc_service_perf,
-        "WorkOrderCheckList[materials_installed]": data.material_inst,
-        "WorkOrderCheckList[materials_installed_desc]": data.desc_material_inst,
-        "WorkOrderCheckList[workOrder_100]": data.workOrder_100,
-        "WorkOrderCheckList[walkthrough_completed]": data.walkThrough_comp,
-        "WorkOrderCheckList[return_needed]": data.return_needed,
-        "WorkOrderCheckList[return_needed_desc]": data.desc_return_needed,
-        "WorkOrderCheckList[manager_name]": data.manager_name,
-        "WorkOrderCheckList[manager_signature]": data.signature_base64,
-        "WorkOrderCheckList[job_purchase_order_id]": data.job_purchase_order_id,
-        "WorkOrderCheckList[modified_date]": data.modified_date,
+        "AssignmentChecklist[service_performed]": data.service_perf,
+        "AssignmentChecklist[service_performed_desc]": data.desc_service_perf,
+        "AssignmentChecklist[materials_installed]": data.material_inst,
+        "AssignmentChecklist[materials_installed_desc]": data.desc_material_inst,
+        "AssignmentChecklist[assignment_100]": data.assignment_100,
+        "AssignmentChecklist[walkthrough_completed]": data.walkThrough_comp,
+        "AssignmentChecklist[return_needed]": data.return_needed,
+        "AssignmentChecklist[return_needed_desc]": data.desc_return_needed,
+        "AssignmentChecklist[manager_name]": data.manager_name,
+        "AssignmentChecklist[manager_signature]": data.signature_base64,
+        "AssignmentChecklist[assignment_id]": data.assignment_id,
+        "AssignmentChecklist[modified_date]": data.modified_date,
       },
       {
         headers: {
           TOKEN: token,
         },
         params: {
-          id: data.job_purchase_order_id,
+          id: data.assignment_id,
         },
       },
     );
@@ -54,18 +54,18 @@ export async function postFinalCheckListApi(token, data) {
 export async function postFinalCheckoutApi(
   token,
   comment,
-  job_purchase_order_id,
+  assignment_id,
 ) {
   try {
     const result = await instance.post(
-      "/finalCheckout",
+      "/completeAssignment",
       {
-        "WorkOrderCheckin[comment]": comment,
+        "AssignmentVisit[comment]": comment,
       },
       {
         headers: { TOKEN: token },
         params: {
-          id: job_purchase_order_id,
+          id: assignment_id,
         },
       },
     );
@@ -92,7 +92,7 @@ export async function insertFinalCheckOutSqlite(db, data) {
     const values = columns.map((key) => data[key]);
 
     await db.runAsync(
-      `INSERT INTO final_checkout (${columns.join(", ")})
+      `INSERT INTO completion (${columns.join(", ")})
          VALUES (${placeholders})`,
       [...values],
     );
@@ -105,7 +105,7 @@ export async function insertFinalCheckOutSqlite(db, data) {
 export async function selectFinalCheckOutSqlite(db, key, value) {
   try {
     const result = await db.getAllAsync(
-      `SELECT * FROM final_checkout WHERE (${key}) = ?`,
+      `SELECT * FROM completion WHERE (${key}) = ?`,
       [value],
     );
     return result;
@@ -123,7 +123,7 @@ export async function updateFinalCheckOutSqlite(
 ) {
   try {
     await db.runAsync(
-      `UPDATE final_checkout SET (${key1}) = ? WHERE (${key2}) = ?`,
+      `UPDATE completion SET (${key1}) = ? WHERE (${key2}) = ?`,
       [value1, value2],
     );
     console.log("Update final checkout function  ran");
@@ -134,10 +134,10 @@ export async function updateFinalCheckOutSqlite(
 
 export async function cleanupFinalCheckOutSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.work_order.id);
+    const workOrderIds = value.map((item) => item.assignment.id);
     const placeholders = workOrderIds.map(() => "?").join(", ");
 
-    const query = `DELETE FROM final_checkout WHERE job_purchase_order_id NOT IN (${placeholders})`;
+    const query = `DELETE FROM completion WHERE assignment_id NOT IN (${placeholders})`;
 
     await db.runAsync(query, workOrderIds);
 

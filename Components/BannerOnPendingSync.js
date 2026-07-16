@@ -17,9 +17,9 @@ export default function BannerOnPendingSync() {
   const checkPendingItems = async () => {
     try {
       const [attachments, checkIns, finals] = await Promise.all([
-        selectAttachmentSqlite(db, "submittedToARC", "Pending"),
-        selectCheckInOutSqlite(db, "submittedToARC", "Pending"),
-        selectFinalCheckOutSqlite(db, "submittedToARC", "Pending"),
+        selectAttachmentSqlite(db, "syncStatus", "Pending"),
+        selectCheckInOutSqlite(db, "syncStatus", "Pending"),
+        selectFinalCheckOutSqlite(db, "syncStatus", "Pending"),
       ]);
 
       const a = attachments?.length || 0;

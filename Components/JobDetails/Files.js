@@ -33,7 +33,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [labels, setLabels] = useState([]);
-  const workOrderId = selectedJob[0].expanded_id.split("-")[1];
+  const workOrderId = selectedJob[0].reference_code.split("-")[1];
   const [token, setToken] = useState([]);
 
   useEffect(() => {
@@ -87,12 +87,12 @@ export default function Files({ selectedJob, fetchFiles, files }) {
           uri: asset.uri,
           fileName: asset.fileName || "Unnamed file",
           label: label,
-          job_purchase_order_id: selectedJob[0].id,
+          assignment_id: selectedJob[0].id,
           type: "File",
           mimeType: asset.mimeType,
-          workord_id: workOrderId,
+          assignment_ref_id: workOrderId,
           date: moment().unix(),
-          submittedToARC: "No",
+          syncStatus: "No",
         }));
 
         const updatedFiles = [...files];
@@ -171,17 +171,17 @@ export default function Files({ selectedJob, fetchFiles, files }) {
   };
 
   const notSubmittedFiles = useMemo(() => {
-    return files.filter((file) => file?.submittedToARC === "No");
+    return files.filter((file) => file?.syncStatus === "No");
   }, [files]);
 
   const submittedFiles = useMemo(() => {
     return files.filter(
       (file) =>
-        file?.submittedToARC === "Yes" || file?.submittedToARC === "Pending",
+        file?.syncStatus === "Yes" || file?.syncStatus === "Pending",
     );
   }, [files]);
 
-  if (selectedJob[0].workflow_step_label !== "Completed") {
+  if (selectedJob[0].status_label !== "Completed") {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
         <ScrollView contentContainerStyle={StyleSheet.container}>
@@ -338,7 +338,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                             {moment().format("L")}
                           </Text>
                         </Chip>
-                        {file.submittedToARC === "Pending" && (
+                        {file.syncStatus === "Pending" && (
                           <Chip style={StyleSheet.chip} icon="cloud-upload">
                             Pending
                           </Chip>

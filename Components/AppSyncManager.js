@@ -102,8 +102,8 @@ export function useAppSync({
 
     await Promise.allSettled(
       jobs.map(async (job) => {
-        const id = job.work_order.id;
-        job.work_order.user_id = user.user_id;
+        const id = job.assignment.id;
+        job.assignment.user_id = user.user_id;
         const [detailsResult, contactsResult, checkinsResult] =
           await Promise.allSettled([
             getWorkOrderDetailsApi(token, id),
@@ -113,19 +113,19 @@ export function useAppSync({
 
         if (
           detailsResult.status === "fulfilled" &&
-          detailsResult.value?.work_order
+          detailsResult.value?.assignment
         ) {
-          job.work_order.contractor_requirements =
-            detailsResult.value.work_order.contractor_requirements;
-          job.work_order.desc_of_work =
-            detailsResult.value.work_order.desc_of_work;
+          job.assignment.vendor_requirements =
+            detailsResult.value.assignment.vendor_requirements;
+          job.assignment.desc_of_work =
+            detailsResult.value.assignment.desc_of_work;
         }
 
         if (
           contactsResult.status === "fulfilled" &&
           contactsResult.value
         ) {
-          contactsResult.value.job_purchase_order_id = id;
+          contactsResult.value.assignment_id = id;
           try {
             await insertContactSqlite(db, contactsResult.value);
           } catch (err) {
@@ -138,7 +138,7 @@ export function useAppSync({
           Array.isArray(checkinsResult.value)
         ) {
           for (const c of checkinsResult.value) {
-            c.submittedToARC = "Yes";
+            c.syncStatus = "Yes";
             await deleteCheckInOutDuplicatesSqlite(db, c);
             await insertCheckInOutSqlite(db, c);
           }
@@ -148,8 +148,8 @@ export function useAppSync({
 
     // Attachment types / labels
     try {
-      if (jobs?.[0]?.job?.attachment_types) {
-        await insertCategoryLabelSqlite(db, jobs[0].job.attachment_types);
+      if (jobs?.[0]?.site?.attachment_types) {
+        await insertCategoryLabelSqlite(db, jobs[0].site.attachment_types);
       }
     } catch (e) {
       console.warn("insertCategoryLabelSqlite error:", e);
@@ -171,19 +171,19 @@ export function useAppSync({
     }
 
     // The API doesn't know about locally-completed jobs, so INSERT OR REPLACE
-    // above can overwrite workflow_step_label back to "Scheduled". Re-apply
-    // "Completed" for any work order that has a final_checkout record.
+    // above can overwrite status_label back to "Scheduled". Re-apply
+    // "Completed" for any work order that has a completion record.
     try {
       const completedIds = await db.getAllAsync(
-        "SELECT DISTINCT job_purchase_order_id FROM final_checkout",
+        "SELECT DISTINCT assignment_id FROM completion",
       );
-      for (const { job_purchase_order_id } of completedIds) {
+      for (const { assignment_id } of completedIds) {
         await updateWorkOrderSqlite(
           db,
-          "workflow_step_label",
+          "status_label",
           "Completed",
           "id",
-          job_purchase_order_id,
+          assignment_id,
         );
       }
     } catch (e) {
@@ -199,7 +199,7 @@ export function useAppSync({
   const syncPendingAttachments = async (token) => {
     const pending = await selectAttachmentSqlite(
       db,
-      "submittedToARC",
+      "syncStatus",
       "Pending",
     );
     if (!pending?.length) return;
@@ -212,11 +212,11 @@ export function useAppSync({
               ? await postPhotosApi(token, att)
               : await postDocumentsApi(token, att);
 
-          att.submittedToARC = res?.status === 200 ? "Yes" : "Pending";
+          att.syncStatus = res?.status === 200 ? "Yes" : "Pending";
           await updateAttachmentSqlite(db, att);
         } catch (e) {
           console.warn("Attachment sync failed:", e);
-          att.submittedToARC = "Pending";
+          att.syncStatus = "Pending";
           await updateAttachmentSqlite(db, att);
         }
       }),
@@ -227,7 +227,7 @@ export function useAppSync({
   const syncPendingCheckInOut = async (token) => {
     const pending = await selectCheckInOutSqlite(
       db,
-      "submittedToARC",
+      "syncStatus",
       "Pending",
     );
 
@@ -261,7 +261,7 @@ export function useAppSync({
   const syncPendingFinalCheckouts = async (token) => {
     const pending = await selectFinalCheckOutSqlite(
       db,
-      "submittedToARC",
+      "syncStatus",
       "Pending",
     );
 
@@ -275,28 +275,28 @@ export function useAppSync({
             const checkoutRes = await postFinalCheckoutApi(
               token,
               record.desc_misc_notes,
-              record.job_purchase_order_id,
+              record.assignment_id,
             );
             if (checkoutRes) {
               await updateFinalCheckOutSqlite(
                 db,
-                "submittedToARC",
+                "syncStatus",
                 "Yes",
-                "job_purchase_order_id",
-                record.job_purchase_order_id,
+                "assignment_id",
+                record.assignment_id,
               );
               await updateWorkOrderSqlite(
                 db,
-                "workflow_step_label",
+                "status_label",
                 "Completed",
                 "id",
-                record.job_purchase_order_id,
+                record.assignment_id,
               );
             }
           }
         } catch (err) {
           console.warn(
-            `Final checkout failed for job ${record.job_purchase_order_id}`,
+            `Final checkout failed for job ${record.assignment_id}`,
             err,
           );
         }

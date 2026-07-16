@@ -14,12 +14,12 @@ import OpenMap from "./OpenMap";
 
 export default function Contacts({ selectedJob, contacts }) {
   function CoordinatorCall() {
-    const number = contacts[0].job_coordinator_phone_nbr || "704-555-0100";
+    const number = contacts[0].account_manager_phone_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
   function AftHrsCall() {
-    const number = contacts[0].job_coordinator_after_hours_nbr || "704-555-0100";
+    const number = contacts[0].account_manager_after_hours_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
@@ -86,15 +86,15 @@ export default function Contacts({ selectedJob, contacts }) {
           <View style={StyleSheet.containerRowView}>
             <View style={{ flex: 1 }}>
               <Text style={StyleSheet.TextDescript}>
-                {contacts?.[0]?.job_coordinator_first_name || ""}{" "}
-                {contacts?.[0]?.job_coordinator_last_name || ""}
+                {contacts?.[0]?.account_manager_first_name || ""}{" "}
+                {contacts?.[0]?.account_manager_last_name || ""}
                 {"\n"}
-                {contacts?.[0]?.job_coordinator_email || ""}
+                {contacts?.[0]?.account_manager_email || ""}
                 {"\n"}
                 Phone:{" "}
-                {contacts?.[0]?.job_coordinator_phone_nbr || ""}
+                {contacts?.[0]?.account_manager_phone_nbr || ""}
                 {"\n"}
-                Fax: {contacts?.[0]?.job_coordinator_fax_nbr || ""}
+                Fax: {contacts?.[0]?.account_manager_fax_nbr || ""}
               </Text>
             </View>
             <View style={StyleSheet.contactIcon}>
@@ -117,7 +117,7 @@ export default function Contacts({ selectedJob, contacts }) {
               <Text style={StyleSheet.TextDescript}>
                 Call after 5:30 PM EST
                 {"\n"}
-                {contacts?.[0]?.job_coordinator_after_hours_nbr || "See coordinator above"}
+                {contacts?.[0]?.account_manager_after_hours_nbr || "See coordinator above"}
               </Text>
             </View>
             <View style={StyleSheet.contactIcon}>

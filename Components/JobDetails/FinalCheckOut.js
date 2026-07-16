@@ -73,7 +73,7 @@ export default function FinalCheckOut({
     desc_service_perf: "",
     material_inst: "",
     desc_material_inst: "",
-    workOrder_100: "",
+    assignment_100: "",
     walkThrough_comp: "",
     return_needed: "",
     desc_return_needed: "",
@@ -83,7 +83,7 @@ export default function FinalCheckOut({
     signature_size: "",
     signature_md5: "",
     signature_modification_time: "",
-    job_purchase_order_id: "",
+    assignment_id: "",
   });
 
   const handleInputChange = (name, value) => {
@@ -104,11 +104,11 @@ export default function FinalCheckOut({
       ...formData,
       service_perf: servicePerf,
       material_inst: materialInst,
-      workOrder_100: "1",
+      assignment_100: "1",
       walkThrough_comp: walkthrough,
       return_needed: returnNeeded,
       signature_base64: signature,
-      job_purchase_order_id: selectedJob[0]?.id,
+      assignment_id: selectedJob[0]?.id,
     };
 
     const requiredFields = [
@@ -147,20 +147,20 @@ export default function FinalCheckOut({
         ...payload,
         service_perf: boolToString(servicePerf),
         material_inst: boolToString(materialInst),
-        workOrder_100: "1",
+        assignment_100: "1",
         walkThrough_comp: boolToString(walkthrough),
         return_needed: boolToString(returnNeeded),
         modified_date: getUnixTime(new Date()),
-        submittedToARC: "Pending",
+        syncStatus: "Pending",
       };
 
       await insertFinalCheckOutSqlite(db, apiPayload);
       await updateWorkOrderSqlite(
         db,
-        "workflow_step_label",
+        "status_label",
         "Completed",
         "id",
-        apiPayload.job_purchase_order_id,
+        apiPayload.assignment_id,
       );
 
       const sqliteJobs = await selectWorkOrderSqlite(
@@ -188,7 +188,7 @@ export default function FinalCheckOut({
               await postFinalCheckoutApi(
                 userData.access_token,
                 apiPayload.desc_misc_notes,
-                apiPayload.job_purchase_order_id,
+                apiPayload.assignment_id,
               );
             } catch {
               console.log(
@@ -204,10 +204,10 @@ export default function FinalCheckOut({
 
       await updateFinalCheckOutSqlite(
         db,
-        "submittedToARC",
+        "syncStatus",
         submittedStatus,
-        "job_purchase_order_id",
-        apiPayload.job_purchase_order_id,
+        "assignment_id",
+        apiPayload.assignment_id,
       );
 
       setCheckoutFormVisible(false);
@@ -241,14 +241,14 @@ export default function FinalCheckOut({
                       icon="message-reply-text"
                       size={30}
                     />
-                    {checkin.checking_out === 0 && (
+                    {checkin.departing === 0 && (
                       <Text style={StyleSheet.TextDescript}>
                         Check in comments:
                         {"\n"}
                         {` ${checkin.comment || "No Comment Left"}`}
                       </Text>
                     )}
-                    {checkin.checking_out === 1 && (
+                    {checkin.departing === 1 && (
                       <Text style={StyleSheet.TextDescript}>
                         Check out comments:
                         {"\n"}
@@ -262,22 +262,22 @@ export default function FinalCheckOut({
                       icon="clipboard-text-clock"
                       size={30}
                     />
-                    {checkin.checking_out === 0 && (
+                    {checkin.departing === 0 && (
                       <Text style={StyleSheet.TextDescript}>
                         Check in time:
                         {"\n"}
                         {format(
-                          fromUnixTime(checkin.checkin_date),
+                          fromUnixTime(checkin.visit_date),
                           "MMM d, yyyy h:mm a",
                         )}
                       </Text>
                     )}
-                    {checkin.checking_out === 1 && (
+                    {checkin.departing === 1 && (
                       <Text style={StyleSheet.TextDescript}>
                         Check out time:
                         {"\n"}
                         {format(
-                          fromUnixTime(checkin.checkin_date),
+                          fromUnixTime(checkin.visit_date),
                           "MMM d, yyyy h:mm a",
                         )}
                       </Text>

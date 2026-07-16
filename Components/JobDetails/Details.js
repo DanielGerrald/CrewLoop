@@ -18,7 +18,7 @@ export default function Details({ details }) {
           <Text style={StyleSheet.TextTitle}>Contractor Requirements</Text>
           <View style={StyleSheet.containerRowView}>
             <Text style={StyleSheet.TextDescript}>
-              {details[0].contractor_requirements}
+              {details[0].vendor_requirements}
             </Text>
           </View>
         </View>
