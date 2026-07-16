@@ -19,10 +19,10 @@ export default function AttachmentSubmit({
   );
 
   const pendingAttachments = attachments.filter(
-    (att) => att.submittedToARC === "No" || att.submittedToARC === "Pending",
+    (att) => att.syncStatus === "No" || att.syncStatus === "Pending",
   );
   const showSubmitButton = pendingAttachments.some(
-    (att) => att.submittedToARC === "No",
+    (att) => att.syncStatus === "No",
   );
 
   return (

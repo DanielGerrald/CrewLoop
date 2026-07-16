@@ -57,15 +57,15 @@ export default function JobModal({
 
         const checkInInfo = await selectCheckInOutSqlite(
           db,
-          "job_purchase_order_id",
+          "assignment_id",
           selectedJob[0].id,
-          "checkin_date",
+          "visit_date",
           "DESC",
         );
 
         const checkoutRows = await selectFinalCheckOutSqlite(
           db,
-          "job_purchase_order_id",
+          "assignment_id",
           selectedJob[0].id,
         );
 
@@ -76,7 +76,7 @@ export default function JobModal({
 
         if (checkInInfo.length > 0) {
           const lastObj = checkInInfo[0];
-          setCheckedIn(!lastObj.checking_out);
+          setCheckedIn(!lastObj.departing);
         } else {
           setCheckedIn(false);
         }
@@ -96,7 +96,7 @@ export default function JobModal({
     try {
       const photos = await selectAttachmentSqlite(
         db,
-        "job_purchase_order_id",
+        "assignment_id",
         selectedJob[0].id,
         "type",
         "Photo",
@@ -111,7 +111,7 @@ export default function JobModal({
     try {
       let files = await selectAttachmentSqlite(
         db,
-        "job_purchase_order_id",
+        "assignment_id",
         selectedJob[0].id,
         "type",
         "File",
@@ -147,7 +147,7 @@ export default function JobModal({
                 >{`${selectedJob[0].type || ""}`}</Text>
                 <Text
                   style={StyleSheet.TextTitle}
-                >{`${selectedJob[0].expanded_id || ""}`}</Text>
+                >{`${selectedJob[0].reference_code || ""}`}</Text>
               </View>
               <TouchableOpacity style={StyleSheet.closeButton}>
                 <AntDesign
@@ -242,7 +242,7 @@ export default function JobModal({
                   </View>
                 </Card.Content>
               </Card>
-              {selectedJob[0].workflow_step_label !== "Completed" && (
+              {selectedJob[0].status_label !== "Completed" && (
                 <CheckInOut
                   setShowDetails={setShowDetails}
                   setShowContacts={setShowContacts}

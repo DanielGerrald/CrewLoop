@@ -242,7 +242,6 @@ CrewLoop/
 │
 ├── Database/               # Data layer — SQLite + API calls
 │   ├── SetupDatabase.js    # Schema creation and migrations
-│   ├── JobDatabase.js      # Work order API calls
 │   ├── UserDatabase.js     # Auth and user data
 │   ├── CheckInOutDatabase.js
 │   ├── AttachmentDatabase.js
@@ -272,20 +271,20 @@ The mock server at `http://localhost:3001` provides:
 |---|---|---|
 | `GET` | `/version` | App version / update gate check |
 | `POST` | `/login` | Authenticate and return user token |
-| `GET` | `/userProfile` | Fetch logged-in user profile |
+| `GET` | `/accountProfile` | Fetch logged-in user profile |
 | `POST` | `/recoverPassword` | Send password reset |
-| `GET` | `/workOrders` | All open work orders |
-| `GET` | `/workOrderDetails?id=` | Contractor requirements and work description |
-| `GET` | `/completedWorkOrders` | Completed work orders |
-| `GET` | `/workOrderContacts?id=` | Site and coordinator contacts for a job |
-| `GET` | `/workOrderCheckins?id=` | Check-in/out history for a job |
-| `POST` | `/workOrderCheckin?id=` | Record a check-in or check-out |
-| `POST` | `/uploadWorkOrderPhoto?id=` | Upload a photo attachment |
-| `POST` | `/uploadWorkOrderDocument?id=` | Upload a document attachment |
-| `POST` | `/updateWorkOrderCheckList?id=` | Submit final checkout checklist |
-| `POST` | `/finalCheckout?id=` | Submit final checkout |
+| `GET` | `/assignments` | All open assignments |
+| `GET` | `/assignmentDetails?id=` | Vendor requirements and work description |
+| `GET` | `/completedAssignments` | Completed assignments |
+| `GET` | `/assignmentContacts?id=` | Site and account manager contacts for an assignment |
+| `GET` | `/assignmentVisits?id=` | Check-in/out history for an assignment |
+| `POST` | `/assignmentVisit?id=` | Record a check-in or check-out |
+| `POST` | `/uploadAssignmentPhoto?id=` | Upload a photo attachment |
+| `POST` | `/uploadAssignmentDocument?id=` | Upload a document attachment |
+| `POST` | `/updateAssignmentChecklist?id=` | Submit final checkout checklist |
+| `POST` | `/completeAssignment?id=` | Submit final checkout |
 | `POST` | `/sync` | Batch sync offline records |
-| `POST` | `/updateUserProfile` | Update user profile |
+| `POST` | `/updateAccountProfile` | Update user profile |
 
 All data is in-memory. Restarting the server resets to the default sample dataset.
 

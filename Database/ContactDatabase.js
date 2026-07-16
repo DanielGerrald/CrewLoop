@@ -16,7 +16,7 @@ const instance = axios.create({
 
 export async function getWorkOrderContactsApi(access_token, id) {
   try {
-    const response = await instance.get("/workOrderContacts", {
+    const response = await instance.get("/assignmentContacts", {
       headers: {
         TOKEN: access_token,
       },
@@ -35,46 +35,46 @@ export async function getWorkOrderContactsApi(access_token, id) {
 export async function insertContactSqlite(db, contact) {
   try {
     const jobPurchaseOrderId = {
-      job_purchase_order_id: contact.job_purchase_order_id,
+      assignment_id: contact.assignment_id,
     };
 
     const storeContact = {
-      store_contacts_id: contact.store_contacts.id,
-      store_contacts_first_name: contact.store_contacts.first_name,
-      store_contacts_last_name: contact.store_contacts.last_name,
-      store_contacts_phone_nbr: contact.store_contacts.phone_nbr,
-      store_contacts_phone_nbr_ext: contact.store_contacts.phone_nbr_ext,
-      store_contacts_fax_nbr: contact.store_contacts.fax_nbr,
-      store_contacts_mobile_nbr: contact.store_contacts.mobile_nbr,
-      store_contacts_email: contact.store_contacts.email,
-      store_contacts_is_employee: contact.store_contacts.is_employee,
-      store_contacts_after_hours_nbr: contact.store_contacts.after_hours_nbr,
-      store_contacts_contact_type: contact.store_contacts.contact_type,
+      site_contact_id: contact.site_contact.id,
+      site_contact_first_name: contact.site_contact.first_name,
+      site_contact_last_name: contact.site_contact.last_name,
+      site_contact_phone_nbr: contact.site_contact.phone_nbr,
+      site_contact_phone_nbr_ext: contact.site_contact.phone_nbr_ext,
+      site_contact_fax_nbr: contact.site_contact.fax_nbr,
+      site_contact_mobile_nbr: contact.site_contact.mobile_nbr,
+      site_contact_email: contact.site_contact.email,
+      site_contact_is_employee: contact.site_contact.is_employee,
+      site_contact_after_hours_nbr: contact.site_contact.after_hours_nbr,
+      site_contact_contact_type: contact.site_contact.contact_type,
     };
     const jobCoordinator = {
-      job_coordinator_id: contact.job_coordinator.id,
-      job_coordinator_first_name: contact.job_coordinator.first_name,
-      job_coordinator_last_name: contact.job_coordinator.last_name,
-      job_coordinator_phone_nbr: contact.job_coordinator.phone_nbr,
-      job_coordinator_phone_nbr_ext: contact.job_coordinator.phone_nbr_ext,
-      job_coordinator_fax_nbr: contact.job_coordinator.fax_nbr,
-      job_coordinator_mobile_nbr: contact.job_coordinator.mobile_nbr,
-      job_coordinator_email: contact.job_coordinator.email,
-      job_coordinator_is_employee: contact.job_coordinator.is_employee,
-      job_coordinator_after_hours_nbr: contact.job_coordinator.after_hours_nbr,
+      account_manager_id: contact.account_manager.id,
+      account_manager_first_name: contact.account_manager.first_name,
+      account_manager_last_name: contact.account_manager.last_name,
+      account_manager_phone_nbr: contact.account_manager.phone_nbr,
+      account_manager_phone_nbr_ext: contact.account_manager.phone_nbr_ext,
+      account_manager_fax_nbr: contact.account_manager.fax_nbr,
+      account_manager_mobile_nbr: contact.account_manager.mobile_nbr,
+      account_manager_email: contact.account_manager.email,
+      account_manager_is_employee: contact.account_manager.is_employee,
+      account_manager_after_hours_nbr: contact.account_manager.after_hours_nbr,
     };
     const companyInfo = {
-      company_info_id: contact.company_info.id,
-      company_info_first_name: contact.company_info.first_name,
-      company_info_last_name: contact.company_info.last_name,
-      company_info_phone_nbr: contact.company_info.phone_nbr,
-      company_info_phone_nbr_ext: contact.company_info.phone_nbr_ext,
-      company_info_fax_nbr: contact.company_info.fax_nbr,
-      company_info_mobile_nbr: contact.company_info.mobile_nbr,
-      company_info_email: contact.company_info.email,
-      company_info_is_employee: contact.company_info.is_employee,
-      company_info_after_hours_nbr: contact.company_info.after_hours_nbr,
-      company_info_contact_type: contact.company_info.contact_type,
+      vendor_contact_id: contact.vendor_contact.id,
+      vendor_contact_first_name: contact.vendor_contact.first_name,
+      vendor_contact_last_name: contact.vendor_contact.last_name,
+      vendor_contact_phone_nbr: contact.vendor_contact.phone_nbr,
+      vendor_contact_phone_nbr_ext: contact.vendor_contact.phone_nbr_ext,
+      vendor_contact_fax_nbr: contact.vendor_contact.fax_nbr,
+      vendor_contact_mobile_nbr: contact.vendor_contact.mobile_nbr,
+      vendor_contact_email: contact.vendor_contact.email,
+      vendor_contact_is_employee: contact.vendor_contact.is_employee,
+      vendor_contact_after_hours_nbr: contact.vendor_contact.after_hours_nbr,
+      vendor_contact_contact_type: contact.vendor_contact.contact_type,
     };
 
     const data = {
@@ -104,7 +104,8 @@ export async function insertContactSqlite(db, contact) {
 export async function selectContactSqlite(db, key, value) {
   try {
     return await db.getAllAsync(
-      `SELECT * FROM contact WHERE (${key}) = (${value})`,
+      `SELECT * FROM contact WHERE ${key} = ?`,
+      [value],
     );
   } catch (error) {
     console.log("Select SQLITE contacts failed:", error);
@@ -113,10 +114,10 @@ export async function selectContactSqlite(db, key, value) {
 
 export async function cleanupContactSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.work_order.id);
+    const workOrderIds = value.map((item) => item.assignment.id);
     const placeholders = workOrderIds.map(() => "?").join(", ");
 
-    const query = `DELETE FROM contact WHERE job_purchase_order_id NOT IN (${placeholders})`;
+    const query = `DELETE FROM contact WHERE assignment_id NOT IN (${placeholders})`;
 
     await db.runAsync(query, workOrderIds);
 

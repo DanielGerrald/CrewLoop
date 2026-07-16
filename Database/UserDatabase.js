@@ -29,7 +29,7 @@ export async function getLoginApi(data) {
 
 export async function getUserProfileApi(data) {
   try {
-    let response = await instance.get("/userProfile", {
+    let response = await instance.get("/accountProfile", {
       headers: { TOKEN: data.access_token },
     });
     if (response.data.info.status === "OK") {
@@ -43,15 +43,15 @@ export async function getUserProfileApi(data) {
 export async function postUserApi(data) {
   try {
     await instance.post(
-      "/updateUserProfile",
+      "/updateAccountProfile",
       {
-        "ContractorTech[person][first_name]": data.first_name,
-        "ContractorTech[person][last_name]": data.last_name,
-        "ContractorTech[person][email]": data.email,
-        "ContractorTech[person][phone_nbr]": data.phone_nbr,
-        "ContractorTech[person][last_login]": data.last_login,
-        "ContractorTech[notify_sms]": data.notify_sms,
-        "ContractorTech[notify_email]": data.notify_email,
+        "CrewMember[person][first_name]": data.first_name,
+        "CrewMember[person][last_name]": data.last_name,
+        "CrewMember[person][email]": data.email,
+        "CrewMember[person][phone_nbr]": data.phone_nbr,
+        "CrewMember[person][last_login]": data.last_login,
+        "CrewMember[notify_sms]": data.notify_sms,
+        "CrewMember[notify_email]": data.notify_email,
       },
       { headers: { TOKEN: data.access_token } },
     );

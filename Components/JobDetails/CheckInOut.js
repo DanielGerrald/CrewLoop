@@ -62,11 +62,11 @@ export default function CheckInOut({
 
       const payload = {
         comment,
-        checkin_date: checkinDate,
-        job_purchase_order_id: jobPurchaseOrderID,
-        checking_out: checkingOutFlag,
-        contractor_tech_id: userData.user_id,
-        submittedToARC: "",
+        visit_date: checkinDate,
+        assignment_id: jobPurchaseOrderID,
+        departing: checkingOutFlag,
+        crew_member_id: userData.user_id,
+        syncStatus: "",
       };
 
       const networkState = await Network.getNetworkStateAsync();
@@ -81,18 +81,18 @@ export default function CheckInOut({
             userData.access_token,
           );
           if (success) {
-            payload.submittedToARC = "Yes";
+            payload.syncStatus = "Yes";
             await insertCheckInOutSqlite(db, payload);
           } else {
-            payload.submittedToARC = "Pending";
+            payload.syncStatus = "Pending";
             await insertCheckInOutSqlite(db, payload);
           }
         } catch {
-          payload.submittedToARC = "Pending";
+          payload.syncStatus = "Pending";
           await insertCheckInOutSqlite(db, payload);
         }
       } else {
-        payload.submittedToARC = "Pending";
+        payload.syncStatus = "Pending";
         await insertCheckInOutSqlite(db, payload);
       }
 
@@ -101,8 +101,8 @@ export default function CheckInOut({
         {
           id: checkinDate,
           comment: payload.comment,
-          checkin_date: payload.checkin_date,
-          checking_out: payload.checking_out,
+          visit_date: payload.visit_date,
+          departing: payload.departing,
         },
       ]);
 

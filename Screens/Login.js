@@ -149,32 +149,32 @@ export default function Login(props) {
         await cleanupAttachmentSqlite(db, jobs);
         await cleanupFinalCheckOutSqlite(db, jobs);
         for (const job of jobs) {
-          job.work_order.user_id = updatedUser.user_id;
+          job.assignment.user_id = updatedUser.user_id;
           let details = await getWorkOrderDetailsApi(
             updatedUser.access_token,
-            job.work_order.id,
+            job.assignment.id,
           );
-          job.work_order.contractor_requirements =
-            details.work_order.contractor_requirements;
-          job.work_order.desc_of_work = details.work_order.desc_of_work;
+          job.assignment.vendor_requirements =
+            details.assignment.vendor_requirements;
+          job.assignment.desc_of_work = details.assignment.desc_of_work;
           let contacts = await getWorkOrderContactsApi(
             updatedUser.access_token,
-            job.work_order.id,
+            job.assignment.id,
           );
           if (contacts !== undefined) {
-            contacts.job_purchase_order_id = job.work_order.id;
+            contacts.assignment_id = job.assignment.id;
             await insertContactSqlite(db, contacts);
           }
           const checkinArray = await getCheckInOutApi(
             updatedUser.access_token,
-            job.work_order.id,
+            job.assignment.id,
           );
           for (const checkin of checkinArray) {
-            checkin.submittedToARC = "Yes";
+            checkin.syncStatus = "Yes";
             await insertCheckInOutSqlite(db, checkin);
           }
         }
-        await insertCategoryLabelSqlite(db, jobs[0].job.attachment_types);
+        await insertCategoryLabelSqlite(db, jobs[0].site.attachment_types);
         await insertJobs(jobs);
       }
       setLoading(false);

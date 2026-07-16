@@ -17,7 +17,7 @@ const instance = axios.create({
 
 export async function getWorkOrderApi(data) {
   try {
-    const response = await instance.get("/workOrders", {
+    const response = await instance.get("/assignments", {
       headers: {
         TOKEN: data.access_token,
       },
@@ -30,7 +30,7 @@ export async function getWorkOrderApi(data) {
 
 export async function getWorkOrderDetailsApi(access_token, id) {
   try {
-    const response = await instance.get("/workOrderDetails", {
+    const response = await instance.get("/assignmentDetails", {
       headers: {
         TOKEN: access_token,
       },
@@ -46,7 +46,7 @@ export async function getWorkOrderDetailsApi(access_token, id) {
 
 export async function getCompletedWorkOrderApi(token) {
   try {
-    const response = await instance.get("/completedWorkOrders", {
+    const response = await instance.get("/completedAssignments", {
       headers: {
         TOKEN: token,
       },
@@ -61,12 +61,12 @@ export async function getCompletedWorkOrderApi(token) {
 
 export async function insertWorkOrderSqlite(db, data) {
   try {
-    const customer = data.customer || {};
-    const jobData = data.job || {};
-    const workOrder = data.work_order || {};
+    const customer = data.client || {};
+    const jobData = data.site || {};
+    const workOrder = data.assignment || {};
     delete jobData.attachment_types;
     const { id, ...rest } = jobData;
-    const newJobData = { job_id: id, ...rest };
+    const newJobData = { site_id: id, ...rest };
 
     const newData = { ...customer, ...newJobData, ...workOrder };
 
@@ -77,7 +77,7 @@ export async function insertWorkOrderSqlite(db, data) {
     const placeholders = columns.map(() => "?").join(", ");
     const values = columns.map((key) => newData[key]);
     await db.runAsync(
-      `INSERT OR REPLACE INTO workorder (${columns.join(", ")}) VALUES (${placeholders})`,
+      `INSERT OR REPLACE INTO assignment (${columns.join(", ")}) VALUES (${placeholders})`,
       [...values],
     );
 
@@ -89,7 +89,7 @@ export async function insertWorkOrderSqlite(db, data) {
 
 export async function selectWorkOrderSqlite(db, key, value) {
   try {
-    const query = `SELECT * FROM workorder WHERE ${key} = ?`;
+    const query = `SELECT * FROM assignment WHERE ${key} = ?`;
     const results = await db.getAllAsync(query, [value]);
     return results;
   } catch (error) {
@@ -100,7 +100,7 @@ export async function selectWorkOrderSqlite(db, key, value) {
 export async function updateWorkOrderSqlite(db, key1, value1, key2, value2) {
   try {
     await db.runAsync(
-      `UPDATE workorder SET (${key1}) = ? WHERE (${key2}) = ?`,
+      `UPDATE assignment SET (${key1}) = ? WHERE (${key2}) = ?`,
       [value1, value2],
     );
     console.log("Update work order function ran");
@@ -111,10 +111,10 @@ export async function updateWorkOrderSqlite(db, key1, value1, key2, value2) {
 
 export async function cleanupWorkOrderSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.work_order.id);
+    const workOrderIds = value.map((item) => item.assignment.id);
     const placeholders = workOrderIds.map(() => "?").join(", ");
 
-    const query = `DELETE FROM workorder WHERE id NOT IN (${placeholders})`;
+    const query = `DELETE FROM assignment WHERE id NOT IN (${placeholders})`;
 
     await db.runAsync(query, workOrderIds);
 

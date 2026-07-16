@@ -33,17 +33,17 @@ export async function postDocumentsApi(token, document) {
     name: document.fileName,
     type: document.mimeType,
   });
-  formData.append("JobAttachment[type_id]", document.label_id);
+  formData.append("AssignmentAttachment[type_id]", document.label_id);
 
   const response = await postInstance.post(
-    "/uploadWorkOrderDocument",
+    "/uploadAssignmentDocument",
     formData,
     {
       headers: {
         TOKEN: token,
       },
       params: {
-        id: document.workord_id,
+        id: document.assignment_ref_id,
       },
     },
   );
@@ -59,14 +59,14 @@ export async function postPhotosApi(token, photo) {
     name: photo.fileName,
     type: photo.mimeType,
   });
-  formData.append("JobAttachment[type_id]", photo.label_id);
+  formData.append("AssignmentAttachment[type_id]", photo.label_id);
 
-  const response = await postInstance.post("/uploadWorkOrderPhoto", formData, {
+  const response = await postInstance.post("/uploadAssignmentPhoto", formData, {
     headers: {
       TOKEN: token,
     },
     params: {
-      id: photo.workord_id,
+      id: photo.assignment_ref_id,
     },
   });
 
@@ -166,10 +166,10 @@ export async function deleteAttachmentSqlite(db, id) {
 
 export async function cleanupAttachmentSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.work_order.id);
+    const workOrderIds = value.map((item) => item.assignment.id);
     const placeholders = workOrderIds.map(() => "?").join(", ");
 
-    const query = `DELETE FROM attachment WHERE job_purchase_order_id NOT IN (${placeholders})`;
+    const query = `DELETE FROM attachment WHERE assignment_id NOT IN (${placeholders})`;
 
     await db.runAsync(query, workOrderIds);
 

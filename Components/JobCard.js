@@ -20,7 +20,7 @@ export default function JobCard({ jobData }) {
     setModalVisible(false);
     setSelectedJob(await selectWorkOrderSqlite(db, "id", jobId));
     setSelectedContact(
-      await selectContactSqlite(db, "job_purchase_order_id", jobId),
+      await selectContactSqlite(db, "assignment_id", jobId),
     );
     setModalVisible(true);
   };
@@ -46,7 +46,7 @@ export default function JobCard({ jobData }) {
                   <View style={StyleSheet.columnView}>
                     <Text style={StyleSheet.jobCardContentTitle}>
                       {`${job.type}#  `}
-                      {job.expanded_id}
+                      {job.reference_code}
                     </Text>
                   </View>
                 </View>
