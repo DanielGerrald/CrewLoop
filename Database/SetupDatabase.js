@@ -1,7 +1,7 @@
 import { environment } from "../Config";
 
 export default async function setupDatabase(db) {
-  const DATABASE_VERSION = 7;
+  const DATABASE_VERSION = 8;
 
   try {
     let { user_version: currentDbVersion } = await db.getFirstAsync(
@@ -103,8 +103,7 @@ export default async function setupDatabase(db) {
         await db.execAsync(`
                 CREATE TABLE IF NOT EXISTS contact
                 (
-                  id                              INTEGER PRIMARY KEY,
-                  job_purchase_order_id           INTEGER,
+                  job_purchase_order_id           INTEGER PRIMARY KEY,
                   company_info_id                 INTEGER,
                   company_info_first_name         TEXT,
                   company_info_last_name          TEXT,

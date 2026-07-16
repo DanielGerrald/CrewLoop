@@ -104,7 +104,8 @@ export async function insertContactSqlite(db, contact) {
 export async function selectContactSqlite(db, key, value) {
   try {
     return await db.getAllAsync(
-      `SELECT * FROM contact WHERE (${key}) = (${value})`,
+      `SELECT * FROM contact WHERE ${key} = ?`,
+      [value],
     );
   } catch (error) {
     console.log("Select SQLITE contacts failed:", error);

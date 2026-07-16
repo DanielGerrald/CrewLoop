@@ -242,7 +242,6 @@ CrewLoop/
 │
 ├── Database/               # Data layer — SQLite + API calls
 │   ├── SetupDatabase.js    # Schema creation and migrations
-│   ├── JobDatabase.js      # Work order API calls
 │   ├── UserDatabase.js     # Auth and user data
 │   ├── CheckInOutDatabase.js
 │   ├── AttachmentDatabase.js
