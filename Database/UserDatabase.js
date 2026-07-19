@@ -17,8 +17,11 @@ const instance = axios.create({
 
 export async function getLoginApi(data) {
   try {
-    const body = `username=${encodeURIComponent(data.username)}&password=${encodeURIComponent(data.password)}`;
-    let response = await instance.post("/login", body);
+    let response = await instance.post(
+      "/contractorApi/login",
+      JSON.stringify({ username: data.username, password: data.password }),
+      { headers: { "Content-Type": "application/json" } },
+    );
     if (response.data.info.status === "OK") {
       return Promise.resolve(response.data.results);
     }
