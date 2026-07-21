@@ -11,14 +11,15 @@ import {
   updateUserSqlite,
 } from "../Database/UserDatabase";
 import CustomInput from "../Components/CustomInput";
-import AsyncStorage from "expo-sqlite/kv-store";
 import Version from "../Components/Version";
 import { useSQLiteContext } from "expo-sqlite";
 import AppSyncManager from "../Components/AppSyncManager";
 import { useJob } from "../Components/Context";
+import { useAuth } from "../Components/AuthContext";
 
-export default function Profile(props) {
+export default function Profile() {
   const db = useSQLiteContext();
+  const { logout, refreshUser } = useAuth();
   const [lastLoggedIn, setLastLoggedIn] = useState(null);
   const [updatedUser, setUpdatedUser] = useState(null);
   const [isEnabledSMS, setIsEnabledSMS] = useState(false);
@@ -78,6 +79,7 @@ export default function Profile(props) {
         postUserApi(r);
         setUpdatedUser(r);
       });
+      await refreshUser();
 
       Alert.alert("User Profile updated successfully!");
     } else {
@@ -162,14 +164,7 @@ export default function Profile(props) {
             <Pressable style={StyleSheet.submitBtn} onPress={onSubmit}>
               <Text style={StyleSheet.buttonText}>Update</Text>
             </Pressable>
-            <Pressable
-              onPress={async () => {
-                await updateUserSqlite(db, { ...updatedUser, logged_in: 0 });
-                await AsyncStorage.removeItem("userName");
-                props.navigation.navigate("Login");
-              }}
-              style={StyleSheet.logoutBtn}
-            >
+            <Pressable onPress={logout} style={StyleSheet.logoutBtn}>
               <Text style={StyleSheet.logoutBtnText}>Log Out</Text>
             </Pressable>
           </View>
