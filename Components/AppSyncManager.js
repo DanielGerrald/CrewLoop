@@ -7,20 +7,16 @@ import {
   View,
   Text,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite";
 import * as Network from "expo-network";
 
 import StyleSheet from "../StyleSheet";
 import syncLock from "./SyncLock";
 import { useJob } from "./Context";
+import { useAuth } from "./AuthContext";
 import useAppFocusRefresh from "./AppFocusRefresh";
 import { showOnceAlert } from "./AlertManager";
-import {
-  getUserProfileApi,
-  lastLoggedinUserSqlite,
-  updateUserSqlite,
-} from "../Database/UserDatabase";
+import { getUserProfileApi, updateUserSqlite } from "../Database/UserDatabase";
 import {
   cleanupWorkOrderSqlite,
   getCompletedWorkOrderApi,
@@ -63,27 +59,20 @@ import BannerOnPendingSync from "./BannerOnPendingSync";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function useAppSync({
-  fetchPhotos,
-  fetchFiles,
-  autoNavigateHome = true,
-  onSyncSuccess,
-} = {}) {
+export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
   const db = useSQLiteContext();
-  const navigation = useNavigation();
+  const { user: authUser } = useAuth();
   const { setJobResult, incrementSyncVersion } = useJob();
   const [refreshing, setRefreshing] = useState(false);
   const scrollViewRef = useRef(null);
 
   /** AUTH & SESSION **/
   const getAuthenticatedUser = async ({ silent = false } = {}) => {
-    const user = await lastLoggedinUserSqlite(db);
-
-    if (!user || user.logged_in !== 1) {
+    if (!authUser) {
       if (!silent) showOnceAlert("No User", "Not logged in", "Please log in.");
       return null;
     }
-    return user;
+    return authUser;
   };
 
   /** JOB SYNC (open + completed + details + contacts + checkins) **/
@@ -377,19 +366,15 @@ export function useAppSync({
 
     try {
       const user = await getAuthenticatedUser({ silent: true });
-      if (!user) {
-        navigation.navigate("Login");
-        return;
-      }
-      await runSyncTasks(user);
+      if (!user) return;
 
-      if (autoNavigateHome) navigation.navigate("Home");
+      await runSyncTasks(user);
     } catch (error) {
       console.error("Error managing session:", error);
       Alert.alert("An error occurred. Please try again.");
       setJobResult([]);
     }
-  }, [autoNavigateHome]);
+  }, [authUser]);
 
   useEffect(() => {
     manageSession();
@@ -400,12 +385,7 @@ export function useAppSync({
   return { refreshing, onRefresh, scrollViewRef };
 }
 
-export default function AppSyncManager({
-  children,
-  fetchPhotos,
-  fetchFiles,
-  autoNavigateHome = true,
-}) {
+export default function AppSyncManager({ children, fetchPhotos, fetchFiles }) {
   const [bannerVisible, setBannerVisible] = React.useState(false);
   const [bannerText, setBannerText] = React.useState("");
 
@@ -418,7 +398,6 @@ export default function AppSyncManager({
   const { refreshing, onRefresh, scrollViewRef } = useAppSync({
     fetchPhotos,
     fetchFiles,
-    autoNavigateHome,
     onSyncSuccess: showBanner,
   });
 

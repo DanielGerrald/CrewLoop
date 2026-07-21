@@ -12,6 +12,7 @@ import ForgotPassword from "./Screens/ForgotPassword";
 import Home from "./Screens/Home";
 import Loading from "./Components/Loading";
 import { JobProvider } from "./Components/Context";
+import { AuthContextProvider, useAuth } from "./Components/AuthContext";
 import { navigationRef } from "./Components/NavigationRef";
 import StagingBanner from "./Components/StagingBanner";
 import setupDatabase from "./Database/SetupDatabase";
@@ -21,7 +22,54 @@ import {
   UnsupportedOSScreen,
 } from "./Components/UpdateGate";
 
-const Stack = createNativeStackNavigator();
+const AuthStack = createNativeStackNavigator();
+const AuthenticatedStack = createNativeStackNavigator();
+
+function LoggedOutNavigator() {
+  return (
+    <AuthStack.Navigator
+      initialRouteName="Login"
+      screenOptions={{ fullScreenGestureEnabled: true }}
+      id="auth-stack"
+    >
+      <AuthStack.Screen
+        name="Login"
+        component={Login}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <AuthStack.Screen
+        name="Forgot Password"
+        component={ForgotPassword}
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+    </AuthStack.Navigator>
+  );
+}
+
+function LoggedInNavigator() {
+  return (
+    <AuthenticatedStack.Navigator
+      screenOptions={{ fullScreenGestureEnabled: true }}
+      id="authenticated-stack"
+    >
+      <AuthenticatedStack.Screen
+        name="Home"
+        component={Home}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+    </AuthenticatedStack.Navigator>
+  );
+}
+
+function RootNavigator() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  return isAuthenticated ? <LoggedInNavigator /> : <LoggedOutNavigator />;
+}
 
 async function checkForUpdates() {
   try {
@@ -80,30 +128,12 @@ export default function App() {
           onInit={setupDatabase}
           useSuspense
         >
-          <JobProvider>
-            <StagingBanner />
-            <Stack.Navigator
-              initialRouteName="Login"
-              screenOptions={{ fullScreenGestureEnabled: true }}
-              id="stack-navigator"
-            >
-              <Stack.Screen
-                name="Login"
-                component={Login}
-                options={{ headerShown: false, gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="Forgot Password"
-                component={ForgotPassword}
-                options={{ headerShown: false, gestureEnabled: true }}
-              />
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                options={{ headerShown: false, gestureEnabled: false }}
-              />
-            </Stack.Navigator>
-          </JobProvider>
+          <AuthContextProvider>
+            <JobProvider>
+              <StagingBanner />
+              <RootNavigator />
+            </JobProvider>
+          </AuthContextProvider>
         </SQLiteProvider>
         <StatusBar style="light" />
       </NavigationContainer>

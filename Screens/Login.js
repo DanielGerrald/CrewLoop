@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import * as Network from "expo-network";
 import { IconButton } from "react-native-paper";
 
@@ -33,7 +34,7 @@ import {
   insertWorkOrderSqlite,
 } from "../Database/WorkOrderDatabase";
 import { insertCategoryLabelSqlite } from "../Database/LabelDatabase";
-import { isTokenExpired, useSessionManager } from "../Components/SessionManager";
+import { isTokenExpired, useAuth } from "../Components/AuthContext";
 import {
   cleanupCheckInOutSqlite,
   getCheckInOutApi,
@@ -51,8 +52,9 @@ import Version from "../Components/Version";
 import { useSQLiteContext } from "expo-sqlite";
 import { BLURHASH } from "../Components/constants";
 
-export default function Login(props) {
-  useSessionManager();
+export default function Login() {
+  const { login } = useAuth();
+  const navigation = useNavigation();
   const db = useSQLiteContext();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -178,7 +180,7 @@ export default function Login(props) {
         await insertJobs(jobs);
       }
       setLoading(false);
-      props.navigation.navigate("Home");
+      login(updatedUser);
     } catch (error) {
       console.error("Error during login process:", error);
       setLoading(false);
@@ -195,7 +197,7 @@ export default function Login(props) {
         "Try again when you have internet access",
       );
     } else if (!(await isTokenExpired(sqliteUserData.token_expire_date))) {
-      props.navigation.navigate("Home");
+      login(sqliteUserData);
     }
   }
 
@@ -229,48 +231,57 @@ export default function Login(props) {
                   placeholder={BLURHASH}
                 />
                 <Text style={StyleSheet.loginTitle}>CrewLoop</Text>
+                <Text style={StyleSheet.loginSubtitle}>
+                  Sign in to manage your jobs
+                </Text>
               </View>
-              <View style={StyleSheet.loginForm}>
-                <CustomInput
-                  label="username"
-                  style={StyleSheet.inputView}
-                  placeholder={"User Name"}
-                  value={formData.username}
-                  onChangeText={(text) => handleInputChange("username", text)}
-                  textContentType="username"
-                  autoComplete="username"
-                />
-
-                <View style={StyleSheet.passwordInputContainer}>
+              <View style={StyleSheet.loginCard}>
+                <View style={StyleSheet.loginForm}>
                   <CustomInput
-                    label="password"
+                    label="username"
                     style={StyleSheet.inputView}
-                    placeholder={"Password"}
-                    value={formData.password}
-                    onChangeText={(text) => handleInputChange("password", text)}
-                    secureTextEntry={!showPassword}
-                    textContentType="password"
-                    autoComplete="password"
+                    placeholder={"User Name"}
+                    value={formData.username}
+                    onChangeText={(text) => handleInputChange("username", text)}
+                    textContentType="username"
+                    autoComplete="username"
                   />
-                  <IconButton
-                    icon={showPassword ? "eye-off" : "eye"}
-                    color={"#1E2530"}
-                    size={20}
-                    onPress={togglePasswordVisibility}
-                    style={StyleSheet.passwordVisibilityButton}
-                  />
-                </View>
 
-                <View style={StyleSheet.loginFormButtons}>
-                  <Pressable
-                    onPress={() => props.navigation.navigate("Forgot Password")}
-                  >
-                    <Text style={StyleSheet.signupText}>Forgot Password?</Text>
-                  </Pressable>
-                  <Pressable onPress={onSubmit} style={StyleSheet.loginBtn}>
-                    <Text style={StyleSheet.buttonText}>LOGIN</Text>
-                  </Pressable>
-                  <SignupButton />
+                  <View style={StyleSheet.passwordInputContainer}>
+                    <CustomInput
+                      label="password"
+                      style={StyleSheet.inputView}
+                      placeholder={"Password"}
+                      value={formData.password}
+                      onChangeText={(text) =>
+                        handleInputChange("password", text)
+                      }
+                      secureTextEntry={!showPassword}
+                      textContentType="password"
+                      autoComplete="password"
+                    />
+                    <IconButton
+                      icon={showPassword ? "eye-off" : "eye"}
+                      color={"#1E2530"}
+                      size={20}
+                      onPress={togglePasswordVisibility}
+                      style={StyleSheet.passwordVisibilityButton}
+                    />
+                  </View>
+
+                  <View style={StyleSheet.loginFormButtons}>
+                    <Pressable
+                      onPress={() => navigation.navigate("Forgot Password")}
+                    >
+                      <Text style={StyleSheet.signupText}>
+                        Forgot Password?
+                      </Text>
+                    </Pressable>
+                    <Pressable onPress={onSubmit} style={StyleSheet.loginBtn}>
+                      <Text style={StyleSheet.buttonText}>LOGIN</Text>
+                    </Pressable>
+                    <SignupButton />
+                  </View>
                 </View>
               </View>
               <Version />
