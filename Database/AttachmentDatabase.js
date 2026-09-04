@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
+import * as ImageManipulator from "expo-image-manipulator";
 
 import { environment } from "../Config";
 
@@ -9,9 +10,30 @@ import { environment } from "../Config";
 const sanitizeKey = (value) => String(value).replace(/[.#$/[\]]/g, "_");
 
 async function putAttachment(token, data) {
-  const base64 = await FileSystem.readAsStringAsync(data.uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  // Photos are captured/picked at full quality (several MB), which after
+  // base64 inflation (~33%) can make the write body large enough that
+  // Firebase's REST API rejects it with a generic "Invalid data; couldn't
+  // parse JSON" error. Downscale + recompress photos before upload — the
+  // full-quality original stays on-device untouched, only the remote copy
+  // is smaller. Documents (PDFs) can't be resized this way, so they still
+  // read their raw bytes.
+  let base64;
+  if (data.type === "Photo") {
+    const resized = await ImageManipulator.manipulateAsync(
+      data.uri,
+      [{ resize: { width: 1600 } }],
+      {
+        compress: 0.6,
+        format: ImageManipulator.SaveFormat.JPEG,
+        base64: true,
+      },
+    );
+    base64 = resized.base64;
+  } else {
+    base64 = await FileSystem.readAsStringAsync(data.uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
 
   const key = sanitizeKey(data.fileName);
 
@@ -173,7 +195,7 @@ export async function updateAttachmentSqlite(db, data) {
     const values = [];
 
     for (const [key, value] of Object.entries(data)) {
-      if (value !== undefined && value !== null) {
+      if (key !== "id" && value !== undefined && value !== null) {
         fieldsToUpdate.push(`${key} = ?`);
         values.push(value);
       }

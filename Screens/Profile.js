@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Switch, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import StyleSheet from "../StyleSheet";
 import { SAFE_AREA_EDGES } from "../Components/constants";
 import AvatarIcon from "../Components/AvatarIcon";
+import ReauthModal from "../Components/ReauthModal";
 import {
+  getLoginApi,
   lastLoggedinUserSqlite,
   postUserApi,
   requestEmailChangeApi,
@@ -25,6 +27,8 @@ export default function Profile() {
   const [updatedUser, setUpdatedUser] = useState(null);
   const [isEnabledSMS, setIsEnabledSMS] = useState(false);
   const [isEnabledEmail, setIsEnabledEmail] = useState(false);
+  const [reauthVisible, setReauthVisible] = useState(false);
+  const pendingEmailRef = useRef(null);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -88,7 +92,15 @@ export default function Profile() {
 
       const emailChanged = email !== lastLoggedIn.email;
       if (emailChanged) {
-        await requestEmailChangeApi(user.idToken, email);
+        const emailResult = await requestEmailChangeApi(user.idToken, email);
+        if (
+          !emailResult.success &&
+          emailResult.errorCode === "CREDENTIAL_TOO_OLD_LOGIN_AGAIN"
+        ) {
+          pendingEmailRef.current = email;
+          setReauthVisible(true);
+          return;
+        }
       }
 
       await refreshUser();
@@ -101,6 +113,46 @@ export default function Profile() {
       );
     } else {
       Alert.alert("Please fill in all required fields.");
+    }
+  };
+
+  const handleReauthConfirm = async (password) => {
+    try {
+      const freshLogin = await getLoginApi({
+        username: lastLoggedIn.email,
+        password,
+      });
+      if (!freshLogin?.idToken) {
+        Alert.alert("Incorrect password. Please try again.");
+        return;
+      }
+
+      await updateUserSqlite(db, {
+        localId: lastLoggedIn.localId,
+        idToken: freshLogin.idToken,
+        refreshToken: freshLogin.refreshToken,
+      });
+
+      const emailResult = await requestEmailChangeApi(
+        freshLogin.idToken,
+        pendingEmailRef.current,
+      );
+      setReauthVisible(false);
+
+      if (emailResult.success) {
+        await refreshUser();
+        Alert.alert(
+          "User Profile updated successfully!",
+          `We sent a confirmation link to ${pendingEmailRef.current}. Your email won't change until you confirm it.`,
+        );
+      } else {
+        Alert.alert(
+          "Email Change Error",
+          "Could not update your email. Please try again.",
+        );
+      }
+    } catch (error) {
+      Alert.alert("Incorrect password. Please try again.");
     }
   };
 
@@ -188,6 +240,11 @@ export default function Profile() {
         </View>
         <Version />
       </AppSyncManager>
+      <ReauthModal
+        visible={reauthVisible}
+        onCancel={() => setReauthVisible(false)}
+        onConfirm={handleReauthConfirm}
+      />
     </SafeAreaView>
   );
 }

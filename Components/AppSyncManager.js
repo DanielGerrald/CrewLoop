@@ -24,7 +24,6 @@ import {
 import {
   cleanupWorkOrderSqlite,
 getAssignmentsApi,
-  getWorkOrderDetailsApi,
   insertWorkOrderSqlite,
   selectWorkOrderSqlite,
   updateWorkOrderSqlite,
@@ -92,72 +91,63 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
       return;
     }
 
-    await Promise.allSettled(
-      jobs.map(async (job) => {
-        const id = job.assignment.id;
-        const assignmentRefId = job.site?.reference_code?.split("-")[1];
-        job.assignment.localId = user.localId;
-        const [detailsResult, contactsResult, checkinsResult, attachmentsResult] =
-          await Promise.allSettled([
-            getWorkOrderDetailsApi(token, id),
-            getWorkOrderContactsApi(token, id),
-            getCheckInOutApi(token, id),
-            assignmentRefId
-              ? getAttachmentsApi(token, assignmentRefId)
-              : Promise.resolve([]),
-          ]);
+    // Sequential per job (rather than firing every job's requests at once) —
+    // getAttachmentsApi also writes each file to disk, so N jobs in parallel
+    // meant N x 4 concurrent Firebase requests plus concurrent disk writes,
+    // which was silently dropping attachments under real network conditions
+    // (getAttachmentsApi swallows its own errors and just returns []).
+    for (const job of jobs) {
+      const id = job.assignment.id;
+      const assignmentRefId = job.site?.reference_code?.split("-")[1];
+      job.assignment.localId = user.localId;
+      const [contactsResult, checkinsResult, attachmentsResult] =
+        await Promise.allSettled([
+          getWorkOrderContactsApi(token, id),
+          getCheckInOutApi(token, id),
+          assignmentRefId
+            ? getAttachmentsApi(token, assignmentRefId)
+            : Promise.resolve([]),
+        ]);
 
-        if (
-          detailsResult.status === "fulfilled" &&
-          detailsResult.value?.assignment
-        ) {
-          job.assignment.vendor_requirements =
-            detailsResult.value.assignment.vendor_requirements;
-          job.assignment.desc_of_work =
-            detailsResult.value.assignment.desc_of_work;
+      if (contactsResult.status === "fulfilled" && contactsResult.value) {
+        try {
+          await insertContactSqlite(db, contactsResult.value, id);
+        } catch (err) {
+          console.warn(`Failed contacts insert for ${id}:`, err);
         }
+      }
 
-        if (
-          contactsResult.status === "fulfilled" &&
-          contactsResult.value
-        ) {
-          try {
-            await insertContactSqlite(db, contactsResult.value, id);
-          } catch (err) {
-            console.warn(`Failed contacts insert for ${id}:`, err);
+      if (
+        checkinsResult.status === "fulfilled" &&
+        Array.isArray(checkinsResult.value)
+      ) {
+        for (const c of checkinsResult.value) {
+          c.syncStatus = "Yes";
+          await deleteCheckInOutDuplicatesSqlite(db, c);
+          await insertCheckInOutSqlite(db, c);
+        }
+      }
+
+      if (attachmentsResult.status === "rejected") {
+        console.warn(
+          `Attachments fetch rejected for job ${id}:`,
+          attachmentsResult.reason,
+        );
+      } else if (Array.isArray(attachmentsResult.value)) {
+        for (const att of attachmentsResult.value) {
+          const existing = await selectAttachmentSqlite(
+            db,
+            "fileName",
+            att.fileName,
+            "assignment_id",
+            att.assignment_id,
+          );
+          if (!existing?.length) {
+            await insertAttachmentSqlite(db, att);
           }
         }
-
-        if (
-          checkinsResult.status === "fulfilled" &&
-          Array.isArray(checkinsResult.value)
-        ) {
-          for (const c of checkinsResult.value) {
-            c.syncStatus = "Yes";
-            await deleteCheckInOutDuplicatesSqlite(db, c);
-            await insertCheckInOutSqlite(db, c);
-          }
-        }
-
-        if (
-          attachmentsResult.status === "fulfilled" &&
-          Array.isArray(attachmentsResult.value)
-        ) {
-          for (const att of attachmentsResult.value) {
-            const existing = await selectAttachmentSqlite(
-              db,
-              "fileName",
-              att.fileName,
-              "assignment_id",
-              att.assignment_id,
-            );
-            if (!existing?.length) {
-              await insertAttachmentSqlite(db, att);
-            }
-          }
-        }
-      }),
-    );
+      }
+    }
 
     // Attachment types / labels — fetched from the dedicated RTDB node
     try {

@@ -117,13 +117,11 @@ export async function requestEmailChangeApi(idToken, newEmail) {
         newEmail,
       },
     );
-    return true;
+    return { success: true };
   } catch (error) {
-    console.error(
-      "requestEmailChangeApi Error:",
-      error.response?.data?.error?.message || error.message,
-    );
-    return false;
+    const errorCode = error.response?.data?.error?.message;
+    console.error("requestEmailChangeApi Error:", errorCode || error.message);
+    return { success: false, errorCode };
   }
 }
 
