@@ -19,34 +19,40 @@ import { IconButton } from "react-native-paper";
 import StyleSheet from "../StyleSheet";
 import {
   getLoginApi,
+  getUserAvatarApi,
   getUserProfileApi,
   insertUserSqlite,
+  selectUserByEmailSqlite,
   selectUserSqlite,
   updateUserSqlite,
 } from "../Database/UserDatabase";
 import CustomInput from "../Components/CustomInput";
 import { SignupButton } from "../Components/SignupButton.js";
-import {
+import { getAssignmentsApi,
   cleanupWorkOrderSqlite,
-  getCompletedWorkOrderApi,
-  getWorkOrderApi,
-  getWorkOrderDetailsApi,
   insertWorkOrderSqlite,
+  updateWorkOrderSqlite,
 } from "../Database/WorkOrderDatabase";
-import { insertCategoryLabelSqlite } from "../Database/LabelDatabase";
+import { getLabelsApi, insertCategoryLabelSqlite } from "../Database/LabelDatabase";
 import { isTokenExpired, useAuth } from "../Components/AuthContext";
 import {
   cleanupCheckInOutSqlite,
-  getCheckInOutApi,
-  insertCheckInOutSqlite,
 } from "../Database/CheckInOutDatabase";
-import {
-  cleanupContactSqlite,
-  getWorkOrderContactsApi,
-  insertContactSqlite,
+import {getWorkOrderContactsApi,
+  cleanupContactSqlite, insertContactSqlite
 } from "../Database/ContactDatabase";
-import { cleanupAttachmentSqlite } from "../Database/AttachmentDatabase";
-import { cleanupFinalCheckOutSqlite } from "../Database/FinalCheckOutDatabase";
+import {
+  cleanupAttachmentSqlite,
+  getAttachmentsApi,
+  insertAttachmentSqlite,
+  selectAttachmentSqlite,
+} from "../Database/AttachmentDatabase";
+import {
+  cleanupFinalCheckOutSqlite,
+  getFinalCheckoutApi,
+  insertFinalCheckOutSqlite,
+  selectFinalCheckOutSqlite,
+} from "../Database/FinalCheckOutDatabase";
 import Loading from "../Components/Loading";
 import Version from "../Components/Version";
 import { useSQLiteContext } from "expo-sqlite";
@@ -64,12 +70,9 @@ export default function Login() {
     password: "",
   });
 
-  const handleInputChange = (name, value) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+const handleInputChange = (name, value) => {
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
 
   async function insertJobs(jobs) {
     for (const job of jobs) {
@@ -108,12 +111,16 @@ export default function Login() {
       }
 
       const userProfile = await getUserProfileApi(apiLoginData);
-      delete userProfile.id;
+      const avatar = await getUserAvatarApi(
+        apiLoginData.idToken,
+        apiLoginData.localId,
+      );
 
-      const existingUser = await selectUserSqlite(db, formData);
+      const existingUser = await selectUserSqlite(db, apiLoginData.localId);
       const userData = {
         ...apiLoginData,
         ...userProfile,
+        ...(avatar ? { avatar } : {}),
         logged_in: 1,
       };
 
@@ -123,7 +130,8 @@ export default function Login() {
         await updateUserSqlite(db, userData);
       }
 
-      const updatedUser = await selectUserSqlite(db, formData);
+      const updatedUser = await selectUserSqlite(db, apiLoginData.localId);
+     
 
       if (!updatedUser) {
         setLoading(false);
@@ -131,54 +139,85 @@ export default function Login() {
         return;
       }
 
-      if (await isTokenExpired(updatedUser.token_expire_date)) {
+      if (await isTokenExpired(updatedUser.idToken)) {
         setLoading(false);
         Alert.alert("Session expired. Please log in again.");
         return;
       }
 
-      const openJobs = await getWorkOrderApi(updatedUser);
-      const completedJobs = await getCompletedWorkOrderApi(
-        updatedUser.access_token,
+const jobs = await getAssignmentsApi(updatedUser.idToken);
+  const attachmentTypes = await getLabelsApi(updatedUser.idToken);
+
+if (jobs.length > 0) {
+
+
+  await cleanupWorkOrderSqlite(db, jobs);
+  await cleanupContactSqlite(db, jobs);
+  await cleanupCheckInOutSqlite(db, jobs);
+  await cleanupAttachmentSqlite(db, jobs);
+  await cleanupFinalCheckOutSqlite(db, jobs);
+
+  if (attachmentTypes) {
+    await insertCategoryLabelSqlite(db, attachmentTypes);
+  }
+
+
+
+  for (const job of jobs) {
+    await insertWorkOrderSqlite(db, job);
+    if (job.assignment.completed) {
+      await updateWorkOrderSqlite(
+        db,
+        "status_label",
+        "Completed",
+        "id",
+        job.assignment.id,
       );
 
-      const jobs = [...openJobs, ...completedJobs];
-
-      if (jobs.length > 0) {
-        await cleanupWorkOrderSqlite(db, jobs);
-        await cleanupContactSqlite(db, jobs);
-        await cleanupCheckInOutSqlite(db, jobs);
-        await cleanupAttachmentSqlite(db, jobs);
-        await cleanupFinalCheckOutSqlite(db, jobs);
-        for (const job of jobs) {
-          job.assignment.user_id = updatedUser.user_id;
-          let details = await getWorkOrderDetailsApi(
-            updatedUser.access_token,
-            job.assignment.id,
-          );
-          job.assignment.vendor_requirements =
-            details.assignment.vendor_requirements;
-          job.assignment.desc_of_work = details.assignment.desc_of_work;
-          let contacts = await getWorkOrderContactsApi(
-            updatedUser.access_token,
-            job.assignment.id,
-          );
-          if (contacts !== undefined) {
-            contacts.assignment_id = job.assignment.id;
-            await insertContactSqlite(db, contacts);
-          }
-          const checkinArray = await getCheckInOutApi(
-            updatedUser.access_token,
-            job.assignment.id,
-          );
-          for (const checkin of checkinArray) {
-            checkin.syncStatus = "Yes";
-            await insertCheckInOutSqlite(db, checkin);
-          }
+      const existingCheckout = await selectFinalCheckOutSqlite(
+        db,
+        "assignment_id",
+        job.assignment.id,
+      );
+      if (!existingCheckout?.length) {
+        const finalCheckout = await getFinalCheckoutApi(
+          updatedUser.idToken,
+          job.assignment.id,
+        );
+        if (finalCheckout) {
+          await insertFinalCheckOutSqlite(db, finalCheckout);
         }
-        await insertCategoryLabelSqlite(db, jobs[0].site.attachment_types);
-        await insertJobs(jobs);
       }
+    }
+    const contact = await getWorkOrderContactsApi(
+      updatedUser.idToken,
+      job.assignment.id,
+    );
+    if (contact) {
+      await insertContactSqlite(db, contact, job.assignment.id);
+    }
+
+    const assignmentRefId = job.site?.reference_code?.split("-")[1];
+    if (assignmentRefId) {
+      const attachments = await getAttachmentsApi(
+        updatedUser.idToken,
+        assignmentRefId,
+      );
+      for (const att of attachments) {
+        const existing = await selectAttachmentSqlite(
+          db,
+          "fileName",
+          att.fileName,
+          "assignment_id",
+          att.assignment_id,
+        );
+        if (!existing?.length) {
+          await insertAttachmentSqlite(db, att);
+        }
+      }
+    }
+  }
+}
       setLoading(false);
       login(updatedUser);
     } catch (error) {
@@ -190,13 +229,18 @@ export default function Login() {
 
   async function handleOfflineLogin() {
     setLoading(false);
-    const sqliteUserData = await selectUserSqlite(db, formData);
-    if (sqliteUserData === null) {
+    const sqliteUserData = await selectUserByEmailSqlite(db, formData.username);
+    if (!sqliteUserData) {
       Alert.alert(
         "The username does not exist!",
         "Try again when you have internet access",
       );
-    } else if (!(await isTokenExpired(sqliteUserData.token_expire_date))) {
+    } else if (await isTokenExpired(sqliteUserData.idToken)) {
+      Alert.alert(
+        "Session expired.",
+        "Try again when you have internet access",
+      );
+    } else {
       login(sqliteUserData);
     }
   }

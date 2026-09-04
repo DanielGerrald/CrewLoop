@@ -5,15 +5,20 @@ import { useMemo } from "react";
 
 import StyleSheet from "../StyleSheet";
 import JobCard from "../Components/JobCard";
+import Loading from "../Components/Loading";
 import { useJob } from "../Components/Context";
 import { Avatar, Card, Text } from "react-native-paper";
 import AppSyncManager from "../Components/AppSyncManager";
 import { BLURHASH, SAFE_AREA_EDGES, getActiveJobs } from "../Components/constants";
 
 export default function JobsList() {
-  const { jobResult } = useJob();
+  const { jobResult, isJobsLoading } = useJob();
 
   const jobData = useMemo(() => getActiveJobs(jobResult), [jobResult]);
+
+  if (isJobsLoading) {
+    return <Loading />;
+  }
 
   return (
     <SafeAreaView style={StyleSheet.SafeArea} edges={SAFE_AREA_EDGES}>

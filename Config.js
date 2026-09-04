@@ -8,9 +8,9 @@ function getEnvironment() {
       return {
         envName: "production",
         icon: "✅",
-        apiUrl: "https://api.crewloop-demo.com/crewloopApi",
+        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
         enableHiddenFeatures: false,
-        apikey: null,
+        apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: false,
       };
 
@@ -18,9 +18,9 @@ function getEnvironment() {
       return {
         envName: "staging",
         icon: "🚧",
-        apiUrl: "https://staging.crewloop-demo.com/crewloopApi",
+        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
-        apikey: null,
+        apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,
       };
 
@@ -28,10 +28,9 @@ function getEnvironment() {
       return {
         envName: "development",
         icon: "⚙️",
-        // Point to local mock API server — run `npm run mock-api` before launching the app
-        apiUrl: "http://localhost:3001",
+        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
-        apikey: null,
+        apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,
       };
 
@@ -39,10 +38,9 @@ function getEnvironment() {
       return {
         envName: "demo",
         icon: "🎯",
-        // Default also points to local mock API for easy employer demos
-        apiUrl: "http://localhost:3001",
+        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
-        apikey: null,
+        apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,
       };
   }

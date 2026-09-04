@@ -9,16 +9,32 @@ import {
 import { AppState } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import moment from "moment";
 import { format } from "date-fns";
 
 import { lastLoggedinUserSqlite, updateUserSqlite } from "../Database/UserDatabase";
 
 const SESSION_CHECK_INTERVAL_MS = 300_000; // 5 min
 
-export async function isTokenExpired(tokenExpireDate) {
-  if (!tokenExpireDate) return true;
-  return tokenExpireDate < moment().unix();
+export async function isTokenExpired(token) {
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const decodedJson = JSON.parse(atob(payloadBase64));
+    const exp = decodedJson.exp; // Expiration time in seconds since epoch
+    const now = Math.floor(Date.now() / 1000);
+    
+    return now >= exp; // Returns true if expired
+  } catch (e) {
+    return true; // Treat invalid tokens as expired
+  }
+}
+
+export function getTokenExpiry(token) {
+  try {
+    const { exp } = JSON.parse(atob(token.split(".")[1]));
+    return exp ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
 }
 
 const AuthContext = createContext({
@@ -60,7 +76,7 @@ export function AuthContextProvider({ children }) {
         return;
       }
 
-      if (await isTokenExpired(lastLoggedIn.token_expire_date)) {
+      if (await isTokenExpired(lastLoggedIn.idToken)) {
         await updateUserSqlite(db, { ...lastLoggedIn, logged_in: 0 });
         clearSessionInterval();
         setUser(null);
@@ -68,11 +84,10 @@ export function AuthContextProvider({ children }) {
       }
 
       setUser(lastLoggedIn);
-      const expiresAt = lastLoggedIn.token_expire_date * 1000;
-      console.log(
-        "Token valid through:",
-        format(new Date(expiresAt), "MMM d, yyyy h:mm a"),
-      );
+ const expiresAt = getTokenExpiry(lastLoggedIn.idToken);
+if (expiresAt) {
+  console.log("Token valid through:", format(new Date(expiresAt), "MMM d, yyyy h:mm a"));
+}
       startSessionInterval();
     } catch (error) {
       console.error("Error checking session:", error);

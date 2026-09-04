@@ -1,78 +1,145 @@
 import axios from "axios";
-import { Alert } from "react-native";
 import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
+
 
 export async function getLoginApi(data) {
-  try {
-    let response = await instance.post(
-      "/login",
-      JSON.stringify({ username: data.username, password: data.password }),
-      { headers: { "Content-Type": "application/json" } },
-    );
-    if (response.data.info.status === "OK") {
-      return Promise.resolve(response.data.results);
-    }
-  } catch (error) {
-    console.error("getLogin Error:", error);
-  }
+
+    const response = await axios.post(
+      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + environment.apikey,
+      {
+        email: data.username,
+        password: data.password,
+        returnSecureToken: true,
+      }
+    )
+  
+    return response.data;
+  
 }
 
 export async function getUserProfileApi(data) {
   try {
-    let response = await instance.get("/accountProfile", {
-      headers: { TOKEN: data.access_token },
-    });
-    if (response.data.info.status === "OK") {
-      return Promise.resolve(response.data.results);
-    }
+    const response = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${environment.apikey}`,
+      { idToken: data.idToken },
+    );
+    const user = response.data.users?.[0];
+    if (!user) return undefined;
+
+    const displayName = user.displayName || "";
+    const [first_name = "", ...rest] = displayName.split(" ");
+
+    return {
+      displayName,
+      first_name,
+      last_name: rest.join(" "),
+      email: user.email,
+      localId: user.localId,
+    };
   } catch (error) {
-    console.error("getUserProfile Error:", error);
+    console.error(
+      "getUserProfile Error:",
+      error.response?.data?.error?.message || error.message,
+    );
   }
 }
 
 export async function postUserApi(data) {
   try {
-    await instance.post(
-      "/updateAccountProfile",
+    const authResponse = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${environment.apikey}`,
       {
-        "CrewMember[person][first_name]": data.first_name,
-        "CrewMember[person][last_name]": data.last_name,
-        "CrewMember[person][email]": data.email,
-        "CrewMember[person][phone_nbr]": data.phone_nbr,
-        "CrewMember[person][last_login]": data.last_login,
-        "CrewMember[notify_sms]": data.notify_sms,
-        "CrewMember[notify_email]": data.notify_email,
+        idToken: data.idToken,
+        displayName: data.displayName,
+        returnSecureToken: true,
       },
-      { headers: { TOKEN: data.access_token } },
     );
+    const idToken = authResponse.data.idToken;
+    const refreshToken = authResponse.data.refreshToken;
+
+    return { ...data, idToken, refreshToken };
   } catch (error) {
-    console.error("postUserAPI Error:", error);
-    Alert.alert(error.message);
+    console.error(
+      "postUserApi Error:",
+      error.response?.data?.error?.message || error.message,
+    );
   }
 }
 
-export async function postRecoverPasswordAPI(data) {
+// Avatar images are stored as a data URI (base64) directly in the
+// Realtime Database rather than Firebase Storage, matching how attachment
+// photos/signatures are handled elsewhere in this app.
+export async function postUserAvatarApi(idToken, localId, base64, mimeType) {
   try {
-    const results = await instance.post("/recoverPassword", {
-      username: data,
-    });
-    return results.data?.info?.message;
+    await axios.put(
+      environment.apiUrl + `/AVATARS/${localId}.json`,
+      { base64, mimeType },
+      { params: { auth: idToken } },
+    );
+    return true;
+  } catch (error) {
+    console.log(
+      "postUserAvatarApi Error:",
+      error.response?.data ?? error.message,
+    );
+    return false;
+  }
+}
+
+export async function getUserAvatarApi(idToken, localId) {
+  try {
+    const response = await axios.get(
+      environment.apiUrl + `/AVATARS/${localId}.json`,
+      { params: { auth: idToken } },
+    );
+    const data = response.data;
+    if (!data?.base64) return null;
+    return `data:${data.mimeType || "image/jpeg"};base64,${data.base64}`;
+  } catch (error) {
+    console.log(
+      "getUserAvatarApi Error:",
+      error.response?.data ?? error.message,
+    );
+    return null;
+  }
+}
+
+export async function requestEmailChangeApi(idToken, newEmail) {
+  try {
+    await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${environment.apikey}`,
+      {
+        requestType: "VERIFY_AND_CHANGE_EMAIL",
+        idToken,
+        newEmail,
+      },
+    );
+    return true;
+  } catch (error) {
+    console.error(
+      "requestEmailChangeApi Error:",
+      error.response?.data?.error?.message || error.message,
+    );
+    return false;
+  }
+}
+
+export async function postRecoverPasswordAPI(email) {
+  try {
+    await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${environment.apikey}`,
+      {
+        requestType: "PASSWORD_RESET",
+        email,
+      },
+    );
+    return `A password reset link has been sent to ${email}.`;
   } catch (error) {
     const errorMessage =
-      error.response?.data?.info?.message ||
+      error.response?.data?.error?.message ||
       error.message ||
       "An unexpected error occurred.";
     console.error("postRecoverPasswordAPI Error:", errorMessage);
@@ -91,7 +158,7 @@ export async function insertUserSqlite(db, data) {
     const values = columns.map((key) => data[key]);
 
     await db.runAsync(
-      `INSERT INTO "user" (${columns.join(", ")}) VALUES (${placeholders})`,
+      `INSERT OR REPLACE INTO "user" (${columns.join(", ")}) VALUES (${placeholders})`,
       [...values],
     );
   } catch (error) {
@@ -105,14 +172,14 @@ export async function updateUserSqlite(db, data) {
     const values = [];
 
     for (const [key, value] of Object.entries(data)) {
-      if (key !== "username" && value !== undefined && value !== null) {
+      if (key !== "localId" && value !== undefined && value !== null) {
         fieldsToUpdate.push(`${key} = ?`);
         values.push(value);
       }
     }
     await db.runAsync(
-      `UPDATE user SET ${fieldsToUpdate.join(", ")} WHERE username = ? COLLATE NOCASE`,
-      [...values, data.username],
+      `UPDATE user SET ${fieldsToUpdate.join(", ")} WHERE localId = ?`,
+      [...values, data.localId],
     );
   } catch (error) {
     console.error("Update User function failed:", error);
@@ -130,13 +197,26 @@ export async function lastLoggedinUserSqlite(db) {
   }
 }
 
+
 export async function selectUserSqlite(db, data) {
+  
   try {
     return await db.getFirstAsync(
-      "SELECT * FROM user WHERE username = ? COLLATE NOCASE",
-      [data.username],
+      "SELECT * FROM user WHERE localId = ?",
+      [data],
     );
   } catch (error) {
     console.error("select user function failed:", error);
+  }
+}
+
+export async function selectUserByEmailSqlite(db, email) {
+  try {
+    return await db.getFirstAsync(
+      "SELECT * FROM user WHERE email = ?",
+      [email],
+    );
+  } catch (error) {
+    console.error("select user by email function failed:", error);
   }
 }

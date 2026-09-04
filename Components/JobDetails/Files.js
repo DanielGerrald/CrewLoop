@@ -61,7 +61,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
   const pickFile = async (labelId, label) => {
     try {
       const lastLoggedIn = await lastLoggedinUserSqlite(db);
-      setToken(lastLoggedIn.access_token);
+      setToken(lastLoggedIn.idToken);
       let result = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: false,
         multiple: false,
@@ -206,11 +206,14 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                       >
                         <Chip
                           icon={() => (
-                            <Icon source="tag" color={"blue"} size={20} />
+                            <Icon source="tag" color={"#01ab52"} size={20} />
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelLarge"> {label.type_label}</Text>
+                          <Text variant="labelLarge" style={StyleSheet.chipText}>
+                            {" "}
+                            {label.type_label}
+                          </Text>
                         </Chip>
                       </TouchableOpacity>
                     ))}
@@ -269,11 +272,11 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                     <View style={StyleSheet.labelView}>
                       <Chip
                         icon={() => (
-                          <Icon source="tag" color={"blue"} size={20} />
+                          <Icon source="tag" color={"#01ab52"} size={20} />
                         )}
                         style={StyleSheet.chip}
                       >
-                        <Text variant="labelSmall"> {file.label}</Text>
+                        <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
                       </Chip>
                       <Chip
                         icon={() => (
@@ -281,7 +284,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                         )}
                         style={StyleSheet.chip}
                       >
-                        <Text variant="labelSmall">{moment().format("L")}</Text>
+                        <Text variant="labelSmall" style={StyleSheet.chipText}>{moment().format("L")}</Text>
                       </Chip>
                     </View>
                   </TouchableOpacity>
@@ -322,11 +325,11 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                       <View style={StyleSheet.labelView}>
                         <Chip
                           icon={() => (
-                            <Icon source="tag" color={"blue"} size={20} />
+                            <Icon source="tag" color={"#01ab52"} size={20} />
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelSmall"> {file.label}</Text>
+                          <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
                         </Chip>
                         <Chip
                           icon={() => (
@@ -334,12 +337,12 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelSmall">
+                          <Text variant="labelSmall" style={StyleSheet.chipText}>
                             {moment().format("L")}
                           </Text>
                         </Chip>
                         {file.syncStatus === "Pending" && (
-                          <Chip style={StyleSheet.chip} icon="cloud-upload">
+                          <Chip style={StyleSheet.chip} textStyle={StyleSheet.chipText} icon="cloud-upload">
                             Pending
                           </Chip>
                         )}
@@ -363,7 +366,6 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                 <TouchableOpacity
                   key={index.toString()}
                   onPress={() => openFile(file.uri)}
-                  onLongPress={() => deleteFile(file.id)}
                 >
                   <View style={StyleSheet.rowView}>
                     <View style={StyleSheet.fileIconRow}>
@@ -382,11 +384,11 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                   <View style={StyleSheet.labelView}>
                     <Chip
                       icon={() => (
-                        <Icon source="tag" color={"blue"} size={20} />
+                        <Icon source="tag" color={"#01ab52"} size={20} />
                       )}
                       style={StyleSheet.chip}
                     >
-                      <Text variant="labelSmall"> {file.label}</Text>
+                      <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
                     </Chip>
                     <Chip
                       icon={() => (
@@ -394,7 +396,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                       )}
                       style={StyleSheet.chip}
                     >
-                      <Text variant="labelSmall">
+                      <Text variant="labelSmall" style={StyleSheet.chipText}>
                         {moment.unix(file.date).format("L")}
                       </Text>
                     </Chip>

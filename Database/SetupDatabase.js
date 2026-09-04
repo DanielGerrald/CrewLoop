@@ -1,7 +1,7 @@
 import { environment } from "../Config";
 
 export default async function setupDatabase(db) {
-  const DATABASE_VERSION = 9;
+  const DATABASE_VERSION = 1;
 
   try {
     let { user_version: currentDbVersion } = await db.getFirstAsync(
@@ -43,25 +43,26 @@ export default async function setupDatabase(db) {
         await db.execAsync(`
                 CREATE TABLE IF NOT EXISTS user
                 (
-                  user_id           INTEGER PRIMARY KEY,
+                  localId           TEXT PRIMARY KEY,
                   vendor_id         INTEGER,
                   company_name      TEXT,
-                  username          TEXT,
                   first_name        TEXT,
                   last_name         TEXT,
                   email             TEXT,
                   phone_nbr         TEXT,
                   mobile_nbr        TEXT,
                   fax_nbr           TEXT,
-                  active            TEXT,
-                  created_on        TEXT,
-                  access_token      TEXT,
-                  token_expire_date INTEGER,
+                  idToken           TEXT,
+                  expiresIn         INTEGER,
                   notify_sms        INTEGER DEFAULT (0),
                   notify_email      INTEGER DEFAULT (0),
                   avatar            BLOB,
                   last_login        INTEGER,
                   logged_in         INTEGER DEFAULT (0),
+                  kind              TEXT,
+                  displayName       TEXT,
+                  registered        TEXT,
+                  refreshToken      TEXT,
                   uuid              TEXT
                 )
               `);
@@ -96,7 +97,7 @@ export default async function setupDatabase(db) {
                   state               TEXT,
                   store_nbr           TEXT,
                   type                TEXT,
-                  user_id             INTEGER,
+                  localId             INTEGER,
                   status_label        TEXT,
                   zip                 INTEGER,
                   company_name        TEXT

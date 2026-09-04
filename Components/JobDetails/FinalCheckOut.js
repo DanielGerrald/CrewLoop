@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -18,12 +18,14 @@ import StyleSheet from "../../StyleSheet";
 import CustomInput from "../CustomInput";
 import SignatureScreen from "../../Screens/SignatureScreen";
 import {
+  deleteFinalCheckOutSqlite,
   insertFinalCheckOutSqlite,
   postFinalCheckListApi,
   postFinalCheckoutApi,
   updateFinalCheckOutSqlite,
 } from "../../Database/FinalCheckOutDatabase";
 import {
+  patchAssignmentApi,
   selectWorkOrderSqlite,
   updateWorkOrderSqlite,
 } from "../../Database/WorkOrderDatabase";
@@ -32,19 +34,27 @@ import { useSQLiteContext } from "expo-sqlite";
 import * as Network from "expo-network";
 import { useJob } from "../Context";
 
-function SummaryRow({ icon, label, value }) {
+function SummaryRow({ icon, label, value, secondaryLabel, secondaryValue }) {
   return (
-    <View style={StyleSheet.workLogComment}>
+    <View style={StyleSheet.workLogEntry}>
       <View style={StyleSheet.rowView}>
         <Avatar.Icon
           style={StyleSheet.avatarIconCheckout}
           icon={icon}
           size={30}
         />
-        <Text style={StyleSheet.TextDescript}>
-          {label}:{"\n"}
-          {` ${value}`}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={StyleSheet.TextDescript}>
+            {label}:{"\n"}
+            {` ${value}`}
+          </Text>
+          {secondaryValue ? (
+            <Text style={StyleSheet.textMuted}>
+              {secondaryLabel}:{"\n"}
+              {` ${secondaryValue}`}
+            </Text>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -92,6 +102,35 @@ export default function FinalCheckOut({
       [name]: value,
     });
   };
+
+  // Pre-fill the form with the previously submitted checkout when editing
+  // (e.g. after reopening a completed job) — a brand-new checkout has no
+  // finalCheckoutData yet, so this leaves the blank defaults untouched. Only
+  // fills once per time the form becomes visible, so a background sync
+  // re-fetching the same data mid-edit doesn't clobber unsaved changes.
+  const prefilledRef = useRef(false);
+  useEffect(() => {
+    if (!checkoutFormVisible) {
+      prefilledRef.current = false;
+      return;
+    }
+    if (prefilledRef.current || !finalCheckoutData) return;
+    prefilledRef.current = true;
+
+    setServicePerf(finalCheckoutData.service_perf === "1");
+    setMaterialInst(finalCheckoutData.material_inst === "1");
+    setWalkthrough(finalCheckoutData.walkThrough_comp === "1");
+    setReturnNeeded(finalCheckoutData.return_needed === "1");
+    setSignature(finalCheckoutData.signature_base64 || "");
+    setFormData((prev) => ({
+      ...prev,
+      desc_service_perf: finalCheckoutData.desc_service_perf || "",
+      desc_material_inst: finalCheckoutData.desc_material_inst || "",
+      desc_return_needed: finalCheckoutData.desc_return_needed || "",
+      desc_misc_notes: finalCheckoutData.desc_misc_notes || "",
+      manager_name: finalCheckoutData.manager_name || "",
+    }));
+  }, [checkoutFormVisible, finalCheckoutData]);
 
   async function onSubmit() {
     setForceValidate(true);
@@ -154,6 +193,9 @@ export default function FinalCheckOut({
         syncStatus: "Pending",
       };
 
+      // Delete any prior submission first so editing and resubmitting after
+      // a reopen replaces it instead of leaving a stale duplicate row.
+      await deleteFinalCheckOutSqlite(db, apiPayload.assignment_id);
       await insertFinalCheckOutSqlite(db, apiPayload);
       await updateWorkOrderSqlite(
         db,
@@ -165,8 +207,8 @@ export default function FinalCheckOut({
 
       const sqliteJobs = await selectWorkOrderSqlite(
         db,
-        "user_id",
-        userData.user_id,
+        "localId",
+        userData.localId,
       );
       setJobResult(sqliteJobs);
 
@@ -179,16 +221,21 @@ export default function FinalCheckOut({
       if (online) {
         try {
           const listRes = await postFinalCheckListApi(
-            userData.access_token,
+            userData.idToken,
             apiPayload,
           );
           if (listRes) {
             submittedStatus = "Yes";
             try {
               await postFinalCheckoutApi(
-                userData.access_token,
+                userData.idToken,
                 apiPayload.desc_misc_notes,
                 apiPayload.assignment_id,
+              );
+              await patchAssignmentApi(
+                userData.idToken,
+                apiPayload.assignment_id,
+                { completed: 1 },
               );
             } catch {
               console.log(
@@ -217,6 +264,59 @@ export default function FinalCheckOut({
     }
   }
 
+  function handleReopen() {
+    Alert.alert(
+      "Reopen Job",
+      "This will move the job back to Active Jobs so you can edit the final checkout. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reopen",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const networkState = await Network.getNetworkStateAsync();
+              const online = Boolean(
+                networkState?.isConnected &&
+                  networkState?.isInternetReachable,
+              );
+              if (!online) {
+                Alert.alert(
+                  "No internet connection",
+                  "Please try again when you have internet access.",
+                );
+                return;
+              }
+
+              const userData = await lastLoggedinUserSqlite(db);
+              await patchAssignmentApi(userData.idToken, selectedJob[0].id, {
+                completed: 0,
+              });
+              await updateWorkOrderSqlite(
+                db,
+                "status_label",
+                "Scheduled",
+                "id",
+                selectedJob[0].id,
+              );
+
+              const sqliteJobs = await selectWorkOrderSqlite(
+                db,
+                "localId",
+                userData.localId,
+              );
+              setJobResult(sqliteJobs);
+
+              setCheckoutFormVisible(true);
+            } catch (err) {
+              Alert.alert("Reopen Error", err.message);
+            }
+          },
+        },
+      ],
+    );
+  }
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
       <ScrollView contentContainerStyle={StyleSheet.container}>
@@ -233,62 +333,40 @@ export default function FinalCheckOut({
           </View>
           {workLog && (
             <>
-              {checkInOutData.map((checkin) => (
-                <View style={StyleSheet.workLogComment} key={checkin.id}>
-                  <View style={StyleSheet.rowView}>
-                    <Avatar.Icon
-                      style={StyleSheet.avatarIconCheckout}
-                      icon="message-reply-text"
-                      size={30}
-                    />
-                    {checkin.departing === 0 && (
-                      <Text style={StyleSheet.TextDescript}>
-                        Check in comments:
-                        {"\n"}
-                        {` ${checkin.comment || "No Comment Left"}`}
-                      </Text>
-                    )}
-                    {checkin.departing === 1 && (
-                      <Text style={StyleSheet.TextDescript}>
-                        Check out comments:
-                        {"\n"}
-                        {` ${checkin.comment || "No Comment Left"}`}
-                      </Text>
-                    )}
-                  </View>
-                  <View style={StyleSheet.rowView}>
-                    <Avatar.Icon
-                      style={StyleSheet.avatarIconCheckout}
-                      icon="clipboard-text-clock"
-                      size={30}
-                    />
-                    {checkin.departing === 0 && (
-                      <Text style={StyleSheet.TextDescript}>
-                        Check in time:
-                        {"\n"}
-                        {format(
-                          fromUnixTime(checkin.visit_date),
-                          "MMM d, yyyy h:mm a",
-                        )}
-                      </Text>
-                    )}
-                    {checkin.departing === 1 && (
-                      <Text style={StyleSheet.TextDescript}>
-                        Check out time:
-                        {"\n"}
-                        {format(
-                          fromUnixTime(checkin.visit_date),
-                          "MMM d, yyyy h:mm a",
-                        )}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              ))}
+              {[...checkInOutData]
+                .reverse()
+                .map((checkin) => {
+                  const isCheckIn = checkin.departing === 0;
+                  return (
+                    <View style={StyleSheet.workLogEntry} key={checkin.id}>
+                      <View style={StyleSheet.rowView}>
+                        <Avatar.Icon
+                          style={StyleSheet.avatarIconCheckout}
+                          icon={isCheckIn ? "login" : "logout"}
+                          size={30}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={StyleSheet.Text}>
+                            {isCheckIn ? "Checked In" : "Checked Out"} —{" "}
+                            {format(
+                              fromUnixTime(checkin.visit_date),
+                              "MMM d, yyyy h:mm a",
+                            )}
+                          </Text>
+                          <Text style={StyleSheet.TextDescript}>
+                            {checkin.comment || "No comment left"}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
             </>
           )}
 
-          {!checkoutFormVisible && finalCheckoutData && (
+          {!checkoutFormVisible &&
+            finalCheckoutData &&
+            selectedJob[0]?.status_label === "Completed" && (
             <>
               <View style={StyleSheet.horizontalRule} />
               <Text style={StyleSheet.TextTitle}>Final Checkout Summary</Text>
@@ -309,29 +387,25 @@ export default function FinalCheckOut({
                 icon="wrench"
                 label="Service Performed"
                 value={finalCheckoutData.service_perf === "1" ? "Yes" : "No"}
+                secondaryLabel="Service Description"
+                secondaryValue={
+                  finalCheckoutData.service_perf === "1"
+                    ? finalCheckoutData.desc_service_perf
+                    : null
+                }
               />
-              {finalCheckoutData.service_perf === "1" &&
-                finalCheckoutData.desc_service_perf ? (
-                <SummaryRow
-                  icon="text"
-                  label="Service Description"
-                  value={finalCheckoutData.desc_service_perf}
-                />
-              ) : null}
 
               <SummaryRow
                 icon="package-variant-closed"
                 label="Material Installed"
                 value={finalCheckoutData.material_inst === "1" ? "Yes" : "No"}
+                secondaryLabel="Material Description"
+                secondaryValue={
+                  finalCheckoutData.material_inst === "1"
+                    ? finalCheckoutData.desc_material_inst
+                    : null
+                }
               />
-              {finalCheckoutData.material_inst === "1" &&
-                finalCheckoutData.desc_material_inst ? (
-                <SummaryRow
-                  icon="text"
-                  label="Material Description"
-                  value={finalCheckoutData.desc_material_inst}
-                />
-              ) : null}
 
               <SummaryRow
                 icon="walk"
@@ -345,15 +419,13 @@ export default function FinalCheckOut({
                 icon="keyboard-return"
                 label="Return Needed"
                 value={finalCheckoutData.return_needed === "1" ? "Yes" : "No"}
+                secondaryLabel="Return Reason"
+                secondaryValue={
+                  finalCheckoutData.return_needed === "1"
+                    ? finalCheckoutData.desc_return_needed
+                    : null
+                }
               />
-              {finalCheckoutData.return_needed === "1" &&
-                finalCheckoutData.desc_return_needed ? (
-                <SummaryRow
-                  icon="text"
-                  label="Return Reason"
-                  value={finalCheckoutData.desc_return_needed}
-                />
-              ) : null}
 
               {finalCheckoutData.desc_misc_notes ? (
                 <SummaryRow
@@ -383,6 +455,13 @@ export default function FinalCheckOut({
                   </View>
                 </View>
               ) : null}
+
+              <TouchableOpacity
+                style={StyleSheet.logoutBtn}
+                onPress={handleReopen}
+              >
+                <Text style={StyleSheet.logoutBtnText}>Reopen Job</Text>
+              </TouchableOpacity>
             </>
           )}
 

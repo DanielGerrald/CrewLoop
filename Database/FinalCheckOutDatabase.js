@@ -1,53 +1,73 @@
 import axios from "axios";
+import { getUnixTime } from "date-fns";
 import { environment } from "../Config";
 
 //---------------API Functions---------------//
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
 
 export async function postFinalCheckListApi(token, data) {
   try {
-    const result = await instance.post(
-      "/updateAssignmentChecklist",
+    await axios.put(
+      environment.apiUrl + `/CHECKLISTS/${data.assignment_id}.json`,
       {
-        "AssignmentChecklist[service_performed]": data.service_perf,
-        "AssignmentChecklist[service_performed_desc]": data.desc_service_perf,
-        "AssignmentChecklist[materials_installed]": data.material_inst,
-        "AssignmentChecklist[materials_installed_desc]": data.desc_material_inst,
-        "AssignmentChecklist[assignment_100]": data.assignment_100,
-        "AssignmentChecklist[walkthrough_completed]": data.walkThrough_comp,
-        "AssignmentChecklist[return_needed]": data.return_needed,
-        "AssignmentChecklist[return_needed_desc]": data.desc_return_needed,
-        "AssignmentChecklist[manager_name]": data.manager_name,
-        "AssignmentChecklist[manager_signature]": data.signature_base64,
-        "AssignmentChecklist[assignment_id]": data.assignment_id,
-        "AssignmentChecklist[modified_date]": data.modified_date,
+        service_perf: data.service_perf,
+        desc_service_perf: data.desc_service_perf,
+        material_inst: data.material_inst,
+        desc_material_inst: data.desc_material_inst,
+        assignment_100: data.assignment_100,
+        walkThrough_comp: data.walkThrough_comp,
+        return_needed: data.return_needed,
+        desc_return_needed: data.desc_return_needed,
+        desc_misc_notes: data.desc_misc_notes,
+        manager_name: data.manager_name,
+        manager_signature: data.signature_base64,
+        assignment_id: data.assignment_id,
+        modified_date: data.modified_date,
       },
-      {
-        headers: {
-          TOKEN: token,
-        },
-        params: {
-          id: data.assignment_id,
-        },
-      },
+      { params: { auth: token } },
     );
     console.log("Post Final Check list API ran");
-    return result?.data?.info?.code === 200;
+    return true;
   } catch (error) {
     const errorMessage =
-      error.response?.data?.info?.message ||
+      error.response?.data?.error?.message ||
       error.message ||
       "An unexpected error occurred.";
     console.log("Post Final Checklist API error:", errorMessage);
+    return false;
+  }
+}
+
+export async function getFinalCheckoutApi(token, assignment_id) {
+  try {
+    const response = await axios.get(
+      environment.apiUrl + `/CHECKLISTS/${assignment_id}.json`,
+      { params: { auth: token } },
+    );
+    const data = response.data;
+    if (!data) return null;
+
+    return {
+      assignment_id: data.assignment_id ?? assignment_id,
+      service_perf: data.service_perf,
+      desc_service_perf: data.desc_service_perf,
+      material_inst: data.material_inst,
+      desc_material_inst: data.desc_material_inst,
+      assignment_100: data.assignment_100,
+      walkThrough_comp: data.walkThrough_comp,
+      return_needed: data.return_needed,
+      desc_return_needed: data.desc_return_needed,
+      desc_misc_notes: data.desc_misc_notes,
+      manager_name: data.manager_name,
+      signature_base64: data.manager_signature,
+      modified_date: data.modified_date,
+      syncStatus: "Yes",
+    };
+  } catch (error) {
+    console.log(
+      "getFinalCheckoutApi Error:",
+      error.response?.data ?? error.message,
+    );
+    return null;
   }
 }
 
@@ -57,27 +77,24 @@ export async function postFinalCheckoutApi(
   assignment_id,
 ) {
   try {
-    const result = await instance.post(
-      "/completeAssignment",
+    await axios.put(
+      environment.apiUrl + `/COMPLETIONS/${assignment_id}.json`,
       {
-        "AssignmentVisit[comment]": comment,
+        comment,
+        assignment_id,
+        completed_date: getUnixTime(new Date()),
       },
-      {
-        headers: { TOKEN: token },
-        params: {
-          id: assignment_id,
-        },
-      },
+      { params: { auth: token } },
     );
-    return result?.data?.info?.code === 200;
+    return true;
   } catch (error) {
     const errorMessage =
-      error.response?.data?.info?.message ||
+      error.response?.data?.error?.message ||
       error.message ||
       "An unexpected error occurred.";
 
     console.log("post Final Checkout Api Error:", errorMessage);
-    //Alert.alert(error.message);
+    return false;
   }
 }
 
@@ -129,6 +146,17 @@ export async function updateFinalCheckOutSqlite(
     console.log("Update final checkout function  ran");
   } catch (error) {
     console.log("Update final checkout function failed:", error);
+  }
+}
+
+export async function deleteFinalCheckOutSqlite(db, assignment_id) {
+  try {
+    await db.runAsync(`DELETE FROM completion WHERE assignment_id = ?`, [
+      assignment_id,
+    ]);
+    console.log("Delete final checkout function ran");
+  } catch (error) {
+    console.log("Delete final checkout function failed:", error);
   }
 }
 

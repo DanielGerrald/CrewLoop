@@ -1,77 +1,112 @@
 import axios from "axios";
+import * as FileSystem from "expo-file-system/legacy";
 
 import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
+// Firebase keys can't contain ".", "#", "$", "/", "[", "]".
+const sanitizeKey = (value) => String(value).replace(/[.#$/[\]]/g, "_");
 
-const postInstance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
-
-export async function postDocumentsApi(token, document) {
-  const formData = new FormData();
-  formData.append("documents[]", {
-    uri: document.uri,
-    name: document.fileName,
-    type: document.mimeType,
+async function putAttachment(token, data) {
+  const base64 = await FileSystem.readAsStringAsync(data.uri, {
+    encoding: FileSystem.EncodingType.Base64,
   });
-  formData.append("AssignmentAttachment[type_id]", document.label_id);
 
-  const response = await postInstance.post(
-    "/uploadAssignmentDocument",
-    formData,
+  const key = sanitizeKey(data.fileName);
+
+  await axios.put(
+    environment.apiUrl + `/ATTACHMENTS/${data.assignment_ref_id}/${key}.json`,
     {
-      headers: {
-        TOKEN: token,
-      },
-      params: {
-        id: document.assignment_ref_id,
-      },
+      fileName: data.fileName,
+      label: data.label,
+      label_id: data.label_id,
+      type: data.type,
+      assignment_id: data.assignment_id,
+      assignment_ref_id: data.assignment_ref_id,
+      mimeType: data.mimeType,
+      date: data.date,
+      base64,
     },
+    { params: { auth: token } },
   );
 
-  console.log("Upload successful for document:", document.fileName);
-  return response;
+  return { status: 200 };
 }
 
 export async function postPhotosApi(token, photo) {
-  const formData = new FormData();
-  formData.append("photos[]", {
-    uri: photo.uri,
-    name: photo.fileName,
-    type: photo.mimeType,
-  });
-  formData.append("AssignmentAttachment[type_id]", photo.label_id);
+  try {
+    const result = await putAttachment(token, photo);
+    console.log("Upload successful for photo:", photo.fileName);
+    return result;
+  } catch (error) {
+    console.log(
+      "Upload photo error:",
+      error.response?.data?.error || error.message,
+    );
+    return { status: 500 };
+  }
+}
 
-  const response = await postInstance.post("/uploadAssignmentPhoto", formData, {
-    headers: {
-      TOKEN: token,
-    },
-    params: {
-      id: photo.assignment_ref_id,
-    },
-  });
+export async function postDocumentsApi(token, document) {
+  try {
+    const result = await putAttachment(token, document);
+    console.log("Upload successful for document:", document.fileName);
+    return result;
+  } catch (error) {
+    console.log(
+      "Upload document error:",
+      error.response?.data?.error || error.message,
+    );
+    return { status: 500 };
+  }
+}
 
-  console.log("Upload successful for photo:", photo.fileName);
-  return response;
+
+export async function getAttachmentsApi(token, id) {
+  try {
+    const response = await axios.get(
+      environment.apiUrl + `/ATTACHMENTS/${id}.json`,
+      { params: { auth: token } },
+    );
+    const results = response.data;
+    if (!results) return [];
+
+    const attachments = [];
+    for (const item of Object.values(results)) {
+      if (!item?.fileName || !item?.base64) continue;
+
+      const uri = `${FileSystem.documentDirectory}${sanitizeKey(item.fileName)}`;
+      try {
+        await FileSystem.writeAsStringAsync(uri, item.base64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      } catch (writeError) {
+        console.log("Failed writing attachment to disk:", writeError);
+        continue;
+      }
+
+      attachments.push({
+        fileName: item.fileName,
+        label: item.label,
+        label_id: item.label_id,
+        type: item.type,
+        assignment_id: item.assignment_id,
+        assignment_ref_id: item.assignment_ref_id,
+        mimeType: item.mimeType,
+        date: item.date,
+        uri,
+        syncStatus: "Yes",
+      });
+    }
+    return attachments;
+  } catch (error) {
+    console.log(
+      "Get attachments API error:",
+      error.response?.data ?? error.message,
+    );
+    return [];
+  }
 }
 
 //---------------SQLITE Functions---------------//

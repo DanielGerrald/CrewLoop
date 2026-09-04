@@ -99,6 +99,14 @@ export default StyleSheet.create({
     margin: "1%",
     borderRadius: 15,
   },
+  chipText: {
+    color: "#ffffff",
+  },
+  imageViewerHeader: {
+    width: "100%",
+    padding: 16,
+    alignItems: "flex-end",
+  },
   closeButton: {
     position: "absolute",
     right: 10,
@@ -210,6 +218,17 @@ export default StyleSheet.create({
   inputAreaView: {
     width: width * 0.8,
     backgroundColor: "#6A89A7",
+    borderRadius: 15,
+    minHeight: height * 0.2,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+    textAlignVertical: "top",
+  },
+  checkInOutCommentBox: {
+    width: width * 0.8,
+    backgroundColor: "#4F6B85",
     borderRadius: 15,
     minHeight: height * 0.2,
     paddingLeft: width * 0.05,
@@ -588,5 +607,12 @@ export default StyleSheet.create({
     backgroundColor: "#1E2530",
     alignSelf: "flex-start",
     marginBottom: 15,
+  },
+  workLogEntry: {
+    width: width * 0.8,
+    backgroundColor: "#283246",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
   },
 });

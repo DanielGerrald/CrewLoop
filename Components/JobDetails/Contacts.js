@@ -13,13 +13,15 @@ import StyleSheet from "../../StyleSheet";
 import OpenMap from "./OpenMap";
 
 export default function Contacts({ selectedJob, contacts }) {
+  const isCompleted = selectedJob[0]?.status_label === "Completed";
+
   function CoordinatorCall() {
-    const number = contacts[0].account_manager_phone_nbr || "704-555-0100";
+    const number = contacts?.[0]?.account_manager_phone_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
   function AftHrsCall() {
-    const number = contacts[0].account_manager_after_hours_nbr || "704-555-0100";
+    const number = contacts?.[0]?.account_manager_after_hours_nbr || "704-555-0100";
     Linking.openURL(`tel:${number}`);
   }
 
@@ -61,6 +63,7 @@ export default function Contacts({ selectedJob, contacts }) {
             <View style={StyleSheet.contactIcon}>
               {selectedJob?.[0]?.latitude && (
                 <TouchableOpacity
+                  disabled={isCompleted}
                   onPress={() =>
                     OpenMap(
                       selectedJob[0].latitude,
@@ -70,7 +73,10 @@ export default function Contacts({ selectedJob, contacts }) {
                   }
                 >
                   <Avatar.Icon
-                    style={StyleSheet.avatarIconBtn}
+                    style={[
+                      StyleSheet.avatarIconBtn,
+                      isCompleted && { opacity: 0.4 },
+                    ]}
                     icon="map-marker"
                     size={40}
                     color={"#ffffff"}
@@ -98,9 +104,12 @@ export default function Contacts({ selectedJob, contacts }) {
               </Text>
             </View>
             <View style={StyleSheet.contactIcon}>
-              <TouchableOpacity onPress={CoordinatorCall}>
+              <TouchableOpacity disabled={isCompleted} onPress={CoordinatorCall}>
                 <Avatar.Icon
-                  style={StyleSheet.avatarIconBtn}
+                  style={[
+                    StyleSheet.avatarIconBtn,
+                    isCompleted && { opacity: 0.4 },
+                  ]}
                   icon="phone"
                   size={40}
                   color={"#ffffff"}
@@ -121,9 +130,12 @@ export default function Contacts({ selectedJob, contacts }) {
               </Text>
             </View>
             <View style={StyleSheet.contactIcon}>
-              <TouchableOpacity onPress={AftHrsCall}>
+              <TouchableOpacity disabled={isCompleted} onPress={AftHrsCall}>
                 <Avatar.Icon
-                  style={StyleSheet.avatarIconBtn}
+                  style={[
+                    StyleSheet.avatarIconBtn,
+                    isCompleted && { opacity: 0.4 },
+                  ]}
                   icon="phone"
                   size={40}
                   color={"#ffffff"}

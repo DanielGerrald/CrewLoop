@@ -39,4 +39,8 @@ main.env
 # other
 .idea/
 android/
+ios/
 %ProgramData%/
+
+# migration script backups (production data dumps)
+scripts/*-backup-*.json

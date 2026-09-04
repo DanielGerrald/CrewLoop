@@ -19,6 +19,7 @@ import {
   insertCheckInOutSqlite,
   postCheckInOutApi,
 } from "../../Database/CheckInOutDatabase";
+import { patchAssignmentApi } from "../../Database/WorkOrderDatabase";
 import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
 import { useSQLiteContext } from "expo-sqlite";
 import { getUnixTime } from "date-fns";
@@ -65,7 +66,7 @@ export default function CheckInOut({
         visit_date: checkinDate,
         assignment_id: jobPurchaseOrderID,
         departing: checkingOutFlag,
-        crew_member_id: userData.user_id,
+        crew_member_id: userData.localId,
         syncStatus: "",
       };
 
@@ -78,11 +79,14 @@ export default function CheckInOut({
         try {
           const success = await postCheckInOutApi(
             payload,
-            userData.access_token,
+            userData.idToken,
           );
           if (success) {
             payload.syncStatus = "Yes";
             await insertCheckInOutSqlite(db, payload);
+            await patchAssignmentApi(userData.idToken, jobPurchaseOrderID, {
+              checked_in: !isCheckingOut ? 1 : 0,
+            });
           } else {
             payload.syncStatus = "Pending";
             await insertCheckInOutSqlite(db, payload);
@@ -213,7 +217,7 @@ export default function CheckInOut({
                   >
                     <CustomInput
                       label="comment"
-                      style={StyleSheet.inputAreaView}
+                      style={StyleSheet.checkInOutCommentBox}
                       value={comment}
                       placeholder="comments..."
                       multiline={true}

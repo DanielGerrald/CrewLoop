@@ -6,13 +6,13 @@
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "owner": "daniel-gerralds-team",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.crewloop.fieldops",
-      "minimumOsVersion": "16.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
@@ -26,11 +26,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "64ef7588-6805-4115-9a72-1b97205dc3f4"
       }
     },
     "android": {
-      "minSdkVersion": 24,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
@@ -41,6 +40,13 @@
     },
     "plugins": [
       "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "deploymentTarget": "16.0" },
+          "android": { "minSdkVersion": 24 }
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -76,4 +82,5 @@
     ],
     "runtimeVersion": "1.0.0"
   }
+
 }

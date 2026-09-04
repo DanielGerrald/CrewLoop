@@ -5,12 +5,20 @@ const JobContext = createContext();
 export function JobProvider({ children }) {
   const [jobResult, setJobResult] = useState([]);
   const [syncVersion, setSyncVersion] = useState(0);
+  const [isJobsLoading, setIsJobsLoading] = useState(true);
 
   const incrementSyncVersion = () => setSyncVersion((v) => v + 1);
 
   return (
     <JobContext.Provider
-      value={{ jobResult, setJobResult, syncVersion, incrementSyncVersion }}
+      value={{
+        jobResult,
+        setJobResult,
+        syncVersion,
+        incrementSyncVersion,
+        isJobsLoading,
+        setIsJobsLoading,
+      }}
     >
       {children}
     </JobContext.Provider>

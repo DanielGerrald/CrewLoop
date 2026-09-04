@@ -3,39 +3,31 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
 
-export async function getWorkOrderContactsApi(access_token, id) {
+export async function getWorkOrderContactsApi(idToken, id) {
   try {
-    const response = await instance.get("/assignmentContacts", {
-      headers: {
-        TOKEN: access_token,
-      },
-      params: {
-        id: id,
-      },
-    });
-    return Promise.resolve(response.data.results);
+    let response = await axios.get(
+      environment.apiUrl + `/CONTACTS/${id}.json`,
+      { params: { auth: idToken } },
+    );
+    const results = response.data;
+    if (!results) return undefined;
+    return results;
   } catch (error) {
-    console.log("ERROR WorkOrderContacts API call:", error);
+    console.error("getWorkOrderContactsApi Error:", error.response?.data ?? error.message);
   }
 }
 
+
+
+
+
 //---------------SQLITE Functions---------------//
 
-export async function insertContactSqlite(db, contact) {
+export async function insertContactSqlite(db, contact, assignmentId) {
   try {
     const jobPurchaseOrderId = {
-      assignment_id: contact.assignment_id,
+      assignment_id: assignmentId,
     };
 
     const storeContact = {

@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as FileSystem from "expo-file-system/legacy";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import {
   Alert,
@@ -11,6 +12,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, Chip, Icon, SegmentedButtons } from "react-native-paper";
 import moment from "moment";
@@ -68,7 +70,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
 
   const lastLoggedIn = async () => {
     await lastLoggedinUserSqlite(db).then((r) => {
-      setToken(r.access_token);
+      setToken(r.idToken);
     });
   };
 
@@ -121,8 +123,17 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
       const newPath = `${FileSystem.documentDirectory}${imageName}`;
 
       try {
+        // Re-encoding via manipulateAsync bakes in the EXIF orientation, so
+        // landscape photos display upright instead of sideways — <Image>
+        // doesn't reliably respect EXIF rotation on its own (esp. Android).
+        const normalized = await ImageManipulator.manipulateAsync(
+          image.uri,
+          [],
+          { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+        );
+
         await FileSystem.copyAsync({
-          from: image.uri,
+          from: normalized.uri,
           to: newPath,
         });
         image.uri = newPath;
@@ -222,6 +233,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
 
   const openImageView = (imageUri) => {
     const index = images.findIndex((img) => img.uri === imageUri);
+    if (index === -1) return;
     setSelectedImageIndex(index);
     setImageViewVisible(true);
   };
@@ -229,6 +241,14 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
   const closeImageView = () => {
     setImageViewVisible(false);
   };
+
+  const ImageViewerHeader = () => (
+    <SafeAreaView style={StyleSheet.imageViewerHeader}>
+      <TouchableOpacity onPress={closeImageView}>
+        <Icon source="close" size={28} color="#ffffff" />
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 
   const notSubmittedImages = useMemo(() => {
     return images.filter((image) => image?.syncStatus === "No");
@@ -271,7 +291,9 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelLarge">{label.type_label}</Text>
+                          <Text variant="labelLarge" style={StyleSheet.chipText}>
+                            {label.type_label}
+                          </Text>
                         </Chip>
                       </TouchableOpacity>
                     ))}
@@ -343,7 +365,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                         )}
                         style={StyleSheet.chip}
                       >
-                        <Text variant="labelSmall">{image.label}</Text>
+                        <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
                       </Chip>
                       <Chip
                         icon={() => (
@@ -351,7 +373,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                         )}
                         style={StyleSheet.chip}
                       >
-                        <Text variant="labelSmall">
+                        <Text variant="labelSmall" style={StyleSheet.chipText}>
                           {moment.unix(image.date).format("L")}
                         </Text>
                       </Chip>
@@ -374,7 +396,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                     <TouchableOpacity
                       key={index}
                       style={StyleSheet.photoImage}
-                      onPress={() => openImageView(index)}
+                      onPress={() => openImageView(image.uri)}
                       onLongPress={() => deleteImage(image.id)}
                     >
                       <Image
@@ -389,7 +411,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelSmall">{image.label}</Text>
+                          <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
                         </Chip>
                         <Chip
                           icon={() => (
@@ -397,12 +419,12 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                           )}
                           style={StyleSheet.chip}
                         >
-                          <Text variant="labelSmall">
+                          <Text variant="labelSmall" style={StyleSheet.chipText}>
                             {moment.unix(image.date).format("L")}
                           </Text>
                         </Chip>
                         {image.syncStatus === "Pending" && (
-                          <Chip style={StyleSheet.chip} icon="cloud-upload">
+                          <Chip style={StyleSheet.chip} textStyle={StyleSheet.chipText} icon="cloud-upload">
                             Pending
                           </Chip>
                         )}
@@ -420,6 +442,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
             imageIndex={selectedImageIndex}
             visible={imageViewVisible}
             onRequestClose={closeImageView}
+            HeaderComponent={ImageViewerHeader}
           />
         )}
       </KeyboardAvoidingView>
@@ -434,7 +457,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                 <TouchableOpacity
                   key={index}
                   style={StyleSheet.photoImage}
-                  onLongPress={() => deleteImage(image.id)}
+                  onPress={() => openImageView(image.uri)}
                 >
                   <Image style={StyleSheet.image} source={{ uri: image.uri }} />
 
@@ -445,7 +468,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                       )}
                       style={StyleSheet.chip}
                     >
-                      <Text variant="labelSmall">{image.label}</Text>
+                      <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
                     </Chip>
                     <Chip
                       icon={() => (
@@ -453,7 +476,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                       )}
                       style={StyleSheet.chip}
                     >
-                      <Text variant="labelSmall">
+                      <Text variant="labelSmall" style={StyleSheet.chipText}>
                         {moment.unix(image.date).format("L")}
                       </Text>
                     </Chip>
@@ -463,6 +486,15 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
             </View>
           </View>
         </ScrollView>
+        {imageViewVisible && selectedImageIndex !== null && (
+          <ImageViewer
+            images={images.map((img) => ({ uri: img.uri }))}
+            imageIndex={selectedImageIndex}
+            visible={imageViewVisible}
+            onRequestClose={closeImageView}
+            HeaderComponent={ImageViewerHeader}
+          />
+        )}
       </KeyboardAvoidingView>
     );
   }

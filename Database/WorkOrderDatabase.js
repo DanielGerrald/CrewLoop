@@ -4,58 +4,48 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
 
-export async function getWorkOrderApi(data) {
+export async function getAssignmentsApi(idToken) {
   try {
-    const response = await instance.get("/assignments", {
-      headers: {
-        TOKEN: data.access_token,
-      },
+    const response = await axios.get(environment.apiUrl + "/ASSIGNMENTS.json", {
+      params: { auth: idToken },
     });
-    return Promise.resolve(response.data.results);
+    const results = response.data;
+    if (!results) return [];
+    return Object.entries(results)
+      .filter(([, job]) => job && job.assignment)
+      .map(([key, job]) => ({
+        ...job,
+        assignment: {
+          ...job.assignment,
+          id: Number(job.assignment.id ?? key),
+          completed: job.assignment.completed ? 1 : 0,
+        },
+      }));
   } catch (error) {
-    console.log("WorkOrders API call:", error);
+    console.log("Assignments API call:", error);
+    return [];
   }
 }
 
-export async function getWorkOrderDetailsApi(access_token, id) {
+export async function patchAssignmentApi(idToken, id, fields) {
   try {
-    const response = await instance.get("/assignmentDetails", {
-      headers: {
-        TOKEN: access_token,
-      },
-      params: {
-        id: id,
-      },
-    });
-    return Promise.resolve(response.data.results);
+    await axios.patch(
+      environment.apiUrl + `/ASSIGNMENTS/${id}/assignment.json`,
+      fields,
+      { params: { auth: idToken } },
+    );
+    return true;
   } catch (error) {
-    console.log("WorkOrderDetails API call:", error);
+    console.log(
+      "patchAssignmentApi Error:",
+      error.response?.data ?? error.message,
+    );
+    return false;
   }
 }
 
-export async function getCompletedWorkOrderApi(token) {
-  try {
-    const response = await instance.get("/completedAssignments", {
-      headers: {
-        TOKEN: token,
-      },
-    });
-    return Promise.resolve(response.data.results);
-  } catch (error) {
-    console.log("ERROR Completed WorkOrder API call:", error);
-  }
-}
+
 
 //---------------SQLITE Functions---------------//
 

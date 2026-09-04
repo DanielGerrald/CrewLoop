@@ -16,11 +16,14 @@ import { useJob } from "./Context";
 import { useAuth } from "./AuthContext";
 import useAppFocusRefresh from "./AppFocusRefresh";
 import { showOnceAlert } from "./AlertManager";
-import { getUserProfileApi, updateUserSqlite } from "../Database/UserDatabase";
+import {
+  getUserAvatarApi,
+  getUserProfileApi,
+  updateUserSqlite,
+} from "../Database/UserDatabase";
 import {
   cleanupWorkOrderSqlite,
-  getCompletedWorkOrderApi,
-  getWorkOrderApi,
+getAssignmentsApi,
   getWorkOrderDetailsApi,
   insertWorkOrderSqlite,
   selectWorkOrderSqlite,
@@ -42,6 +45,8 @@ import {
 } from "../Database/CheckInOutDatabase";
 import {
   cleanupAttachmentSqlite,
+  getAttachmentsApi,
+  insertAttachmentSqlite,
   postDocumentsApi,
   postPhotosApi,
   selectAttachmentSqlite,
@@ -49,12 +54,14 @@ import {
 } from "../Database/AttachmentDatabase";
 import {
   cleanupFinalCheckOutSqlite,
+  getFinalCheckoutApi,
+  insertFinalCheckOutSqlite,
   postFinalCheckListApi,
   postFinalCheckoutApi,
   selectFinalCheckOutSqlite,
   updateFinalCheckOutSqlite,
 } from "../Database/FinalCheckOutDatabase";
-import { insertCategoryLabelSqlite } from "../Database/LabelDatabase";
+import { getLabelsApi, insertCategoryLabelSqlite } from "../Database/LabelDatabase";
 import BannerOnPendingSync from "./BannerOnPendingSync";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -62,7 +69,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
   const db = useSQLiteContext();
   const { user: authUser } = useAuth();
-  const { setJobResult, incrementSyncVersion } = useJob();
+  const { setJobResult, incrementSyncVersion, setIsJobsLoading } = useJob();
   const [refreshing, setRefreshing] = useState(false);
   const scrollViewRef = useRef(null);
 
@@ -77,13 +84,9 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
 
   /** JOB SYNC (open + completed + details + contacts + checkins) **/
   const fetchAndStoreJobs = async (user) => {
-    const token = user.access_token;
+    const token = user.idToken;
 
-    const [openJobs, completedJobs] = await Promise.all([
-      getWorkOrderApi(user),
-      getCompletedWorkOrderApi(token),
-    ]);
-    const jobs = [...(openJobs || []), ...(completedJobs || [])];
+    const jobs = await getAssignmentsApi(token);
     if (!jobs.length) {
       await cleanupWorkOrderSqlite(db, []); // still normalize state
       return;
@@ -92,12 +95,16 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
     await Promise.allSettled(
       jobs.map(async (job) => {
         const id = job.assignment.id;
-        job.assignment.user_id = user.user_id;
-        const [detailsResult, contactsResult, checkinsResult] =
+        const assignmentRefId = job.site?.reference_code?.split("-")[1];
+        job.assignment.localId = user.localId;
+        const [detailsResult, contactsResult, checkinsResult, attachmentsResult] =
           await Promise.allSettled([
             getWorkOrderDetailsApi(token, id),
             getWorkOrderContactsApi(token, id),
             getCheckInOutApi(token, id),
+            assignmentRefId
+              ? getAttachmentsApi(token, assignmentRefId)
+              : Promise.resolve([]),
           ]);
 
         if (
@@ -114,9 +121,8 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
           contactsResult.status === "fulfilled" &&
           contactsResult.value
         ) {
-          contactsResult.value.assignment_id = id;
           try {
-            await insertContactSqlite(db, contactsResult.value);
+            await insertContactSqlite(db, contactsResult.value, id);
           } catch (err) {
             console.warn(`Failed contacts insert for ${id}:`, err);
           }
@@ -132,13 +138,32 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
             await insertCheckInOutSqlite(db, c);
           }
         }
+
+        if (
+          attachmentsResult.status === "fulfilled" &&
+          Array.isArray(attachmentsResult.value)
+        ) {
+          for (const att of attachmentsResult.value) {
+            const existing = await selectAttachmentSqlite(
+              db,
+              "fileName",
+              att.fileName,
+              "assignment_id",
+              att.assignment_id,
+            );
+            if (!existing?.length) {
+              await insertAttachmentSqlite(db, att);
+            }
+          }
+        }
       }),
     );
 
-    // Attachment types / labels
+    // Attachment types / labels — fetched from the dedicated RTDB node
     try {
-      if (jobs?.[0]?.site?.attachment_types) {
-        await insertCategoryLabelSqlite(db, jobs[0].site.attachment_types);
+      const attachmentTypes = await getLabelsApi(token);
+      if (attachmentTypes) {
+        await insertCategoryLabelSqlite(db, attachmentTypes);
       }
     } catch (e) {
       console.warn("insertCategoryLabelSqlite error:", e);
@@ -154,32 +179,41 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
     for (const job of jobs) {
       try {
         await insertWorkOrderSqlite(db, job);
+        // completed is the authoritative remote flag (toggled by final
+        // checkout submission and by reopening) — status_label itself is
+        // never written back to Firebase, so this keeps local state
+        // consistent with it across every sync without disturbing the
+        // completion/checklist history used to pre-fill a reopened form.
+        if (job.assignment.completed) {
+          await updateWorkOrderSqlite(
+            db,
+            "status_label",
+            "Completed",
+            "id",
+            job.assignment.id,
+          );
+
+          const existingCheckout = await selectFinalCheckOutSqlite(
+            db,
+            "assignment_id",
+            job.assignment.id,
+          );
+          if (!existingCheckout?.length) {
+            const finalCheckout = await getFinalCheckoutApi(
+              token,
+              job.assignment.id,
+            );
+            if (finalCheckout) {
+              await insertFinalCheckOutSqlite(db, finalCheckout);
+            }
+          }
+        }
       } catch (e) {
         console.error("SQLite insert error:", e);
       }
     }
 
-    // The API doesn't know about locally-completed jobs, so INSERT OR REPLACE
-    // above can overwrite status_label back to "Scheduled". Re-apply
-    // "Completed" for any work order that has a completion record.
-    try {
-      const completedIds = await db.getAllAsync(
-        "SELECT DISTINCT assignment_id FROM completion",
-      );
-      for (const { assignment_id } of completedIds) {
-        await updateWorkOrderSqlite(
-          db,
-          "status_label",
-          "Completed",
-          "id",
-          assignment_id,
-        );
-      }
-    } catch (e) {
-      console.warn("restoreCompletedStatus error:", e);
-    }
-
-    const sqliteJobs = await selectWorkOrderSqlite(db, "user_id", user.user_id);
+    const sqliteJobs = await selectWorkOrderSqlite(db, "localId", user.localId);
     setJobResult(sqliteJobs);
     incrementSyncVersion();
   };
@@ -299,7 +333,12 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
       const profile = await getUserProfileApi(user);
       if (profile) {
         delete profile.id;
-        await updateUserSqlite(db, { ...profile, username: user.username });
+        const avatar = await getUserAvatarApi(user.idToken, user.localId);
+        await updateUserSqlite(db, {
+          ...profile,
+          ...(avatar ? { avatar } : {}),
+          username: user.username,
+        });
       }
     } catch (error) {
       console.error("fetchAndStoreUserProfile failed:", error);
@@ -307,7 +346,7 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
   };
 
   const runSyncTasks = async (user) => {
-    const token = user.access_token;
+    const token = user.idToken;
     await syncPendingCheckInOut(token);
     await syncPendingFinalCheckouts(token);
     await syncPendingAttachments(token);
@@ -373,6 +412,8 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
       console.error("Error managing session:", error);
       Alert.alert("An error occurred. Please try again.");
       setJobResult([]);
+    } finally {
+      setIsJobsLoading(false);
     }
   }, [authUser]);
 

@@ -7,6 +7,7 @@ import AvatarIcon from "../Components/AvatarIcon";
 import {
   lastLoggedinUserSqlite,
   postUserApi,
+  requestEmailChangeApi,
   selectUserSqlite,
   updateUserSqlite,
 } from "../Database/UserDatabase";
@@ -42,7 +43,7 @@ export default function Profile() {
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            phone_nbr: user.phone_nbr.toString(),
+            phone_nbr: user.phone_nbr?.toString() || "",
           });
           setIsEnabledSMS(user.notify_sms === 1);
           setIsEnabledEmail(user.notify_email === 1);
@@ -64,24 +65,40 @@ export default function Profile() {
   };
 
   const onSubmit = async () => {
-    const { first_name, last_name, email, phone_nbr } = formData;
+    const { first_name, last_name, phone_nbr, email } = formData;
 
-    if (first_name && last_name && email && phone_nbr) {
+    if (first_name && last_name && phone_nbr && email) {
       const updatedData = {
-        ...formData,
-        username: lastLoggedIn.username,
+        first_name,
+        last_name,
+        phone_nbr,
+        localId: lastLoggedIn.localId,
+        displayName: first_name + " " + last_name,
         notify_sms: isEnabledSMS ? 1 : 0,
         notify_email: isEnabledEmail ? 1 : 0,
       };
 
       await updateUserSqlite(db, updatedData);
-      await selectUserSqlite(db, updatedData).then((r) => {
-        postUserApi(r);
-        setUpdatedUser(r);
-      });
+      const user = await selectUserSqlite(db, updatedData.localId);
+      const result = await postUserApi(user);
+      if (result) {
+        await updateUserSqlite(db, result);
+        setUpdatedUser(result);
+      }
+
+      const emailChanged = email !== lastLoggedIn.email;
+      if (emailChanged) {
+        await requestEmailChangeApi(user.idToken, email);
+      }
+
       await refreshUser();
 
-      Alert.alert("User Profile updated successfully!");
+      Alert.alert(
+        "User Profile updated successfully!",
+        emailChanged
+          ? `We sent a confirmation link to ${email}. Your email won't change until you confirm it.`
+          : undefined,
+      );
     } else {
       Alert.alert("Please fill in all required fields.");
     }

@@ -3,29 +3,20 @@ import { getUnixTime } from "date-fns";
 import { environment } from "../Config";
 
 
-//---------------Axios instance---------------//
-
-const instance = axios.create({
-  baseURL: environment.apiUrl,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  params: {
-    apikey: environment.apikey,
-  },
-});
-
-
 //---------------API Functions---------------//
 
 export async function getCheckInOutApi(token, id) {
   try {
-    const response = await instance.get("/assignmentVisits", {
-      headers: { TOKEN: token },
-      params: { id },
-    });
-    return response.data?.results ?? [];
+    const response = await axios.get(
+      environment.apiUrl + `/VISITS/${id}.json`,
+      { params: { auth: token } },
+    );
+    const results = response.data;
+    if (!results) return [];
+    return Object.values(results).map((visit) => ({
+      ...visit,
+      id: visit.visit_date,
+    }));
   } catch (error) {
     console.log("Get Check In/Out API call error:", error);
     return [];
@@ -36,22 +27,27 @@ export async function postCheckInOutApi(
     data,
     token
 ){
-  const body = {
-    "AssignmentVisit[comment]": data.comment,
-    "AssignmentVisit[departing]": data.departing,
-    "AssignmentVisit[crew_member_id]": data.crew_member_id,
-    "AssignmentVisit[assignment_id]": data.assignment_id,
-    "AssignmentVisit[visit_date]": data.visit_date,
-    //"AssignmentVisit[work_completed]":
-  };
-
-  const result = await instance.post("/assignmentVisit", body, {
-    headers: { TOKEN: token },
-    params: { id: data.assignment_id },
-  });
-
-  console.log("Post check in/out API response:", result.data);
-  return result?.data?.info?.code === 200;
+  try {
+    await axios.put(
+      environment.apiUrl +
+        `/VISITS/${data.assignment_id}/${data.visit_date}.json`,
+      {
+        comment: data.comment,
+        departing: data.departing,
+        crew_member_id: data.crew_member_id,
+        assignment_id: data.assignment_id,
+        visit_date: data.visit_date,
+      },
+      { params: { auth: token } },
+    );
+    return true;
+  } catch (error) {
+    console.log(
+      "Post check in/out API error:",
+      error.response?.data?.error || error.message,
+    );
+    return false;
+  }
 }
 
 //---------------SQLITE Functions---------------//
@@ -129,7 +125,7 @@ export async function deleteCheckInOutDuplicatesSqlite(db, serverRecord) {
 export async function updateCheckInOutSqlite(db, value, id) {
   try {
     await db.runAsync(
-        `UPDATE CheckInOut
+        `UPDATE visit
          SET syncStatus = ?
          WHERE id = ?`,
         [value, id]
