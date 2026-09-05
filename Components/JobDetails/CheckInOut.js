@@ -1,19 +1,19 @@
 import {
+  Dimensions,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
   Platform,
 } from "react-native";
-import * as React from "react";
 import { useState } from "react";
 import { IconButton } from "react-native-paper";
 
-import StyleSheet from "../../StyleSheet";
 import CustomInput from "../CustomInput";
 import {
   insertCheckInOutSqlite,
@@ -130,9 +130,9 @@ export default function CheckInOut({
             setCommentVisible(false);
             setModalVisible(true);
           }}
-          style={StyleSheet.checkInOutBtn}
+          style={styles.checkInOutBtn}
         >
-          <Text style={StyleSheet.logoutBtnText}>Check Out</Text>
+          <Text style={styles.logoutBtnText}>Check Out</Text>
         </TouchableOpacity>
       )}
 
@@ -148,9 +148,9 @@ export default function CheckInOut({
             setCommentVisible(true);
             setModalVisible(true);
           }}
-          style={StyleSheet.checkInOutBtn}
+          style={styles.checkInOutBtn}
         >
-          <Text style={StyleSheet.logoutBtnText}>Check In</Text>
+          <Text style={styles.logoutBtnText}>Check In</Text>
         </TouchableOpacity>
       )}
 
@@ -170,15 +170,15 @@ export default function CheckInOut({
             onPress={Keyboard.dismiss}
             accessible={false}
           >
-            <View style={StyleSheet.modalPopup}>
-              <View style={StyleSheet.modalPopupContent}>
+            <View style={styles.modalPopup}>
+              <View style={styles.modalPopupContent}>
                 {checkOutQuestion && (
                   <>
-                    <Text style={StyleSheet.Text}>
+                    <Text style={styles.Text}>
                       Are you performing a final checkout?
                     </Text>
-                    <View style={StyleSheet.checkoutRow}>
-                      <View style={StyleSheet.checkoutColumn}>
+                    <View style={styles.checkoutRow}>
+                      <View style={styles.checkoutColumn}>
                         <IconButton
                           icon="check"
                           size={30}
@@ -189,9 +189,9 @@ export default function CheckInOut({
                             hideModal();
                           }}
                         />
-                        <Text style={StyleSheet.TextDescript}>Yes</Text>
+                        <Text style={styles.TextDescript}>Yes</Text>
                       </View>
-                      <View style={StyleSheet.checkoutColumn}>
+                      <View style={styles.checkoutColumn}>
                         <IconButton
                           icon="close"
                           size={30}
@@ -203,7 +203,7 @@ export default function CheckInOut({
                             setCheckOutQuestion(false);
                           }}
                         />
-                        <Text style={StyleSheet.TextDescript}>No</Text>
+                        <Text style={styles.TextDescript}>No</Text>
                       </View>
                     </View>
                   </>
@@ -212,39 +212,39 @@ export default function CheckInOut({
                 {commentVisible && (
                   <ScrollView
                     keyboardShouldPersistTaps="handled"
-                    style={StyleSheet.modalScroll}
-                    contentContainerStyle={StyleSheet.modalScrollContent}
+                    style={styles.modalScroll}
+                    contentContainerStyle={styles.modalScrollContent}
                   >
                     <CustomInput
                       label="comment"
-                      style={StyleSheet.checkInOutCommentBox}
+                      style={styles.checkInOutCommentBox}
                       value={comment}
                       placeholder="comments..."
                       multiline={true}
                       onChangeText={setComment}
                       maxLength={300}
                     />
-                    <View style={StyleSheet.checkoutFormBtns}>
+                    <View style={styles.checkoutFormBtns}>
                       <TouchableOpacity
                         onPress={async () => {
                           await onSubmitCheckin(checkedIn);
                           hideModal();
                           setCheckedIn((prevState) => !prevState);
                         }}
-                        style={StyleSheet.submitBtn}
+                        style={styles.submitBtn}
                         disabled={submitting}
                       >
-                        <Text style={StyleSheet.logoutBtnText}>
+                        <Text style={styles.logoutBtnText}>
                           {submitting ? "Submitting..." : "Submit Comment"}
                         </Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         onPress={hideModal}
-                        style={StyleSheet.submitBtn}
+                        style={styles.submitBtn}
                         disabled={submitting}
                       >
-                        <Text style={StyleSheet.logoutBtnText}>Cancel</Text>
+                        <Text style={styles.logoutBtnText}>Cancel</Text>
                       </TouchableOpacity>
                     </View>
                   </ScrollView>
@@ -257,3 +257,111 @@ export default function CheckInOut({
     </>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  TextDescript: {
+    color: "#D3D3D3",
+    fontSize: textStyle,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  checkInOutBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: height * 0.025,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  checkInOutCommentBox: {
+    width: width * 0.8,
+    backgroundColor: "#4F6B85",
+    borderRadius: 15,
+    minHeight: height * 0.2,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+    textAlignVertical: "top",
+  },
+  checkoutColumn: {
+    flexDirection: "column",
+    alignItems: "center",
+    margin: 20,
+  },
+  checkoutFormBtns: {
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  checkoutRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalPopup: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: width * 0.05,
+  },
+  modalPopupContent: {
+    alignItems: "center",
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: height * 0.8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalScroll: {
+    width: "100%",
+  },
+  modalScrollContent: {
+    alignItems: "center",
+    paddingBottom: 16,
+  },
+  submitBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

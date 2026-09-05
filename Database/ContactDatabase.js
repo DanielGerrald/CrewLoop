@@ -3,33 +3,25 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-
 export async function getWorkOrderContactsApi(idToken, id) {
   try {
-    let response = await axios.get(
+    const response = await axios.get(
       environment.apiUrl + `/CONTACTS/${id}.json`,
       { params: { auth: idToken } },
     );
-    const results = response.data;
-    if (!results) return undefined;
-    return results;
+    return response.data || undefined;
   } catch (error) {
-    console.error("getWorkOrderContactsApi Error:", error.response?.data ?? error.message);
+    console.error(
+      "getWorkOrderContactsApi Error:",
+      error.response?.data ?? error.message,
+    );
   }
 }
-
-
-
-
 
 //---------------SQLITE Functions---------------//
 
 export async function insertContactSqlite(db, contact, assignmentId) {
   try {
-    const jobPurchaseOrderId = {
-      assignment_id: assignmentId,
-    };
-
     const storeContact = {
       site_contact_id: contact.site_contact.id,
       site_contact_first_name: contact.site_contact.first_name,
@@ -73,7 +65,7 @@ export async function insertContactSqlite(db, contact, assignmentId) {
       ...storeContact,
       ...jobCoordinator,
       ...companyInfo,
-      ...jobPurchaseOrderId,
+      assignment_id: assignmentId,
     };
 
     const columns = Object.keys(data).filter(
@@ -84,10 +76,8 @@ export async function insertContactSqlite(db, contact, assignmentId) {
 
     await db.runAsync(
       `INSERT OR REPLACE INTO contact (${columns.join(", ")}) VALUES (${placeholders})`,
-      [...values],
+      values,
     );
-
-    console.log("Insert Contacts function ran");
   } catch (error) {
     console.error("Error inserting contact:", error);
   }
@@ -95,26 +85,29 @@ export async function insertContactSqlite(db, contact, assignmentId) {
 
 export async function selectContactSqlite(db, key, value) {
   try {
-    return await db.getAllAsync(
-      `SELECT * FROM contact WHERE ${key} = ?`,
-      [value],
-    );
+    return await db.getAllAsync(`SELECT * FROM contact WHERE ${key} = ?`, [
+      value,
+    ]);
   } catch (error) {
-    console.log("Select SQLITE contacts failed:", error);
+    console.log("Select contacts failed:", error);
   }
 }
 
 export async function cleanupContactSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.assignment.id);
+    const workOrderIds = (value ?? []).map((item) => item.assignment.id);
+
+    if (!workOrderIds.length) {
+      await db.runAsync("DELETE FROM contact");
+      return;
+    }
+
     const placeholders = workOrderIds.map(() => "?").join(", ");
-
-    const query = `DELETE FROM contact WHERE assignment_id NOT IN (${placeholders})`;
-
-    await db.runAsync(query, workOrderIds);
-
-    console.log("Clean up SQLITE contact function ran");
+    await db.runAsync(
+      `DELETE FROM contact WHERE assignment_id NOT IN (${placeholders})`,
+      workOrderIds,
+    );
   } catch (error) {
-    console.log("Clean up SQLITE contact failed:", error);
+    console.log("Clean up contacts failed:", error);
   }
 }

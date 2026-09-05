@@ -1,16 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   RefreshControl,
   KeyboardAvoidingView,
   Alert,
+  Dimensions,
+  StyleSheet,
   View,
   Text,
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import * as Network from "expo-network";
 
-import StyleSheet from "../StyleSheet";
 import syncLock from "./SyncLock";
 import { useJob } from "./Context";
 import { useAuth } from "./AuthContext";
@@ -23,7 +24,7 @@ import {
 } from "../Database/UserDatabase";
 import {
   cleanupWorkOrderSqlite,
-getAssignmentsApi,
+  getAssignmentsApi,
   insertWorkOrderSqlite,
   selectWorkOrderSqlite,
   updateWorkOrderSqlite,
@@ -417,8 +418,8 @@ export function useAppSync({ fetchPhotos, fetchFiles, onSyncSuccess } = {}) {
 }
 
 export default function AppSyncManager({ children, fetchPhotos, fetchFiles }) {
-  const [bannerVisible, setBannerVisible] = React.useState(false);
-  const [bannerText, setBannerText] = React.useState("");
+  const [bannerVisible, setBannerVisible] = useState(false);
+  const [bannerText, setBannerText] = useState("");
 
   const showBanner = (text = "Sync successful") => {
     setBannerText(text);
@@ -457,7 +458,7 @@ export default function AppSyncManager({ children, fetchPhotos, fetchFiles }) {
       <BannerOnPendingSync />
       <ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={StyleSheet.container}
+        contentContainerStyle={styles.container}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -469,3 +470,14 @@ export default function AppSyncManager({ children, fetchPhotos, fetchFiles }) {
     </KeyboardAvoidingView>
   );
 }
+
+const { width } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+});

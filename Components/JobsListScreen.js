@@ -1,0 +1,113 @@
+import { Dimensions, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { Avatar, Card, Text } from "react-native-paper";
+import { useMemo } from "react";
+
+import JobCard from "./JobCard";
+import Loading from "./Loading";
+import { useJob } from "./Context";
+import AppSyncManager from "./AppSyncManager";
+import { BLURHASH, SAFE_AREA_EDGES } from "./constants";
+
+export default function JobsListScreen({
+  title,
+  emptyMessage,
+  filterJobs,
+  showLoadingGate = false,
+}) {
+  const { jobResult, isJobsLoading } = useJob();
+
+  const jobData = useMemo(() => filterJobs(jobResult), [jobResult, filterJobs]);
+
+  if (showLoadingGate && isJobsLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <SafeAreaView style={styles.SafeArea} edges={SAFE_AREA_EDGES}>
+      <AppSyncManager>
+        <View style={styles.header}>
+          <Image
+            style={styles.logo}
+            source={require("../assets/logo.png")}
+            contentFit="contain"
+            placeholder={BLURHASH}
+          />
+          <Text style={styles.Text}>{title}</Text>
+        </View>
+        {jobData.length === 0 ? (
+          <Card style={styles.compJobCard}>
+            <Card.Content style={styles.jobCardContent}>
+              <Avatar.Icon
+                style={styles.avatarIcon}
+                icon="check-decagram"
+                size={50}
+              />
+              <Text variant="bodyMedium" style={styles.jobCardContentText}>
+                {emptyMessage}
+              </Text>
+            </Card.Content>
+          </Card>
+        ) : (
+          <JobCard jobData={jobData} />
+        )}
+      </AppSyncManager>
+    </SafeAreaView>
+  );
+}
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  SafeArea: {
+    flex: 1,
+    backgroundColor: "#1E2530",
+    paddingTop: 15,
+    paddingBottom: 15,
+  },
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  avatarIcon: {
+    backgroundColor: "#1B3A6B",
+    marginRight: 10,
+  },
+  compJobCard: {
+    backgroundColor: "#6A89A7",
+    marginBottom: height * 0.02,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: height * 0.03,
+  },
+  jobCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: height * 0.01,
+  },
+  jobCardContentText: {
+    fontSize: textStyle - 1,
+  },
+  logo: {
+    flexShrink: 1,
+    width: "auto",
+    minWidth: "100%",
+    minHeight: height * 0.08,
+    marginBottom: height * 0.03,
+  },
+});

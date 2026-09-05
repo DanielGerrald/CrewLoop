@@ -1,11 +1,10 @@
-import { Alert, Image, TouchableOpacity } from "react-native";
+import { Alert, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Network from "expo-network";
 import { Avatar } from "react-native-paper";
 
-import StyleSheet from "../StyleSheet";
 import profileIcon from "../assets/user.png";
 import {
   lastLoggedinUserSqlite,
@@ -89,10 +88,17 @@ export default function AvatarIcon() {
   return (
     <TouchableOpacity onPress={pickImageAsync}>
       <Avatar.Image
-        style={StyleSheet.profilePic}
+        style={styles.profilePic}
         source={{ uri: selectedImage || profileIconUri }}
         size={100}
       />
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  profilePic: {
+    flexShrink: 1,
+    width: "auto",
+  },
+});

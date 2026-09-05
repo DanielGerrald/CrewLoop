@@ -1,5 +1,13 @@
+import { StyleSheet } from "react-native";
 import { Card, IconButton } from "react-native-paper";
-import StyleSheet from "../../StyleSheet";
+
+const TABS = [
+  { key: "details", icon: "format-list-bulleted" },
+  { key: "contacts", icon: "contacts" },
+  { key: "files", icon: "file-document-multiple" },
+  { key: "photos", icon: "image-multiple" },
+  { key: "finalCheckOut", icon: "clipboard-check" },
+];
 
 export default function JobNav({
   showDetails,
@@ -13,73 +21,54 @@ export default function JobNav({
   showFinalCheckOut,
   setShowFinalCheckOut,
 }) {
+  const active = {
+    details: showDetails,
+    contacts: showContacts,
+    files: showFiles,
+    photos: showPhotos,
+    finalCheckOut: showFinalCheckOut,
+  };
+  const setActive = {
+    details: setShowDetails,
+    contacts: setShowContacts,
+    files: setShowFiles,
+    photos: setShowPhotos,
+    finalCheckOut: setShowFinalCheckOut,
+  };
+
+  const selectTab = (key) => {
+    for (const tab of TABS) {
+      setActive[tab.key](tab.key === key);
+    }
+  };
+
   return (
-    <Card.Content style={StyleSheet.rowView}>
-      <IconButton
-        icon="format-list-bulleted"
-        size={35}
-        iconColor={showDetails ? "#ffffff" : "#25292e"}
-        style={StyleSheet.jobNavIcon}
-        onPress={() => {
-          setShowDetails(true);
-          setShowContacts(false);
-          setShowFiles(false);
-          setShowPhotos(false);
-          setShowFinalCheckOut(false);
-        }}
-      />
-      <IconButton
-        icon="contacts"
-        size={35}
-        iconColor={showContacts ? "#ffffff" : "#25292e"}
-        style={StyleSheet.jobNavIcon}
-        onPress={() => {
-          setShowDetails(false);
-          setShowContacts(true);
-          setShowFiles(false);
-          setShowPhotos(false);
-          setShowFinalCheckOut(false);
-        }}
-      />
-      <IconButton
-        icon="file-document-multiple"
-        size={35}
-        iconColor={showFiles ? "#ffffff" : "#25292e"}
-        style={StyleSheet.jobNavIcon}
-        onPress={() => {
-          setShowDetails(false);
-          setShowContacts(false);
-          setShowFiles(true);
-          setShowPhotos(false);
-          setShowFinalCheckOut(false);
-        }}
-      />
-      <IconButton
-        icon="image-multiple"
-        size={35}
-        iconColor={showPhotos ? "#ffffff" : "#25292e"}
-        style={StyleSheet.jobNavIcon}
-        onPress={() => {
-          setShowDetails(false);
-          setShowContacts(false);
-          setShowFiles(false);
-          setShowPhotos(true);
-          setShowFinalCheckOut(false);
-        }}
-      />
-      <IconButton
-        icon="clipboard-check"
-        size={35}
-        iconColor={showFinalCheckOut ? "#ffffff" : "#25292e"}
-        style={StyleSheet.jobNavIcon}
-        onPress={() => {
-          setShowDetails(false);
-          setShowContacts(false);
-          setShowFiles(false);
-          setShowPhotos(false);
-          setShowFinalCheckOut(true);
-        }}
-      />
+    <Card.Content style={styles.rowView}>
+      {TABS.map((tab) => (
+        <IconButton
+          key={tab.key}
+          icon={tab.icon}
+          size={35}
+          iconColor={active[tab.key] ? "#ffffff" : "#25292e"}
+          style={styles.jobNavIcon}
+          onPress={() => selectTab(tab.key)}
+        />
+      ))}
     </Card.Content>
   );
 }
+
+const styles = StyleSheet.create({
+  jobNavIcon: {
+    flex: 1,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 2,
+    shadowOpacity: 0.1,
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});

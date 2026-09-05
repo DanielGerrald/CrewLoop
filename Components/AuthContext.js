@@ -9,7 +9,6 @@ import {
 import { AppState } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { format } from "date-fns";
 
 import { lastLoggedinUserSqlite, updateUserSqlite } from "../Database/UserDatabase";
 
@@ -17,23 +16,12 @@ const SESSION_CHECK_INTERVAL_MS = 300_000; // 5 min
 
 export async function isTokenExpired(token) {
   try {
-    const payloadBase64 = token.split('.')[1];
-    const decodedJson = JSON.parse(atob(payloadBase64));
-    const exp = decodedJson.exp; // Expiration time in seconds since epoch
+    const payloadBase64 = token.split(".")[1];
+    const { exp } = JSON.parse(atob(payloadBase64)); // seconds since epoch
     const now = Math.floor(Date.now() / 1000);
-    
-    return now >= exp; // Returns true if expired
-  } catch (e) {
-    return true; // Treat invalid tokens as expired
-  }
-}
-
-export function getTokenExpiry(token) {
-  try {
-    const { exp } = JSON.parse(atob(token.split(".")[1]));
-    return exp ? exp * 1000 : null;
+    return now >= exp;
   } catch {
-    return null;
+    return true; // Treat invalid tokens as expired
   }
 }
 
@@ -84,10 +72,6 @@ export function AuthContextProvider({ children }) {
       }
 
       setUser(lastLoggedIn);
- const expiresAt = getTokenExpiry(lastLoggedIn.idToken);
-if (expiresAt) {
-  console.log("Token valid through:", format(new Date(expiresAt), "MMM d, yyyy h:mm a"));
-}
       startSessionInterval();
     } catch (error) {
       console.error("Error checking session:", error);

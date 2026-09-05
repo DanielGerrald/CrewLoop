@@ -25,14 +25,12 @@ export async function postFinalCheckListApi(token, data) {
       },
       { params: { auth: token } },
     );
-    console.log("Post Final Check list API ran");
     return true;
   } catch (error) {
-    const errorMessage =
-      error.response?.data?.error?.message ||
-      error.message ||
-      "An unexpected error occurred.";
-    console.log("Post Final Checklist API error:", errorMessage);
+    console.log(
+      "Post final checklist API error:",
+      error.response?.data?.error?.message || error.message,
+    );
     return false;
   }
 }
@@ -71,11 +69,7 @@ export async function getFinalCheckoutApi(token, assignment_id) {
   }
 }
 
-export async function postFinalCheckoutApi(
-  token,
-  comment,
-  assignment_id,
-) {
+export async function postFinalCheckoutApi(token, comment, assignment_id) {
   try {
     await axios.put(
       environment.apiUrl + `/COMPLETIONS/${assignment_id}.json`,
@@ -88,12 +82,10 @@ export async function postFinalCheckoutApi(
     );
     return true;
   } catch (error) {
-    const errorMessage =
-      error.response?.data?.error?.message ||
-      error.message ||
-      "An unexpected error occurred.";
-
-    console.log("post Final Checkout Api Error:", errorMessage);
+    console.log(
+      "Post final checkout API error:",
+      error.response?.data?.error?.message || error.message,
+    );
     return false;
   }
 }
@@ -109,25 +101,21 @@ export async function insertFinalCheckOutSqlite(db, data) {
     const values = columns.map((key) => data[key]);
 
     await db.runAsync(
-      `INSERT INTO completion (${columns.join(", ")})
-         VALUES (${placeholders})`,
-      [...values],
+      `INSERT INTO completion (${columns.join(", ")}) VALUES (${placeholders})`,
+      values,
     );
-    console.log("Insert final checkout function ran");
   } catch (error) {
-    console.log("Insert final checkout function failed:", error);
+    console.log("Insert final checkout failed:", error);
   }
 }
 
 export async function selectFinalCheckOutSqlite(db, key, value) {
   try {
-    const result = await db.getAllAsync(
-      `SELECT * FROM completion WHERE (${key}) = ?`,
-      [value],
-    );
-    return result;
+    return await db.getAllAsync(`SELECT * FROM completion WHERE ${key} = ?`, [
+      value,
+    ]);
   } catch (error) {
-    console.log("Select final checkout function failed:", error);
+    console.log("Select final checkout failed:", error);
   }
 }
 
@@ -139,38 +127,40 @@ export async function updateFinalCheckOutSqlite(
   value2,
 ) {
   try {
-    await db.runAsync(
-      `UPDATE completion SET (${key1}) = ? WHERE (${key2}) = ?`,
-      [value1, value2],
-    );
-    console.log("Update final checkout function  ran");
+    await db.runAsync(`UPDATE completion SET ${key1} = ? WHERE ${key2} = ?`, [
+      value1,
+      value2,
+    ]);
   } catch (error) {
-    console.log("Update final checkout function failed:", error);
+    console.log("Update final checkout failed:", error);
   }
 }
 
 export async function deleteFinalCheckOutSqlite(db, assignment_id) {
   try {
-    await db.runAsync(`DELETE FROM completion WHERE assignment_id = ?`, [
+    await db.runAsync("DELETE FROM completion WHERE assignment_id = ?", [
       assignment_id,
     ]);
-    console.log("Delete final checkout function ran");
   } catch (error) {
-    console.log("Delete final checkout function failed:", error);
+    console.log("Delete final checkout failed:", error);
   }
 }
 
 export async function cleanupFinalCheckOutSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.assignment.id);
+    const workOrderIds = (value ?? []).map((item) => item.assignment.id);
+
+    if (!workOrderIds.length) {
+      await db.runAsync("DELETE FROM completion");
+      return;
+    }
+
     const placeholders = workOrderIds.map(() => "?").join(", ");
-
-    const query = `DELETE FROM completion WHERE assignment_id NOT IN (${placeholders})`;
-
-    await db.runAsync(query, workOrderIds);
-
-    console.log("Clean up SQLITE FinalCheckOut function ran");
+    await db.runAsync(
+      `DELETE FROM completion WHERE assignment_id NOT IN (${placeholders})`,
+      workOrderIds,
+    );
   } catch (error) {
-    console.log("Clean up SQLITE FinalCheckOut failed:", error);
+    console.log("Clean up final checkout failed:", error);
   }
 }

@@ -1,6 +1,8 @@
 import {
   Alert,
+  Dimensions,
   View,
+  StyleSheet,
   TouchableOpacity,
   Linking,
   Platform,
@@ -11,14 +13,12 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import { Text, Avatar, Chip, Icon } from "react-native-paper";
-import * as React from "react";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { useSQLiteContext } from "expo-sqlite";
 
-import StyleSheet from "../../StyleSheet";
 import { selectCategoryLabelSqlite } from "../../Database/LabelDatabase";
-import moment from "moment/moment";
+import moment from "moment";
 import {
   deleteAttachmentSqlite,
   insertAttachmentSqlite,
@@ -184,8 +184,8 @@ export default function Files({ selectedJob, fetchFiles, files }) {
   if (selectedJob[0].status_label !== "Completed") {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-        <ScrollView contentContainerStyle={StyleSheet.container}>
-          <View style={StyleSheet.jobNavContent}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.jobNavContent}>
             <Modal
               visible={modalVisible}
               onRequestClose={() => setModalVisible(false)}
@@ -194,9 +194,9 @@ export default function Files({ selectedJob, fetchFiles, files }) {
             >
               {loading && <Loading />}
               {!loading && (
-                <View style={StyleSheet.modalPopup}>
-                  <View style={StyleSheet.modalPopupContent}>
-                    <Text style={StyleSheet.Text}>Select a Label Category</Text>
+                <View style={styles.modalPopup}>
+                  <View style={styles.modalPopupContent}>
+                    <Text style={styles.Text}>Select a Label Category</Text>
                     {labels.map((label, index) => (
                       <TouchableOpacity
                         key={index}
@@ -208,9 +208,9 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                           icon={() => (
                             <Icon source="tag" color={"#01ab52"} size={20} />
                           )}
-                          style={StyleSheet.chip}
+                          style={styles.chip}
                         >
-                          <Text variant="labelLarge" style={StyleSheet.chipText}>
+                          <Text variant="labelLarge" style={styles.chipText}>
                             {" "}
                             {label.type_label}
                           </Text>
@@ -219,9 +219,9 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                     ))}
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
-                      style={StyleSheet.logoutBtn}
+                      style={styles.logoutBtn}
                     >
-                      <Text style={StyleSheet.logoutBtnText}>Cancel</Text>
+                      <Text style={styles.logoutBtnText}>Cancel</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -229,15 +229,15 @@ export default function Files({ selectedJob, fetchFiles, files }) {
             </Modal>
             <TouchableOpacity
               onPress={() => showModal()}
-              style={StyleSheet.submitBtn}
+              style={styles.submitBtn}
             >
-              <View style={StyleSheet.rowView}>
+              <View style={styles.rowView}>
                 <Avatar.Icon
-                  style={StyleSheet.avatarIconImage}
+                  style={styles.avatarIconImage}
                   icon="file-multiple"
                   size={30}
                 />
-                <Text style={StyleSheet.logoutBtnText}>Select Files</Text>
+                <Text style={styles.logoutBtnText}>Select Files</Text>
               </View>
             </TouchableOpacity>
 
@@ -248,43 +248,43 @@ export default function Files({ selectedJob, fetchFiles, files }) {
             />
 
             {notSubmittedFiles && (
-              <View style={StyleSheet.thumbnailView}>
+              <View style={styles.thumbnailView}>
                 {notSubmittedFiles.map((file, index) => (
                   <TouchableOpacity
                     key={index.toString()}
                     onPress={() => openFile(file.uri)}
                     onLongPress={() => deleteFile(file.id)}
                   >
-                    <View style={StyleSheet.rowView}>
-                      <View style={StyleSheet.fileIconRow}>
+                    <View style={styles.rowView}>
+                      <View style={styles.fileIconRow}>
                         <Avatar.Icon
-                          style={StyleSheet.avatarIconBtn}
+                          style={styles.avatarIconBtn}
                           icon="file-document"
                           size={45}
                         />
                       </View>
-                      <View style={StyleSheet.fileTextRow}>
-                        <Text style={StyleSheet.TextDescript}>
+                      <View style={styles.fileTextRow}>
+                        <Text style={styles.TextDescript}>
                           {file.fileName}
                         </Text>
                       </View>
                     </View>
-                    <View style={StyleSheet.labelView}>
+                    <View style={styles.labelView}>
                       <Chip
                         icon={() => (
                           <Icon source="tag" color={"#01ab52"} size={20} />
                         )}
-                        style={StyleSheet.chip}
+                        style={styles.chip}
                       >
-                        <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
+                        <Text variant="labelSmall" style={styles.chipText}> {file.label}</Text>
                       </Chip>
                       <Chip
                         icon={() => (
                           <Icon source="clock" color={"green"} size={20} />
                         )}
-                        style={StyleSheet.chip}
+                        style={styles.chip}
                       >
-                        <Text variant="labelSmall" style={StyleSheet.chipText}>{moment().format("L")}</Text>
+                        <Text variant="labelSmall" style={styles.chipText}>{moment().format("L")}</Text>
                       </Chip>
                     </View>
                   </TouchableOpacity>
@@ -294,55 +294,54 @@ export default function Files({ selectedJob, fetchFiles, files }) {
 
             {submittedFiles && submittedFiles.length > 0 && (
               <>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.horizontalRule} />
+                <View style={styles.rowView}>
+                  <View style={styles.horizontalRule} />
                 </View>
-                <View style={StyleSheet.rowView}>
-                  <Text style={StyleSheet.TextTitle}>Submitted Documents</Text>
+                <View style={styles.rowView}>
+                  <Text style={styles.TextTitle}>Submitted Documents</Text>
                 </View>
 
                 {submittedFiles.map((file, index) => (
-                  <View style={StyleSheet.thumbnailView} key={index}>
+                  <View style={styles.thumbnailView} key={index}>
                     <TouchableOpacity
                       key={index}
                       onPress={() => openFile(file.uri)}
-                      //onLongPress={() => deleteFile(file.id)}
                     >
-                      <View style={StyleSheet.rowView}>
-                        <View style={StyleSheet.fileIconRow}>
+                      <View style={styles.rowView}>
+                        <View style={styles.fileIconRow}>
                           <Avatar.Icon
-                            style={StyleSheet.avatarIconBtn}
+                            style={styles.avatarIconBtn}
                             icon="file-document"
                             size={45}
                           />
                         </View>
-                        <View style={StyleSheet.fileTextRow}>
-                          <Text style={StyleSheet.TextDescript}>
+                        <View style={styles.fileTextRow}>
+                          <Text style={styles.TextDescript}>
                             {file.fileName}
                           </Text>
                         </View>
                       </View>
-                      <View style={StyleSheet.labelView}>
+                      <View style={styles.labelView}>
                         <Chip
                           icon={() => (
                             <Icon source="tag" color={"#01ab52"} size={20} />
                           )}
-                          style={StyleSheet.chip}
+                          style={styles.chip}
                         >
-                          <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
+                          <Text variant="labelSmall" style={styles.chipText}> {file.label}</Text>
                         </Chip>
                         <Chip
                           icon={() => (
                             <Icon source="clock" color={"green"} size={20} />
                           )}
-                          style={StyleSheet.chip}
+                          style={styles.chip}
                         >
-                          <Text variant="labelSmall" style={StyleSheet.chipText}>
+                          <Text variant="labelSmall" style={styles.chipText}>
                             {moment().format("L")}
                           </Text>
                         </Chip>
                         {file.syncStatus === "Pending" && (
-                          <Chip style={StyleSheet.chip} textStyle={StyleSheet.chipText} icon="cloud-upload">
+                          <Chip style={styles.chip} textStyle={styles.chipText} icon="cloud-upload">
                             Pending
                           </Chip>
                         )}
@@ -359,44 +358,44 @@ export default function Files({ selectedJob, fetchFiles, files }) {
   } else {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-        <ScrollView contentContainerStyle={StyleSheet.container}>
-          <View style={StyleSheet.jobNavContent}>
-            <View style={StyleSheet.thumbnailView}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.jobNavContent}>
+            <View style={styles.thumbnailView}>
               {files.map((file, index) => (
                 <TouchableOpacity
                   key={index.toString()}
                   onPress={() => openFile(file.uri)}
                 >
-                  <View style={StyleSheet.rowView}>
-                    <View style={StyleSheet.fileIconRow}>
+                  <View style={styles.rowView}>
+                    <View style={styles.fileIconRow}>
                       <Avatar.Icon
-                        style={StyleSheet.avatarIconBtn}
+                        style={styles.avatarIconBtn}
                         icon="file-document"
                         size={45}
                       />
                     </View>
-                    <View style={StyleSheet.fileTextRow}>
-                      <Text style={StyleSheet.TextDescript}>
+                    <View style={styles.fileTextRow}>
+                      <Text style={styles.TextDescript}>
                         {file.fileName}
                       </Text>
                     </View>
                   </View>
-                  <View style={StyleSheet.labelView}>
+                  <View style={styles.labelView}>
                     <Chip
                       icon={() => (
                         <Icon source="tag" color={"#01ab52"} size={20} />
                       )}
-                      style={StyleSheet.chip}
+                      style={styles.chip}
                     >
-                      <Text variant="labelSmall" style={StyleSheet.chipText}> {file.label}</Text>
+                      <Text variant="labelSmall" style={styles.chipText}> {file.label}</Text>
                     </Chip>
                     <Chip
                       icon={() => (
                         <Icon source="clock" color={"green"} size={20} />
                       )}
-                      style={StyleSheet.chip}
+                      style={styles.chip}
                     >
-                      <Text variant="labelSmall" style={StyleSheet.chipText}>
+                      <Text variant="labelSmall" style={styles.chipText}>
                         {moment.unix(file.date).format("L")}
                       </Text>
                     </Chip>
@@ -410,3 +409,134 @@ export default function Files({ selectedJob, fetchFiles, files }) {
     );
   }
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  TextDescript: {
+    color: "#D3D3D3",
+    fontSize: textStyle,
+  },
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  avatarIconBtn: {
+    backgroundColor: "#F47C20",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  avatarIconImage: {
+    backgroundColor: "#F47C20",
+  },
+  chip: {
+    backgroundColor: "#1B3A6B",
+    margin: "1%",
+    borderRadius: 15,
+  },
+  chipText: {
+    color: "#ffffff",
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+  fileIconRow: { padding: 10 },
+  fileTextRow: { width: "85%", paddingRight: 10 },
+  horizontalRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#8A95A3",
+    marginBottom: 10,
+    marginTop: 15,
+  },
+  jobNavContent: {
+    marginVertical: height * 0.03,
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+  },
+  labelView: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  logoutBtn: {
+    width: width * 0.6,
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: height * 0.02,
+    marginBottom: height * 0.02,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  modalPopup: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: width * 0.05,
+  },
+  modalPopupContent: {
+    alignItems: "center",
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: height * 0.8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  submitBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbnailView: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+});

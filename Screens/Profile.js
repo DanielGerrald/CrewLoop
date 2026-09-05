@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Switch, Pressable, Alert } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Dimensions, StyleSheet, View, Text, Switch, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import StyleSheet from "../StyleSheet";
 import { SAFE_AREA_EDGES } from "../Components/constants";
 import AvatarIcon from "../Components/AvatarIcon";
 import ReauthModal from "../Components/ReauthModal";
@@ -158,39 +157,39 @@ export default function Profile() {
 
   if (!lastLoggedIn) {
     return (
-      <SafeAreaView style={StyleSheet.SafeArea} edges={SAFE_AREA_EDGES}>
+      <SafeAreaView style={styles.SafeArea} edges={SAFE_AREA_EDGES}>
         <Text>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={StyleSheet.SafeArea} edges={SAFE_AREA_EDGES}>
+    <SafeAreaView style={styles.SafeArea} edges={SAFE_AREA_EDGES}>
       <AppSyncManager>
-        <View style={StyleSheet.header}>
+        <View style={styles.header}>
           <AvatarIcon />
-          <Text style={StyleSheet.Text} name="username">
-            {lastLoggedIn.username}
+          <Text style={styles.Text}>
+            {lastLoggedIn.displayName || lastLoggedIn.email}
           </Text>
         </View>
-        <View style={StyleSheet.profileForm}>
+        <View style={styles.profileForm}>
           <CustomInput
             label="first_name"
-            style={StyleSheet.inputView}
+            style={styles.inputView}
             value={formData.first_name}
             placeholder={"First Name"}
             onChangeText={(text) => handleInputChange("first_name", text)}
           />
           <CustomInput
             label="last_name"
-            style={StyleSheet.inputView}
+            style={styles.inputView}
             value={formData.last_name}
             placeholder={"Last Name"}
             onChangeText={(text) => handleInputChange("last_name", text)}
           />
           <CustomInput
             label="email"
-            style={StyleSheet.inputView}
+            style={styles.inputView}
             value={formData.email}
             placeholder={"Email Address"}
             onChangeText={(text) => handleInputChange("email", text)}
@@ -198,7 +197,7 @@ export default function Profile() {
           />
           <CustomInput
             label="phone_nbr"
-            style={StyleSheet.inputView}
+            style={styles.inputView}
             value={formData.phone_nbr}
             placeholder={"Phone Number"}
             onChangeText={(text) => handleInputChange("phone_nbr", text)}
@@ -206,10 +205,10 @@ export default function Profile() {
             keyboardType="phone-pad"
           />
 
-          <View style={StyleSheet.rowView}>
-            <Text style={StyleSheet.switchLabel}>Email Notifications</Text>
+          <View style={styles.rowView}>
+            <Text style={styles.switchLabel}>Email Notifications</Text>
             <Switch
-              style={StyleSheet.switch}
+              style={styles.switch}
               trackColor={{ false: "#999", true: "#F47C20" }}
               ios_backgroundColor="#2C3444"
               thumbColor={isEnabledEmail ? "#F47C20" : "#f4f3f4"}
@@ -217,10 +216,10 @@ export default function Profile() {
               value={isEnabledEmail}
             />
           </View>
-          <View style={StyleSheet.rowView}>
-            <Text style={StyleSheet.switchLabel}>SMS Notifications</Text>
+          <View style={styles.rowView}>
+            <Text style={styles.switchLabel}>SMS Notifications</Text>
             <Switch
-              style={StyleSheet.switch}
+              style={styles.switch}
               trackColor={{ false: "#999", true: "#F47C20" }}
               ios_backgroundColor="#2C3444"
               thumbColor={isEnabledSMS ? "#F47C20" : "#f4f3f4"}
@@ -229,12 +228,12 @@ export default function Profile() {
             />
           </View>
 
-          <View style={StyleSheet.profileFormButtons}>
-            <Pressable style={StyleSheet.submitBtn} onPress={onSubmit}>
-              <Text style={StyleSheet.buttonText}>Update</Text>
+          <View style={styles.profileFormButtons}>
+            <Pressable style={styles.submitBtn} onPress={onSubmit}>
+              <Text style={styles.buttonText}>Update</Text>
             </Pressable>
-            <Pressable onPress={logout} style={StyleSheet.logoutBtn}>
-              <Text style={StyleSheet.logoutBtnText}>Log Out</Text>
+            <Pressable onPress={logout} style={styles.logoutBtn}>
+              <Text style={styles.logoutBtnText}>Log Out</Text>
             </Pressable>
           </View>
         </View>
@@ -248,3 +247,107 @@ export default function Profile() {
     </SafeAreaView>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  SafeArea: {
+    flex: 1,
+    backgroundColor: "#1E2530",
+    paddingTop: 15,
+    paddingBottom: 15,
+  },
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    fontWeight: "600",
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: height * 0.03,
+  },
+  inputView: {
+    width: width * 0.8,
+    backgroundColor: "#6A89A7",
+    borderRadius: 15,
+    height: height * 0.06,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+  },
+  logoutBtn: {
+    width: width * 0.6,
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: height * 0.02,
+    marginBottom: height * 0.02,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  profileForm: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileFormButtons: {
+    flex: 2,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  submitBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  switch: {
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  switchLabel: {
+    width: width * 0.6,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginTop: height * 0.015,
+  },
+});

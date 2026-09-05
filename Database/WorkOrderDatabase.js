@@ -4,7 +4,6 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-
 export async function getAssignmentsApi(idToken) {
   try {
     const response = await axios.get(environment.apiUrl + "/ASSIGNMENTS.json", {
@@ -23,7 +22,7 @@ export async function getAssignmentsApi(idToken) {
         },
       }));
   } catch (error) {
-    console.log("Assignments API call:", error);
+    console.log("Assignments API call failed:", error);
     return [];
   }
 }
@@ -44,8 +43,6 @@ export async function patchAssignmentApi(idToken, id, fields) {
     return false;
   }
 }
-
-
 
 //---------------SQLITE Functions---------------//
 
@@ -70,46 +67,47 @@ export async function insertWorkOrderSqlite(db, data) {
       `INSERT OR REPLACE INTO assignment (${columns.join(", ")}) VALUES (${placeholders})`,
       [...values],
     );
-
-    console.log("Insert / update Work Order function ran");
   } catch (error) {
-    console.log("Insert / update Work Order function failed:", error);
+    console.log("Insert/update work order failed:", error);
   }
 }
 
 export async function selectWorkOrderSqlite(db, key, value) {
   try {
-    const query = `SELECT * FROM assignment WHERE ${key} = ?`;
-    const results = await db.getAllAsync(query, [value]);
-    return results;
+    return await db.getAllAsync(`SELECT * FROM assignment WHERE ${key} = ?`, [
+      value,
+    ]);
   } catch (error) {
-    console.log("Select SQLITE work orders failed:", error);
+    console.log("Select work orders failed:", error);
   }
 }
 
 export async function updateWorkOrderSqlite(db, key1, value1, key2, value2) {
   try {
     await db.runAsync(
-      `UPDATE assignment SET (${key1}) = ? WHERE (${key2}) = ?`,
+      `UPDATE assignment SET ${key1} = ? WHERE ${key2} = ?`,
       [value1, value2],
     );
-    console.log("Update work order function ran");
   } catch (error) {
-    console.log("Update work order function failed:", error);
+    console.log("Update work order failed:", error);
   }
 }
 
 export async function cleanupWorkOrderSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.assignment.id);
+    const workOrderIds = (value ?? []).map((item) => item.assignment.id);
+
+    if (!workOrderIds.length) {
+      await db.runAsync("DELETE FROM assignment");
+      return;
+    }
+
     const placeholders = workOrderIds.map(() => "?").join(", ");
-
-    const query = `DELETE FROM assignment WHERE id NOT IN (${placeholders})`;
-
-    await db.runAsync(query, workOrderIds);
-
-    console.log("Clean up SQLITE work orders function ran");
+    await db.runAsync(
+      `DELETE FROM assignment WHERE id NOT IN (${placeholders})`,
+      workOrderIds,
+    );
   } catch (error) {
-    console.log("Clean up SQLITE work orders failed:", error);
+    console.log("Clean up work orders failed:", error);
   }
 }

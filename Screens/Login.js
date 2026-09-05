@@ -1,6 +1,8 @@
 import { Image } from "expo-image";
 import {
   Alert,
+  Dimensions,
+  StyleSheet,
   Pressable,
   Text,
   View,
@@ -16,7 +18,6 @@ import { useNavigation } from "@react-navigation/native";
 import * as Network from "expo-network";
 import { IconButton } from "react-native-paper";
 
-import StyleSheet from "../StyleSheet";
 import {
   getLoginApi,
   getUserAvatarApi,
@@ -28,18 +29,19 @@ import {
 } from "../Database/UserDatabase";
 import CustomInput from "../Components/CustomInput";
 import { SignupButton } from "../Components/SignupButton.js";
-import { getAssignmentsApi,
+import {
+  getAssignmentsApi,
   cleanupWorkOrderSqlite,
   insertWorkOrderSqlite,
   updateWorkOrderSqlite,
 } from "../Database/WorkOrderDatabase";
 import { getLabelsApi, insertCategoryLabelSqlite } from "../Database/LabelDatabase";
 import { isTokenExpired, useAuth } from "../Components/AuthContext";
+import { cleanupCheckInOutSqlite } from "../Database/CheckInOutDatabase";
 import {
-  cleanupCheckInOutSqlite,
-} from "../Database/CheckInOutDatabase";
-import {getWorkOrderContactsApi,
-  cleanupContactSqlite, insertContactSqlite
+  getWorkOrderContactsApi,
+  cleanupContactSqlite,
+  insertContactSqlite,
 } from "../Database/ContactDatabase";
 import {
   cleanupAttachmentSqlite,
@@ -70,16 +72,57 @@ export default function Login() {
     password: "",
   });
 
-const handleInputChange = (name, value) => {
-  setFormData((prev) => ({ ...prev, [name]: value }));
-};
+  const handleInputChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  async function insertJobs(jobs) {
-    for (const job of jobs) {
-      try {
-        await insertWorkOrderSqlite(db, job);
-      } catch (error) {
-        console.error("Error inserting job into SQLite:", error);
+  async function syncJob(job, idToken) {
+    await insertWorkOrderSqlite(db, job);
+
+    if (job.assignment.completed) {
+      await updateWorkOrderSqlite(
+        db,
+        "status_label",
+        "Completed",
+        "id",
+        job.assignment.id,
+      );
+
+      const existingCheckout = await selectFinalCheckOutSqlite(
+        db,
+        "assignment_id",
+        job.assignment.id,
+      );
+      if (!existingCheckout?.length) {
+        const finalCheckout = await getFinalCheckoutApi(
+          idToken,
+          job.assignment.id,
+        );
+        if (finalCheckout) {
+          await insertFinalCheckOutSqlite(db, finalCheckout);
+        }
+      }
+    }
+
+    const contact = await getWorkOrderContactsApi(idToken, job.assignment.id);
+    if (contact) {
+      await insertContactSqlite(db, contact, job.assignment.id);
+    }
+
+    const assignmentRefId = job.site?.reference_code?.split("-")[1];
+    if (assignmentRefId) {
+      const attachments = await getAttachmentsApi(idToken, assignmentRefId);
+      for (const att of attachments) {
+        const existing = await selectAttachmentSqlite(
+          db,
+          "fileName",
+          att.fileName,
+          "assignment_id",
+          att.assignment_id,
+        );
+        if (!existing?.length) {
+          await insertAttachmentSqlite(db, att);
+        }
       }
     }
   }
@@ -96,18 +139,17 @@ const handleInputChange = (name, value) => {
 
     try {
       const networkState = await Network.getNetworkStateAsync();
-
       const apiLoginData = await getLoginApi(formData);
 
       if (!networkState.isInternetReachable) {
         await handleOfflineLogin();
         return;
-      } else {
-        if (!apiLoginData) {
-          setLoading(false);
-          Alert.alert("Username and/or password is incorrect");
-          return;
-        }
+      }
+
+      if (!apiLoginData) {
+        setLoading(false);
+        Alert.alert("Username and/or password is incorrect");
+        return;
       }
 
       const userProfile = await getUserProfileApi(apiLoginData);
@@ -131,7 +173,6 @@ const handleInputChange = (name, value) => {
       }
 
       const updatedUser = await selectUserSqlite(db, apiLoginData.localId);
-     
 
       if (!updatedUser) {
         setLoading(false);
@@ -145,79 +186,25 @@ const handleInputChange = (name, value) => {
         return;
       }
 
-const jobs = await getAssignmentsApi(updatedUser.idToken);
-  const attachmentTypes = await getLabelsApi(updatedUser.idToken);
+      const jobs = await getAssignmentsApi(updatedUser.idToken);
+      const attachmentTypes = await getLabelsApi(updatedUser.idToken);
 
-if (jobs.length > 0) {
+      if (jobs.length > 0) {
+        await cleanupWorkOrderSqlite(db, jobs);
+        await cleanupContactSqlite(db, jobs);
+        await cleanupCheckInOutSqlite(db, jobs);
+        await cleanupAttachmentSqlite(db, jobs);
+        await cleanupFinalCheckOutSqlite(db, jobs);
 
+        if (attachmentTypes) {
+          await insertCategoryLabelSqlite(db, attachmentTypes);
+        }
 
-  await cleanupWorkOrderSqlite(db, jobs);
-  await cleanupContactSqlite(db, jobs);
-  await cleanupCheckInOutSqlite(db, jobs);
-  await cleanupAttachmentSqlite(db, jobs);
-  await cleanupFinalCheckOutSqlite(db, jobs);
-
-  if (attachmentTypes) {
-    await insertCategoryLabelSqlite(db, attachmentTypes);
-  }
-
-
-
-  for (const job of jobs) {
-    await insertWorkOrderSqlite(db, job);
-    if (job.assignment.completed) {
-      await updateWorkOrderSqlite(
-        db,
-        "status_label",
-        "Completed",
-        "id",
-        job.assignment.id,
-      );
-
-      const existingCheckout = await selectFinalCheckOutSqlite(
-        db,
-        "assignment_id",
-        job.assignment.id,
-      );
-      if (!existingCheckout?.length) {
-        const finalCheckout = await getFinalCheckoutApi(
-          updatedUser.idToken,
-          job.assignment.id,
-        );
-        if (finalCheckout) {
-          await insertFinalCheckOutSqlite(db, finalCheckout);
+        for (const job of jobs) {
+          await syncJob(job, updatedUser.idToken);
         }
       }
-    }
-    const contact = await getWorkOrderContactsApi(
-      updatedUser.idToken,
-      job.assignment.id,
-    );
-    if (contact) {
-      await insertContactSqlite(db, contact, job.assignment.id);
-    }
 
-    const assignmentRefId = job.site?.reference_code?.split("-")[1];
-    if (assignmentRefId) {
-      const attachments = await getAttachmentsApi(
-        updatedUser.idToken,
-        assignmentRefId,
-      );
-      for (const att of attachments) {
-        const existing = await selectAttachmentSqlite(
-          db,
-          "fileName",
-          att.fileName,
-          "assignment_id",
-          att.assignment_id,
-        );
-        if (!existing?.length) {
-          await insertAttachmentSqlite(db, att);
-        }
-      }
-    }
-  }
-}
       setLoading(false);
       login(updatedUser);
     } catch (error) {
@@ -250,7 +237,7 @@ if (jobs.length > 0) {
   };
 
   return (
-    <SafeAreaView style={StyleSheet.SafeArea}>
+    <SafeAreaView style={styles.SafeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -267,23 +254,23 @@ if (jobs.length > 0) {
               }}
               keyboardShouldPersistTaps="handled"
             >
-              <View style={StyleSheet.header}>
+              <View style={styles.header}>
                 <Image
-                  style={StyleSheet.loginLogo}
+                  style={styles.loginLogo}
                   source={require("../assets/logo.png")}
                   contentFit={"contain"}
                   placeholder={BLURHASH}
                 />
-                <Text style={StyleSheet.loginTitle}>CrewLoop</Text>
-                <Text style={StyleSheet.loginSubtitle}>
+                <Text style={styles.loginTitle}>CrewLoop</Text>
+                <Text style={styles.loginSubtitle}>
                   Sign in to manage your jobs
                 </Text>
               </View>
-              <View style={StyleSheet.loginCard}>
-                <View style={StyleSheet.loginForm}>
+              <View style={styles.loginCard}>
+                <View style={styles.loginForm}>
                   <CustomInput
                     label="username"
-                    style={StyleSheet.inputView}
+                    style={styles.inputView}
                     placeholder={"User Name"}
                     value={formData.username}
                     onChangeText={(text) => handleInputChange("username", text)}
@@ -291,10 +278,10 @@ if (jobs.length > 0) {
                     autoComplete="username"
                   />
 
-                  <View style={StyleSheet.passwordInputContainer}>
+                  <View style={styles.passwordInputContainer}>
                     <CustomInput
                       label="password"
-                      style={StyleSheet.inputView}
+                      style={styles.inputView}
                       placeholder={"Password"}
                       value={formData.password}
                       onChangeText={(text) =>
@@ -309,20 +296,20 @@ if (jobs.length > 0) {
                       color={"#1E2530"}
                       size={20}
                       onPress={togglePasswordVisibility}
-                      style={StyleSheet.passwordVisibilityButton}
+                      style={styles.passwordVisibilityButton}
                     />
                   </View>
 
-                  <View style={StyleSheet.loginFormButtons}>
+                  <View style={styles.loginFormButtons}>
                     <Pressable
                       onPress={() => navigation.navigate("Forgot Password")}
                     >
-                      <Text style={StyleSheet.signupText}>
+                      <Text style={styles.signupText}>
                         Forgot Password?
                       </Text>
                     </Pressable>
-                    <Pressable onPress={onSubmit} style={StyleSheet.loginBtn}>
-                      <Text style={StyleSheet.buttonText}>LOGIN</Text>
+                    <Pressable onPress={onSubmit} style={styles.loginBtn}>
+                      <Text style={styles.buttonText}>LOGIN</Text>
                     </Pressable>
                     <SignupButton />
                   </View>
@@ -336,3 +323,121 @@ if (jobs.length > 0) {
     </SafeAreaView>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  SafeArea: {
+    flex: 1,
+    backgroundColor: "#1E2530",
+    paddingTop: 15,
+    paddingBottom: 15,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    fontWeight: "600",
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: height * 0.03,
+  },
+  inputView: {
+    width: width * 0.8,
+    backgroundColor: "#6A89A7",
+    borderRadius: 15,
+    height: height * 0.06,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+  },
+  loginBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: height * 0.05,
+    marginBottom: height * 0.05,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  loginCard: {
+    width: "100%",
+    alignItems: "center",
+    backgroundColor: "#242C3A",
+    borderRadius: 24,
+    paddingVertical: height * 0.04,
+    paddingHorizontal: width * 0.05,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  loginForm: {
+    flex: 2,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loginFormButtons: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  loginSubtitle: {
+    color: "#8A95A3",
+    fontSize: textStyle,
+    textAlign: "center",
+    marginTop: -height * 0.015,
+    marginBottom: height * 0.01,
+  },
+  loginTitle: {
+    fontWeight: "bold",
+    fontSize: 40,
+    color: "#ffffff",
+    textAlign: "center",
+    marginVertical: height * 0.03,
+  },
+  loginLogo: {
+    flexShrink: 1,
+    width: "auto",
+    minWidth: "100%",
+    minHeight: height * 0.1,
+  },
+  passwordInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  passwordVisibilityButton: {
+    position: "absolute",
+    right: width * 0.03,
+    bottom: height * 0.02,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  signupText: {
+    color: "#F47C20",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+});

@@ -1,23 +1,27 @@
-import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
-import StyleSheet from "../../StyleSheet";
+import { Dimensions, KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from "react-native";
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
 
 export default function Details({ details }) {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-      <ScrollView contentContainerStyle={StyleSheet.container}>
-        <View style={StyleSheet.jobNavContent}>
-          <Text style={StyleSheet.TextTitle}>Work Description</Text>
-          <View style={StyleSheet.containerRowView}>
-            <Text style={StyleSheet.TextDescript}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.jobNavContent}>
+          <Text style={styles.TextTitle}>Work Description</Text>
+          <View style={styles.containerRowView}>
+            <Text style={styles.TextDescript}>
               {details[0].desc_of_work}
             </Text>
           </View>
-          <View style={StyleSheet.rowView}>
-            <View style={StyleSheet.horizontalRule} />
+          <View style={styles.rowView}>
+            <View style={styles.horizontalRule} />
           </View>
-          <Text style={StyleSheet.TextTitle}>Contractor Requirements</Text>
-          <View style={StyleSheet.containerRowView}>
-            <Text style={StyleSheet.TextDescript}>
+          <Text style={styles.TextTitle}>Contractor Requirements</Text>
+          <View style={styles.containerRowView}>
+            <Text style={styles.TextDescript}>
               {details[0].vendor_requirements}
             </Text>
           </View>
@@ -26,3 +30,46 @@ export default function Details({ details }) {
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  TextDescript: {
+    color: "#D3D3D3",
+    fontSize: textStyle,
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+  containerRowView: {
+    flex: 1,
+    flexDirection: "row",
+    width: "90%",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "3%",
+  },
+  horizontalRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#8A95A3",
+    marginBottom: 10,
+    marginTop: 15,
+  },
+  jobNavContent: {
+    marginVertical: height * 0.03,
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});

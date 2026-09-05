@@ -4,8 +4,10 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import {
   Alert,
+  Dimensions,
   Linking,
   Modal,
+  StyleSheet,
   TouchableOpacity,
   View,
   Image,
@@ -19,7 +21,6 @@ import moment from "moment";
 import ImageViewer from "react-native-image-viewing";
 import { useSQLiteContext } from "expo-sqlite";
 
-import StyleSheet from "../../StyleSheet";
 import { selectCategoryLabelSqlite } from "../../Database/LabelDatabase";
 import {
   deleteAttachmentSqlite,
@@ -28,6 +29,45 @@ import {
 import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
 import Loading from "../Loading";
 import AttachmentSubmit from "./AttachmentSubmit";
+
+function ImageThumbnail({ image, onPress, onLongPress }) {
+  return (
+    <TouchableOpacity
+      style={styles.photoImage}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
+      <Image style={styles.image} source={{ uri: image.uri }} />
+      <View style={styles.labelView}>
+        <Chip
+          icon={() => <Icon source="image" color={"purple"} size={20} />}
+          style={styles.chip}
+        >
+          <Text variant="labelSmall" style={styles.chipText}>
+            {image.label}
+          </Text>
+        </Chip>
+        <Chip
+          icon={() => <Icon source="clock" color={"green"} size={20} />}
+          style={styles.chip}
+        >
+          <Text variant="labelSmall" style={styles.chipText}>
+            {moment.unix(image.date).format("L")}
+          </Text>
+        </Chip>
+        {image.syncStatus === "Pending" && (
+          <Chip
+            style={styles.chip}
+            textStyle={styles.chipText}
+            icon="cloud-upload"
+          >
+            Pending
+          </Chip>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function Photos({ selectedJob, fetchPhotos, images }) {
   const db = useSQLiteContext();
@@ -243,11 +283,21 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
   };
 
   const ImageViewerHeader = () => (
-    <SafeAreaView style={StyleSheet.imageViewerHeader}>
+    <SafeAreaView style={styles.imageViewerHeader}>
       <TouchableOpacity onPress={closeImageView}>
         <Icon source="close" size={28} color="#ffffff" />
       </TouchableOpacity>
     </SafeAreaView>
+  );
+
+  const imageViewerModal = imageViewVisible && selectedImageIndex !== null && (
+    <ImageViewer
+      images={images.map((img) => ({ uri: img.uri }))}
+      imageIndex={selectedImageIndex}
+      visible={imageViewVisible}
+      onRequestClose={closeImageView}
+      HeaderComponent={ImageViewerHeader}
+    />
   );
 
   const notSubmittedImages = useMemo(() => {
@@ -264,8 +314,8 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
   if (selectedJob[0].status_label !== "Completed") {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-        <ScrollView contentContainerStyle={StyleSheet.container}>
-          <View style={StyleSheet.jobNavContent}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.jobNavContent}>
             <Modal
               visible={modalVisible}
               onRequestClose={() => setModalVisible(false)}
@@ -275,9 +325,9 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
               {loading ? (
                 <Loading />
               ) : (
-                <View style={StyleSheet.modalPopup}>
-                  <View style={StyleSheet.modalPopupContent}>
-                    <Text style={StyleSheet.Text}>Select a Label Category</Text>
+                <View style={styles.modalPopup}>
+                  <View style={styles.modalPopupContent}>
+                    <Text style={styles.Text}>Select a Label Category</Text>
                     {labels.map((label, index) => (
                       <TouchableOpacity
                         key={index}
@@ -289,9 +339,9 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                           icon={() => (
                             <Icon source="image" color={"purple"} size={20} />
                           )}
-                          style={StyleSheet.chip}
+                          style={styles.chip}
                         >
-                          <Text variant="labelLarge" style={StyleSheet.chipText}>
+                          <Text variant="labelLarge" style={styles.chipText}>
                             {label.type_label}
                           </Text>
                         </Chip>
@@ -299,9 +349,9 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                     ))}
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
-                      style={StyleSheet.logoutBtn}
+                      style={styles.logoutBtn}
                     >
-                      <Text style={StyleSheet.logoutBtnText}>Cancel</Text>
+                      <Text style={styles.logoutBtnText}>Cancel</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -310,7 +360,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
             <SegmentedButtons
               value={buttonValue}
               onValueChange={setButtonValue}
-              style={StyleSheet.segmentedBtn}
+              style={styles.segmentedBtn}
               buttons={[
                 {
                   value: "select",
@@ -345,157 +395,184 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
               refreshAttachments={fetchPhotos}
             />
             {notSubmittedImages && (
-              <View style={StyleSheet.thumbnailView}>
+              <View style={styles.thumbnailView}>
                 {notSubmittedImages.map((image, index) => (
-                  <TouchableOpacity
+                  <ImageThumbnail
                     key={index}
-                    style={StyleSheet.photoImage}
+                    image={image}
                     onPress={() => openImageView(image.uri)}
                     onLongPress={() => deleteImage(image.id)}
-                  >
-                    <Image
-                      style={StyleSheet.image}
-                      source={{ uri: image.uri }}
-                    />
-
-                    <View style={StyleSheet.labelView}>
-                      <Chip
-                        icon={() => (
-                          <Icon source="image" color={"purple"} size={20} />
-                        )}
-                        style={StyleSheet.chip}
-                      >
-                        <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
-                      </Chip>
-                      <Chip
-                        icon={() => (
-                          <Icon source="clock" color={"green"} size={20} />
-                        )}
-                        style={StyleSheet.chip}
-                      >
-                        <Text variant="labelSmall" style={StyleSheet.chipText}>
-                          {moment.unix(image.date).format("L")}
-                        </Text>
-                      </Chip>
-                    </View>
-                  </TouchableOpacity>
+                  />
                 ))}
               </View>
             )}
             {submittedImages && submittedImages.length > 0 && (
               <>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.horizontalRule} />
+                <View style={styles.rowView}>
+                  <View style={styles.horizontalRule} />
                 </View>
-                <View style={StyleSheet.rowView}>
-                  <Text style={StyleSheet.TextTitle}>Submitted Images</Text>
+                <View style={styles.rowView}>
+                  <Text style={styles.TextTitle}>Submitted Images</Text>
                 </View>
 
                 {submittedImages.map((image, index) => (
-                  <View style={StyleSheet.thumbnailView} key={index}>
-                    <TouchableOpacity
-                      key={index}
-                      style={StyleSheet.photoImage}
+                  <View style={styles.thumbnailView} key={index}>
+                    <ImageThumbnail
+                      image={image}
                       onPress={() => openImageView(image.uri)}
                       onLongPress={() => deleteImage(image.id)}
-                    >
-                      <Image
-                        style={StyleSheet.image}
-                        source={{ uri: image.uri }}
-                      />
-
-                      <View style={StyleSheet.labelView}>
-                        <Chip
-                          icon={() => (
-                            <Icon source="image" color={"purple"} size={20} />
-                          )}
-                          style={StyleSheet.chip}
-                        >
-                          <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
-                        </Chip>
-                        <Chip
-                          icon={() => (
-                            <Icon source="clock" color={"green"} size={20} />
-                          )}
-                          style={StyleSheet.chip}
-                        >
-                          <Text variant="labelSmall" style={StyleSheet.chipText}>
-                            {moment.unix(image.date).format("L")}
-                          </Text>
-                        </Chip>
-                        {image.syncStatus === "Pending" && (
-                          <Chip style={StyleSheet.chip} textStyle={StyleSheet.chipText} icon="cloud-upload">
-                            Pending
-                          </Chip>
-                        )}
-                      </View>
-                    </TouchableOpacity>
+                    />
                   </View>
                 ))}
               </>
             )}
           </View>
         </ScrollView>
-        {imageViewVisible && selectedImageIndex !== null && (
-          <ImageViewer
-            images={images.map((img) => ({ uri: img.uri }))}
-            imageIndex={selectedImageIndex}
-            visible={imageViewVisible}
-            onRequestClose={closeImageView}
-            HeaderComponent={ImageViewerHeader}
-          />
-        )}
+        {imageViewerModal}
       </KeyboardAvoidingView>
     );
   } else {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-        <ScrollView contentContainerStyle={StyleSheet.container}>
-          <View style={StyleSheet.jobNavContent}>
-            <View style={StyleSheet.thumbnailView}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.jobNavContent}>
+            <View style={styles.thumbnailView}>
               {images.map((image, index) => (
-                <TouchableOpacity
+                <ImageThumbnail
                   key={index}
-                  style={StyleSheet.photoImage}
+                  image={image}
                   onPress={() => openImageView(image.uri)}
-                >
-                  <Image style={StyleSheet.image} source={{ uri: image.uri }} />
-
-                  <View style={StyleSheet.labelView}>
-                    <Chip
-                      icon={() => (
-                        <Icon source="image" color={"purple"} size={20} />
-                      )}
-                      style={StyleSheet.chip}
-                    >
-                      <Text variant="labelSmall" style={StyleSheet.chipText}>{image.label}</Text>
-                    </Chip>
-                    <Chip
-                      icon={() => (
-                        <Icon source="clock" color={"green"} size={20} />
-                      )}
-                      style={StyleSheet.chip}
-                    >
-                      <Text variant="labelSmall" style={StyleSheet.chipText}>
-                        {moment.unix(image.date).format("L")}
-                      </Text>
-                    </Chip>
-                  </View>
-                </TouchableOpacity>
+                />
               ))}
             </View>
           </View>
         </ScrollView>
-        {imageViewVisible && selectedImageIndex !== null && (
-          <ImageViewer
-            images={images.map((img) => ({ uri: img.uri }))}
-            imageIndex={selectedImageIndex}
-            visible={imageViewVisible}
-            onRequestClose={closeImageView}
-            HeaderComponent={ImageViewerHeader}
-          />
-        )}
+        {imageViewerModal}
       </KeyboardAvoidingView>
     );
   }
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  chip: {
+    backgroundColor: "#1B3A6B",
+    margin: "1%",
+    borderRadius: 15,
+  },
+  chipText: {
+    color: "#ffffff",
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+  horizontalRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#8A95A3",
+    marginBottom: 10,
+    marginTop: 15,
+  },
+  image: { height: height * 0.2 },
+  imageViewerHeader: {
+    width: "100%",
+    padding: 16,
+    alignItems: "flex-end",
+  },
+  jobNavContent: {
+    marginVertical: height * 0.03,
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+  },
+  labelView: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  logoutBtn: {
+    width: width * 0.6,
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: height * 0.02,
+    marginBottom: height * 0.02,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  modalPopup: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: width * 0.05,
+  },
+  modalPopupContent: {
+    alignItems: "center",
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: height * 0.8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  photoImage: {
+    marginTop: 15,
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  segmentedBtn: {
+    width: width * 0.7,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    borderColor: "#F47C20",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbnailView: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+});

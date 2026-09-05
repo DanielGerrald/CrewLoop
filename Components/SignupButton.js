@@ -1,6 +1,10 @@
-import { Pressable, Text } from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import StyleSheet from "../StyleSheet";
+
+const { width } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
 
 export function SignupButton() {
   const handlePress = async () => {
@@ -9,7 +13,15 @@ export function SignupButton() {
 
   return (
     <Pressable onPress={handlePress}>
-      <Text style={StyleSheet.signupText}>View on GitHub</Text>
+      <Text style={styles.signupText}>View on GitHub</Text>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  signupText: {
+    color: "#F47C20",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+});

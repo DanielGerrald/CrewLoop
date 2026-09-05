@@ -1,5 +1,7 @@
 import {
+  Dimensions,
   View,
+  StyleSheet,
   Text,
   Modal,
   TouchableOpacity,
@@ -7,13 +9,12 @@ import {
   ScrollView,
 } from "react-native";
 import { Avatar, Card } from "react-native-paper";
-import moment from "moment/moment";
+import moment from "moment";
 import { AntDesign } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import StyleSheet from "../../StyleSheet";
 import { useJob } from "../../Components/Context";
 import JobNav from "./JobNav";
 import Details from "./Details";
@@ -109,7 +110,7 @@ export default function JobModal({
 
   const fetchFiles = async () => {
     try {
-      let files = await selectAttachmentSqlite(
+      const files = await selectAttachmentSqlite(
         db,
         "assignment_id",
         selectedJob[0].id,
@@ -124,188 +125,256 @@ export default function JobModal({
 
   if (selectedJob.length === 0) {
     return null;
-  } else {
-    return (
-      <Modal
-        presentationStyle="overFullScreen"
-        key={selectedJob[0].id}
-        visible={visible}
-        animationType={"slide"}
-        transparent={false}
-        onRequestClose={onDismiss}
-      >
-        <SafeAreaView style={StyleSheet.SafeArea}>
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
-            <ScrollView
-              contentContainerStyle={StyleSheet.container}
-              keyboardShouldPersistTaps="handled"
-              contentInsetAdjustmentBehavior="automatic"
-            >
-              <View style={StyleSheet.header}>
-                <Text
-                  style={StyleSheet.TextTitle}
-                >{`${selectedJob[0].type || ""}`}</Text>
-                <Text
-                  style={StyleSheet.TextTitle}
-                >{`${selectedJob[0].reference_code || ""}`}</Text>
-              </View>
-              <TouchableOpacity style={StyleSheet.closeButton}>
-                <AntDesign
-                  name="close-circle"
-                  size={30}
-                  color="grey"
-                  onPress={onDismiss}
+  }
+
+  return (
+    <Modal
+      presentationStyle="overFullScreen"
+      key={selectedJob[0].id}
+      visible={visible}
+      animationType={"slide"}
+      transparent={false}
+      onRequestClose={onDismiss}
+    >
+      <SafeAreaView style={styles.SafeArea}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+          <ScrollView
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            contentInsetAdjustmentBehavior="automatic"
+          >
+            <View style={styles.header}>
+              <Text
+                style={styles.TextTitle}
+              >{`${selectedJob[0].type || ""}`}</Text>
+              <Text
+                style={styles.TextTitle}
+              >{`${selectedJob[0].reference_code || ""}`}</Text>
+            </View>
+            <TouchableOpacity style={styles.closeButton}>
+              <AntDesign
+                name="close-circle"
+                size={30}
+                color="grey"
+                onPress={onDismiss}
+              />
+            </TouchableOpacity>
+            <Card style={styles.jobCard}>
+              <Card.Content style={styles.jobCardContent}>
+                <Avatar.Icon
+                  style={styles.avatarIcon}
+                  icon="office-building-marker"
+                  size={40}
                 />
-              </TouchableOpacity>
-              <Card style={StyleSheet.jobCard}>
-                <Card.Content style={StyleSheet.jobCardContent}>
-                  <Avatar.Icon
-                    style={StyleSheet.avatarIcon}
-                    icon="office-building-marker"
-                    size={40}
-                  />
-                  <View style={StyleSheet.columnView}>
-                    <View style={StyleSheet.rowView}>
-                      <View style={StyleSheet.columnView}>
-                        <Text
-                          variant="bodyMedium"
-                          style={StyleSheet.jobCardContentLabel}
-                        >
-                          {selectedJob[0].name || ""}:
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={StyleSheet.columnView}>
+                <View style={styles.columnView}>
+                  <View style={styles.rowView}>
+                    <View style={styles.columnView}>
                       <Text
                         variant="bodyMedium"
-                        style={StyleSheet.jobCardContentText}
+                        style={styles.jobCardContentLabel}
                       >
-                        {selectedJob[0].store_nbr || ""}
+                        {selectedJob[0].name || ""}:
                       </Text>
                     </View>
                   </View>
-                </Card.Content>
-                <Card.Content style={StyleSheet.jobCardContent}>
-                  <Avatar.Icon
-                    style={StyleSheet.avatarIcon}
-                    icon="calendar-clock"
-                    size={40}
-                  />
-                  <View style={StyleSheet.columnView}>
-                    <View style={StyleSheet.rowView}>
-                      <View style={StyleSheet.columnView}>
-                        <Text
-                          variant="bodyMedium"
-                          style={StyleSheet.jobCardContentLabel}
-                        >
-                          Scheduled:
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={StyleSheet.columnView}>
+                  <View style={styles.columnView}>
+                    <Text
+                      variant="bodyMedium"
+                      style={styles.jobCardContentText}
+                    >
+                      {selectedJob[0].store_nbr || ""}
+                    </Text>
+                  </View>
+                </View>
+              </Card.Content>
+              <Card.Content style={styles.jobCardContent}>
+                <Avatar.Icon
+                  style={styles.avatarIcon}
+                  icon="calendar-clock"
+                  size={40}
+                />
+                <View style={styles.columnView}>
+                  <View style={styles.rowView}>
+                    <View style={styles.columnView}>
                       <Text
                         variant="bodyMedium"
-                        style={StyleSheet.jobCardContentText}
+                        style={styles.jobCardContentLabel}
                       >
-                        {moment(selectedJob[0].scheduled_date || "").format(
-                          "MMM Do YYYY",
-                        )}
+                        Scheduled:
                       </Text>
                     </View>
                   </View>
-                </Card.Content>
-                <Card.Content style={StyleSheet.jobCardContent}>
-                  <Avatar.Icon
-                    style={StyleSheet.avatarIcon}
-                    icon="tag-text"
-                    size={40}
-                  />
-                  <View style={StyleSheet.columnView}>
-                    <View style={StyleSheet.rowView}>
-                      <View style={StyleSheet.columnView}>
-                        <Text
-                          variant="bodyMedium"
-                          style={StyleSheet.jobCardContentLabel}
-                        >
-                          {selectedJob[0].type || ""}:
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={StyleSheet.columnView}>
+                  <View style={styles.columnView}>
+                    <Text
+                      variant="bodyMedium"
+                      style={styles.jobCardContentText}
+                    >
+                      {moment(selectedJob[0].scheduled_date || "").format(
+                        "MMM Do YYYY",
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              </Card.Content>
+              <Card.Content style={styles.jobCardContent}>
+                <Avatar.Icon
+                  style={styles.avatarIcon}
+                  icon="tag-text"
+                  size={40}
+                />
+                <View style={styles.columnView}>
+                  <View style={styles.rowView}>
+                    <View style={styles.columnView}>
                       <Text
                         variant="bodyMedium"
-                        style={StyleSheet.jobCardContentText}
+                        style={styles.jobCardContentLabel}
                       >
-                        {selectedJob[0].category || ""}
+                        {selectedJob[0].type || ""}:
                       </Text>
                     </View>
                   </View>
-                </Card.Content>
-              </Card>
-              {selectedJob[0].status_label !== "Completed" && (
-                <CheckInOut
-                  setShowDetails={setShowDetails}
-                  setShowContacts={setShowContacts}
-                  setShowFiles={setShowFiles}
-                  setShowPhotos={setShowPhotos}
-                  setShowFinalCheckOut={setShowFinalCheckOut}
-                  setCheckoutFormVisible={setCheckoutFormVisible}
-                  jobPurchaseOrderID={selectedJob[0].id}
-                  checkedIn={checkedIn}
-                  setCheckedIn={setCheckedIn}
-                  setCheckInOutData={setCheckInOutData}
+                  <View style={styles.columnView}>
+                    <Text
+                      variant="bodyMedium"
+                      style={styles.jobCardContentText}
+                    >
+                      {selectedJob[0].category || ""}
+                    </Text>
+                  </View>
+                </View>
+              </Card.Content>
+            </Card>
+            {selectedJob[0].status_label !== "Completed" && (
+              <CheckInOut
+                setShowDetails={setShowDetails}
+                setShowContacts={setShowContacts}
+                setShowFiles={setShowFiles}
+                setShowPhotos={setShowPhotos}
+                setShowFinalCheckOut={setShowFinalCheckOut}
+                setCheckoutFormVisible={setCheckoutFormVisible}
+                jobPurchaseOrderID={selectedJob[0].id}
+                checkedIn={checkedIn}
+                setCheckedIn={setCheckedIn}
+                setCheckInOutData={setCheckInOutData}
+              />
+            )}
+
+            <Card style={styles.jobCard}>
+              <JobNav
+                showDetails={showDetails}
+                setShowDetails={setShowDetails}
+                showContacts={showContacts}
+                setShowContacts={setShowContacts}
+                showFiles={showFiles}
+                setShowFiles={setShowFiles}
+                showPhotos={showPhotos}
+                setShowPhotos={setShowPhotos}
+                showFinalCheckOut={showFinalCheckOut}
+                setShowFinalCheckOut={setShowFinalCheckOut}
+              />
+              {showDetails && <Details details={selectedJob} />}
+              {showContacts && (
+                <Contacts selectedJob={selectedJob} contacts={selectedContact} />
+              )}
+              {showFiles && (
+                <Files
+                  selectedJob={selectedJob}
+                  fetchFiles={fetchFiles}
+                  files={fileAttachments}
                 />
               )}
-
-              <Card style={StyleSheet.jobCard}>
-                <JobNav
-                  showDetails={showDetails}
-                  setShowDetails={setShowDetails}
-                  showContacts={showContacts}
-                  setShowContacts={setShowContacts}
-                  showFiles={showFiles}
-                  setShowFiles={setShowFiles}
-                  showPhotos={showPhotos}
-                  setShowPhotos={setShowPhotos}
-                  showFinalCheckOut={showFinalCheckOut}
-                  setShowFinalCheckOut={setShowFinalCheckOut}
+              {showPhotos && (
+                <Photos
+                  selectedJob={selectedJob}
+                  fetchPhotos={fetchPhotos}
+                  images={photoAttachments}
                 />
-                {showDetails && <Details details={selectedJob} />}
-                {showContacts && (
-                  <Contacts
-                    selectedJob={selectedJob}
-                    contacts={selectedContact}
-                  />
-                )}
-                {showFiles && (
-                  <Files
-                    selectedJob={selectedJob}
-                    fetchFiles={fetchFiles}
-                    files={fileAttachments}
-                  />
-                )}
-                {showPhotos && (
-                  <Photos
-                    selectedJob={selectedJob}
-                    fetchPhotos={fetchPhotos}
-                    images={photoAttachments}
-                  />
-                )}
-                {showFinalCheckOut && (
-                  <FinalCheckOut
-                    selectedJob={selectedJob}
-                    checkoutFormVisible={checkoutFormVisible}
-                    setCheckoutFormVisible={setCheckoutFormVisible}
-                    checkInOutData={checkInOutData}
-                    finalCheckoutData={finalCheckoutData}
-                    onDismiss={onDismiss}
-                  />
-                )}
-              </Card>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </Modal>
-    );
-  }
+              )}
+              {showFinalCheckOut && (
+                <FinalCheckOut
+                  selectedJob={selectedJob}
+                  checkoutFormVisible={checkoutFormVisible}
+                  setCheckoutFormVisible={setCheckoutFormVisible}
+                  checkInOutData={checkInOutData}
+                  finalCheckoutData={finalCheckoutData}
+                  onDismiss={onDismiss}
+                />
+              )}
+            </Card>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </Modal>
+  );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  SafeArea: {
+    flex: 1,
+    backgroundColor: "#1E2530",
+    paddingTop: 15,
+    paddingBottom: 15,
+  },
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  avatarIcon: {
+    backgroundColor: "#1B3A6B",
+    marginRight: 10,
+  },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  columnView: { flex: 1, flexDirection: "column" },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: height * 0.03,
+  },
+  jobCard: {
+    backgroundColor: "#6A89A7",
+    marginBottom: height * 0.02,
+    width: "100%",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  jobCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: height * 0.01,
+  },
+  jobCardContentLabel: {
+    fontSize: textStyle,
+    fontWeight: "bold",
+  },
+  jobCardContentText: {
+    fontSize: textStyle - 1,
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});

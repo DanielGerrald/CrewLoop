@@ -1,8 +1,15 @@
 import React from "react";
-import { Platform, View, Text, TouchableOpacity, Linking } from "react-native";
+import {
+  Dimensions,
+  Platform,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import * as Application from "expo-application";
 
-import StyleSheet from "../StyleSheet";
 import { getMinimums } from "../Database/UpdateGateApi";
 
 // Update these with your actual App Store / Play Store URLs before publishing
@@ -102,10 +109,10 @@ export function UnsupportedOSScreen() {
     Platform.OS === "ios" ? DEFAULT_MIN_IOS_VERSION : `API ${DEFAULT_MIN_ANDROID_API}`;
 
   return (
-    <View style={StyleSheet.modalPopup}>
-      <View style={StyleSheet.modalPopupContent}>
-        <Text style={StyleSheet.TextTitle}>Device Not Supported</Text>
-        <Text style={StyleSheet.TextDescript}>
+    <View style={styles.modalPopup}>
+      <View style={styles.modalPopupContent}>
+        <Text style={styles.TextTitle}>Device Not Supported</Text>
+        <Text style={styles.TextDescript}>
           This app requires {osName} {minVersion} or later.{"\n\n"}
           Please upgrade your operating system or use a newer device to continue.
         </Text>
@@ -116,22 +123,88 @@ export function UnsupportedOSScreen() {
 
 export function UpdateRequiredScreen({ installedVersion, minVersion }) {
   return (
-    <View style={StyleSheet.modalPopup}>
-      <View style={StyleSheet.modalPopupContent}>
-        <Text style={StyleSheet.TextTitle}>Update Required</Text>
-        <Text style={StyleSheet.TextDescript}>
+    <View style={styles.modalPopup}>
+      <View style={styles.modalPopupContent}>
+        <Text style={styles.TextTitle}>Update Required</Text>
+        <Text style={styles.TextDescript}>
           To continue using the app, please update to the latest version.{"\n"}
         </Text>
-        <Text style={StyleSheet.TextDescript}>
+        <Text style={styles.TextDescript}>
           Installed: v{installedVersion}{"\n"}
           Required: v{minVersion}+
         </Text>
-        <View style={StyleSheet.checkoutFormBtns}>
-          <TouchableOpacity onPress={openStoreListing} style={StyleSheet.submitBtn}>
-            <Text style={StyleSheet.logoutBtnText}>Update now</Text>
+        <View style={styles.checkoutFormBtns}>
+          <TouchableOpacity onPress={openStoreListing} style={styles.submitBtn}>
+            <Text style={styles.logoutBtnText}>Update now</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  TextDescript: {
+    color: "#D3D3D3",
+    fontSize: textStyle,
+  },
+  checkoutFormBtns: {
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  modalPopup: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: width * 0.05,
+  },
+  modalPopupContent: {
+    alignItems: "center",
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: height * 0.8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  submitBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

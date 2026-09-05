@@ -58,9 +58,7 @@ async function putAttachment(token, data) {
 
 export async function postPhotosApi(token, photo) {
   try {
-    const result = await putAttachment(token, photo);
-    console.log("Upload successful for photo:", photo.fileName);
-    return result;
+    return await putAttachment(token, photo);
   } catch (error) {
     console.log(
       "Upload photo error:",
@@ -72,9 +70,7 @@ export async function postPhotosApi(token, photo) {
 
 export async function postDocumentsApi(token, document) {
   try {
-    const result = await putAttachment(token, document);
-    console.log("Upload successful for document:", document.fileName);
-    return result;
+    return await putAttachment(token, document);
   } catch (error) {
     console.log(
       "Upload document error:",
@@ -84,7 +80,9 @@ export async function postDocumentsApi(token, document) {
   }
 }
 
-
+// Downloads attachment metadata + content for one assignment and writes each
+// file's base64 content to local storage so it has a usable `uri`, matching
+// the shape of a freshly-picked photo/document (ready for insertAttachmentSqlite).
 export async function getAttachmentsApi(token, id) {
   try {
     const response = await axios.get(
@@ -133,41 +131,27 @@ export async function getAttachmentsApi(token, id) {
 
 //---------------SQLITE Functions---------------//
 
+async function insertOneAttachment(db, obj) {
+  const columns = Object.keys(obj).filter(
+    (key) => obj[key] !== undefined && obj[key] !== null,
+  );
+  const placeholders = columns.map(() => "?").join(", ");
+  const values = columns.map((key) => obj[key]);
+
+  await db.runAsync(
+    `INSERT INTO attachment (${columns.join(", ")}) VALUES (${placeholders})`,
+    values,
+  );
+}
+
 export async function insertAttachmentSqlite(db, data) {
   try {
-    if (data.length >= 0) {
-      for (const obj of data) {
-        const columns = Object.keys(obj).filter(
-          (key) => obj[key] !== undefined && obj[key] !== null,
-        );
-        const placeholders = columns.map(() => "?").join(", ");
-        const values = columns.map((key) => obj[key]);
-
-        await db.runAsync(
-          `INSERT INTO attachment (${columns.join(", ")})
-             VALUES (${placeholders})`,
-          [...values],
-        );
-        console.log("Insert attachment function ran");
-      }
-    } else {
-      const obj = data;
-
-      const columns = Object.keys(obj).filter(
-        (key) => obj[key] !== undefined && obj[key] !== null,
-      );
-      const placeholders = columns.map(() => "?").join(", ");
-      const values = columns.map((key) => obj[key]);
-
-      await db.runAsync(
-        `INSERT INTO attachment (${columns.join(", ")})
-           VALUES (${placeholders})`,
-        [...values],
-      );
-      console.log("Insert attachment function ran");
+    const rows = Array.isArray(data) ? data : [data];
+    for (const row of rows) {
+      await insertOneAttachment(db, row);
     }
   } catch (error) {
-    console.log("Insert attachment function failed:", error);
+    console.log("Insert attachment failed:", error);
   }
 }
 
@@ -176,16 +160,14 @@ export async function selectAttachmentSqlite(db, key1, value1, key2, value2) {
     let query = `SELECT * FROM attachment WHERE ${key1} = ?`;
     const values = [value1];
 
-    // If both key2 and value2 are provided, add them to the query
     if (key2 && value2) {
       query += ` AND ${key2} = ?`;
       values.push(value2);
     }
 
-    const results = await db.getAllAsync(query, values);
-    return results;
+    return await db.getAllAsync(query, values);
   } catch (error) {
-    console.error("ERROR Select SQLITE attachments failed:", error);
+    console.error("Select attachments failed:", error);
   }
 }
 
@@ -201,37 +183,37 @@ export async function updateAttachmentSqlite(db, data) {
       }
     }
     await db.runAsync(
-      `UPDATE attachment
-         SET ${fieldsToUpdate.join(", ")}
-         WHERE fileName = ?`,
+      `UPDATE attachment SET ${fieldsToUpdate.join(", ")} WHERE fileName = ?`,
       [...values, data.fileName],
     );
-    console.log("Update attachment function ran");
   } catch (error) {
-    console.log("Update attachment function failed:", error);
+    console.log("Update attachment failed:", error);
   }
 }
 
 export async function deleteAttachmentSqlite(db, id) {
   try {
-    await db.runAsync(`DELETE FROM attachment WHERE id = ?`, [id]);
-    console.log("Delete attachment function ran");
+    await db.runAsync("DELETE FROM attachment WHERE id = ?", [id]);
   } catch (error) {
-    console.log("Delete SQLITE attachments failed:", error);
+    console.log("Delete attachment failed:", error);
   }
 }
 
 export async function cleanupAttachmentSqlite(db, value) {
   try {
-    const workOrderIds = value.map((item) => item.assignment.id);
+    const workOrderIds = (value ?? []).map((item) => item.assignment.id);
+
+    if (!workOrderIds.length) {
+      await db.runAsync("DELETE FROM attachment");
+      return;
+    }
+
     const placeholders = workOrderIds.map(() => "?").join(", ");
-
-    const query = `DELETE FROM attachment WHERE assignment_id NOT IN (${placeholders})`;
-
-    await db.runAsync(query, workOrderIds);
-
-    console.log("Clean up SQLITE Attachment function ran");
+    await db.runAsync(
+      `DELETE FROM attachment WHERE assignment_id NOT IN (${placeholders})`,
+      workOrderIds,
+    );
   } catch (error) {
-    console.log("Clean up SQLITE Attachment failed:", error);
+    console.log("Clean up attachments failed:", error);
   }
 }

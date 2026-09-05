@@ -1,17 +1,42 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { Text } from "react-native";
+import { Dimensions, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import JobsList from "./JobsList";
 import CompletedJobs from "./CompletedJobs";
 import Profile from "./Profile";
-import StyleSheet from "../StyleSheet";
 import { useJob } from "../Components/Context";
 import { getActiveJobs } from "../Components/constants";
 import { useMemo } from "react";
 
 const Tab = createMaterialTopTabNavigator();
+
+const { width } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+// Not real view styles — a react-navigation screenOptions config object.
+const tabNavIcons = {
+  tabBarIndicatorStyle: { backgroundColor: "#F47C20" },
+  tabBarActiveTintColor: "#F47C20",
+  tabBarInactiveTintColor: "#8A95A3",
+  tabBarStyle: {
+    backgroundColor: "#1E2530",
+  },
+  tabBarAllowFontScaling: true,
+  tabBarLabelStyle: { fontSize: textStyle - 1 },
+};
+
+const styles = StyleSheet.create({
+  tabBarBadge: {
+    color: "#ffffff",
+    backgroundColor: "#FF6B6B",
+    paddingHorizontal: textStyle * 0.3,
+    borderRadius: 50,
+  },
+});
 
 export default function Home() {
   const { jobResult } = useJob();
@@ -19,10 +44,10 @@ export default function Home() {
   const badge = useMemo(() => getActiveJobs(jobResult).length, [jobResult]);
 
   const screenOptions = useMemo(() => ({
-    ...StyleSheet.tabNavIcons,
+    ...tabNavIcons,
     tabBarStyle: {
-      ...StyleSheet.tabNavIcons.tabBarStyle,
-      paddingBottom:  bottom,
+      ...tabNavIcons.tabBarStyle,
+      paddingBottom: bottom,
       height: 65 + bottom,
     },
   }), [bottom]);
@@ -48,7 +73,7 @@ export default function Home() {
           ),
           tabBarBadge: () =>
             badge > 0 ? (
-              <Text style={StyleSheet.tabBarBadge}>{badge}</Text>
+              <Text style={styles.tabBarBadge}>{badge}</Text>
             ) : null,
         }}
       />

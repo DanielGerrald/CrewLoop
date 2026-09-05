@@ -1,11 +1,12 @@
-import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Modal,
   ScrollView,
+  StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
@@ -14,7 +15,6 @@ import {
 import { Avatar } from "react-native-paper";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 
-import StyleSheet from "../../StyleSheet";
 import CustomInput from "../CustomInput";
 import SignatureScreen from "../../Screens/SignatureScreen";
 import {
@@ -36,20 +36,20 @@ import { useJob } from "../Context";
 
 function SummaryRow({ icon, label, value, secondaryLabel, secondaryValue }) {
   return (
-    <View style={StyleSheet.workLogEntry}>
-      <View style={StyleSheet.rowView}>
+    <View style={styles.workLogEntry}>
+      <View style={styles.rowView}>
         <Avatar.Icon
-          style={StyleSheet.avatarIconCheckout}
+          style={styles.avatarIconCheckout}
           icon={icon}
           size={30}
         />
         <View style={{ flex: 1 }}>
-          <Text style={StyleSheet.TextDescript}>
+          <Text style={styles.TextDescript}>
             {label}:{"\n"}
             {` ${value}`}
           </Text>
           {secondaryValue ? (
-            <Text style={StyleSheet.textMuted}>
+            <Text style={styles.textMuted}>
               {secondaryLabel}:{"\n"}
               {` ${secondaryValue}`}
             </Text>
@@ -319,12 +319,12 @@ export default function FinalCheckOut({
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
-      <ScrollView contentContainerStyle={StyleSheet.container}>
-        <View style={StyleSheet.jobNavContent}>
-          <View style={StyleSheet.rowView}>
-            <Text style={StyleSheet.switchLabel}>Work Log</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.jobNavContent}>
+          <View style={styles.rowView}>
+            <Text style={styles.switchLabel}>Work Log</Text>
             <Switch
-              style={StyleSheet.switch}
+              style={styles.switch}
               value={workLog}
               onValueChange={(value) => setWorkLog(value)}
               trackColor={{ false: "#999", true: "#F47C20" }}
@@ -338,22 +338,22 @@ export default function FinalCheckOut({
                 .map((checkin) => {
                   const isCheckIn = checkin.departing === 0;
                   return (
-                    <View style={StyleSheet.workLogEntry} key={checkin.id}>
-                      <View style={StyleSheet.rowView}>
+                    <View style={styles.workLogEntry} key={checkin.id}>
+                      <View style={styles.rowView}>
                         <Avatar.Icon
-                          style={StyleSheet.avatarIconCheckout}
+                          style={styles.avatarIconCheckout}
                           icon={isCheckIn ? "login" : "logout"}
                           size={30}
                         />
                         <View style={{ flex: 1 }}>
-                          <Text style={StyleSheet.Text}>
+                          <Text style={styles.Text}>
                             {isCheckIn ? "Checked In" : "Checked Out"} —{" "}
                             {format(
                               fromUnixTime(checkin.visit_date),
                               "MMM d, yyyy h:mm a",
                             )}
                           </Text>
-                          <Text style={StyleSheet.TextDescript}>
+                          <Text style={styles.TextDescript}>
                             {checkin.comment || "No comment left"}
                           </Text>
                         </View>
@@ -368,9 +368,9 @@ export default function FinalCheckOut({
             finalCheckoutData &&
             selectedJob[0]?.status_label === "Completed" && (
             <>
-              <View style={StyleSheet.horizontalRule} />
-              <Text style={StyleSheet.TextTitle}>Final Checkout Summary</Text>
-              <View style={StyleSheet.horizontalRule} />
+              <View style={styles.horizontalRule} />
+              <Text style={styles.TextTitle}>Final Checkout Summary</Text>
+              <View style={styles.horizontalRule} />
 
               {finalCheckoutData.modified_date ? (
                 <SummaryRow
@@ -435,7 +435,7 @@ export default function FinalCheckOut({
                 />
               ) : null}
 
-              <View style={StyleSheet.horizontalRule} />
+              <View style={styles.horizontalRule} />
 
               <SummaryRow
                 icon="account-tie"
@@ -445,7 +445,7 @@ export default function FinalCheckOut({
 
               {finalCheckoutData.signature_base64 ? (
                 <View style={{ marginTop: 10, alignItems: "center" }}>
-                  <Text style={StyleSheet.textMuted}>Signature</Text>
+                  <Text style={styles.textMuted}>Signature</Text>
                   <View style={{ backgroundColor: "#ffffff", borderRadius: 8, marginTop: 8, padding: 4 }}>
                     <Image
                       source={{ uri: finalCheckoutData.signature_base64 }}
@@ -457,20 +457,20 @@ export default function FinalCheckOut({
               ) : null}
 
               <TouchableOpacity
-                style={StyleSheet.logoutBtn}
+                style={styles.logoutBtn}
                 onPress={handleReopen}
               >
-                <Text style={StyleSheet.logoutBtnText}>Reopen Job</Text>
+                <Text style={styles.logoutBtnText}>Reopen Job</Text>
               </TouchableOpacity>
             </>
           )}
 
           {checkoutFormVisible && (
             <>
-              <View style={StyleSheet.rowView}>
-                <Text style={StyleSheet.switchLabel}>Service Performed *</Text>
+              <View style={styles.rowView}>
+                <Text style={styles.switchLabel}>Service Performed *</Text>
                 <Switch
-                  style={StyleSheet.switch}
+                  style={styles.switch}
                   value={servicePerf}
                   onValueChange={(value) => setServicePerf(value)}
                   trackColor={{ false: "#999", true: "#F47C20" }}
@@ -482,7 +482,7 @@ export default function FinalCheckOut({
                   label="desc_service_perf"
                   required={true}
                   forceValidate={forceValidate}
-                  style={StyleSheet.inputAreaView}
+                  style={styles.inputAreaView}
                   value={formData.desc_service_perf}
                   placeholder="Describe service performed..."
                   multiline={true}
@@ -493,10 +493,10 @@ export default function FinalCheckOut({
                 />
               )}
 
-              <View style={StyleSheet.rowView}>
-                <Text style={StyleSheet.switchLabel}>Material Installed *</Text>
+              <View style={styles.rowView}>
+                <Text style={styles.switchLabel}>Material Installed *</Text>
                 <Switch
-                  style={StyleSheet.switch}
+                  style={styles.switch}
                   value={materialInst}
                   onValueChange={(value) => setMaterialInst(value)}
                   trackColor={{ false: "#999", true: "#F47C20" }}
@@ -508,7 +508,7 @@ export default function FinalCheckOut({
                   label="desc_material_inst"
                   required={true}
                   forceValidate={forceValidate}
-                  style={StyleSheet.inputAreaView}
+                  style={styles.inputAreaView}
                   value={formData.desc_material_inst}
                   placeholder="Describe materials installed..."
                   multiline={true}
@@ -518,12 +518,12 @@ export default function FinalCheckOut({
                   maxLength={40}
                 />
               )}
-              <View style={StyleSheet.rowView}>
-                <Text style={StyleSheet.switchLabel}>
+              <View style={styles.rowView}>
+                <Text style={styles.switchLabel}>
                   Walkthrough Complete *
                 </Text>
                 <Switch
-                  style={StyleSheet.switch}
+                  style={styles.switch}
                   value={walkthrough}
                   onValueChange={(value) => setWalkthrough(value)}
                   trackColor={{ false: "#999", true: "#F47C20" }}
@@ -538,10 +538,10 @@ export default function FinalCheckOut({
                   forceValidate={forceValidate}
                 />
               )}
-              <View style={StyleSheet.rowView}>
-                <Text style={StyleSheet.switchLabel}>Return Needed</Text>
+              <View style={styles.rowView}>
+                <Text style={styles.switchLabel}>Return Needed</Text>
                 <Switch
-                  style={StyleSheet.switch}
+                  style={styles.switch}
                   trackColor={{ false: "#999", true: "#F47C20" }}
                   thumbColor={returnNeeded ? "#F47C20" : "#f4f3f4"}
                   onValueChange={(value) => setReturnNeeded(value)}
@@ -552,7 +552,7 @@ export default function FinalCheckOut({
                 <CustomInput
                   label="desc_return_needed"
                   required={returnNeeded}
-                  style={StyleSheet.inputAreaView}
+                  style={styles.inputAreaView}
                   value={formData.desc_return_needed}
                   placeholder={"Explain why a return is needed..."}
                   multiline={true}
@@ -564,7 +564,7 @@ export default function FinalCheckOut({
               )}
               <CustomInput
                 label="desc_misc_notes"
-                style={StyleSheet.inputAreaView}
+                style={styles.inputAreaView}
                 value={formData.desc_misc_notes}
                 placeholder={"Misc Job Comments..."}
                 multiline={true}
@@ -573,26 +573,26 @@ export default function FinalCheckOut({
                 }}
                 maxLength={40}
               />
-              <View style={StyleSheet.profileLable}>
-                <Text style={StyleSheet.Text}>Manager Name *</Text>
+              <View style={styles.profileLable}>
+                <Text style={styles.Text}>Manager Name *</Text>
               </View>
               <CustomInput
                 label="manager_name"
                 required={true}
                 forceValidate={forceValidate}
-                style={StyleSheet.inputView}
+                style={styles.inputView}
                 value={formData.manager_name}
                 placeholder={"Manager's Name Here"}
                 onChangeText={(text) => handleInputChange("manager_name", text)}
                 maxLength={40}
               />
 
-              <View style={StyleSheet.checkoutFormBtns}>
+              <View style={styles.checkoutFormBtns}>
                 <TouchableOpacity
-                  style={StyleSheet.logoutBtn}
+                  style={styles.logoutBtn}
                   onPress={() => setShowSignatureScreen(true)}
                 >
-                  <Text style={StyleSheet.logoutBtnText}>Manager Signoff</Text>
+                  <Text style={styles.logoutBtnText}>Manager Signoff</Text>
                 </TouchableOpacity>
                 <Modal
                   visible={showSignatureScreen}
@@ -600,7 +600,7 @@ export default function FinalCheckOut({
                   animationType={"slide"}
                   transparent={true}
                 >
-                  <View style={StyleSheet.signatureModal}>
+                  <View style={styles.signatureModal}>
                     <SignatureScreen
                       setShowSignatureScreen={setShowSignatureScreen}
                       setSignature={setSignature}
@@ -608,13 +608,13 @@ export default function FinalCheckOut({
                   </View>
                 </Modal>
                 <TouchableOpacity
-                  style={StyleSheet.submitBtn}
+                  style={styles.submitBtn}
                   onPress={onSubmit}
                 >
-                  <Text style={StyleSheet.logoutBtnText}>Final Check Out</Text>
+                  <Text style={styles.logoutBtnText}>Final Check Out</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={StyleSheet.textWhite}>* Required Fields</Text>
+              <Text style={styles.textWhite}>* Required Fields</Text>
             </>
           )}
         </View>
@@ -622,3 +622,147 @@ export default function FinalCheckOut({
     </KeyboardAvoidingView>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  Text: {
+    color: "#ffffff",
+    fontSize: textStyle,
+    justifyContent: "flex-start",
+  },
+  TextDescript: {
+    color: "#D3D3D3",
+    fontSize: textStyle,
+  },
+  TextTitle: {
+    color: "#ffffff",
+    fontSize: textStyle + 5,
+    justifyContent: "flex-start",
+  },
+  textWhite: {
+    color: "#ffffff",
+  },
+  textMuted: { color: "#8A95A3" },
+  avatarIconCheckout: {
+    backgroundColor: "#1B3A6B",
+    marginRight: width * 0.03,
+  },
+  checkoutFormBtns: {
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+    paddingHorizontal: width * 0.05,
+  },
+  horizontalRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#8A95A3",
+    marginBottom: 10,
+    marginTop: 15,
+  },
+  inputView: {
+    width: width * 0.8,
+    backgroundColor: "#6A89A7",
+    borderRadius: 15,
+    height: height * 0.06,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+  },
+  inputAreaView: {
+    width: width * 0.8,
+    backgroundColor: "#6A89A7",
+    borderRadius: 15,
+    minHeight: height * 0.2,
+    paddingLeft: width * 0.05,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginBottom: height * 0.02,
+    textAlignVertical: "top",
+  },
+  jobNavContent: {
+    marginVertical: height * 0.03,
+    flexGrow: 1,
+    backgroundColor: "#1E2530",
+    alignItems: "center",
+  },
+  logoutBtn: {
+    width: width * 0.6,
+    backgroundColor: "#6A89A7",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: height * 0.02,
+    marginBottom: height * 0.02,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  profileLable: { alignSelf: "flex-start", paddingLeft: 20 },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  signatureModal: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1E2530",
+  },
+  submitBtn: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    marginTop: height * 0.02,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  switch: {
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  switchLabel: {
+    width: width * 0.6,
+    color: "#ffffff",
+    fontSize: textStyle,
+    marginTop: height * 0.015,
+  },
+  workLogEntry: {
+    width: width * 0.8,
+    backgroundColor: "#283246",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+});

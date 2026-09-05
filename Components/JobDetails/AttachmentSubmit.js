@@ -1,6 +1,12 @@
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import StyleSheet from "../../StyleSheet";
 import { attachmentsProcess } from "./AttachmentsProcess";
 import { useSQLiteContext } from "expo-sqlite";
 
@@ -29,18 +35,45 @@ export default function AttachmentSubmit({
     <View>
       {showSubmitButton && !isProcessing && (
         <TouchableOpacity
-          style={StyleSheet.submitBtnAttachment}
+          style={styles.submitBtnAttachment}
           onPress={processPendingAttachments}
         >
-          <Text style={StyleSheet.logoutBtnText}>Submit Attachments</Text>
+          <Text style={styles.logoutBtnText}>Submit Attachments</Text>
         </TouchableOpacity>
       )}
       {isProcessing && (
-        <TouchableOpacity style={StyleSheet.submitBtnAttachment} disabled>
+        <TouchableOpacity style={styles.submitBtnAttachment} disabled>
           <ActivityIndicator size="small" color="#fff" />
-          <Text style={StyleSheet.logoutBtnText}>Processing...</Text>
+          <Text style={styles.logoutBtnText}>Processing...</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  submitBtnAttachment: {
+    width: width * 0.6,
+    backgroundColor: "#F47C20",
+    borderRadius: 20,
+    height: height * 0.07,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 5,
+    marginBottom: height * 0.025,
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+});

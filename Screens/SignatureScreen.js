@@ -1,7 +1,6 @@
-import React, { useRef } from "react";
-import { View, TouchableOpacity, Text, StyleSheet as RNStyleSheet } from "react-native";
+import { useRef } from "react";
+import { Dimensions, View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Signature from "react-native-signature-canvas";
-import AppStyleSheet from "../StyleSheet";
 
 export default function SignatureScreen({
   setShowSignatureScreen,
@@ -27,25 +26,25 @@ export default function SignatureScreen({
   }
 
   return (
-    <View style={AppStyleSheet.signatureView}>
+    <View style={styles.signatureView}>
       <Signature
         onOK={handleOK}
         ref={ref}
         webStyle={`.m-signature-pad--footer {display: none; margin: 0px;}`}
       />
-      <View style={AppStyleSheet.signatureRow}>
+      <View style={styles.signatureRow}>
         <TouchableOpacity style={styles.sigClearBtn} onPress={handleClear}>
-          <Text style={AppStyleSheet.logoutBtnText}>Clear</Text>
+          <Text style={styles.logoutBtnText}>Clear</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.sigSaveBtn} onPress={handleConfirm}>
-          <Text style={AppStyleSheet.logoutBtnText}>Save</Text>
+          <Text style={styles.logoutBtnText}>Save</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity
         style={styles.sigCancelBtn}
         onPress={() => setShowSignatureScreen(false)}
       >
-        <Text style={AppStyleSheet.logoutBtnText}>Cancel</Text>
+        <Text style={styles.logoutBtnText}>Cancel</Text>
       </TouchableOpacity>
     </View>
   );
@@ -59,7 +58,32 @@ const shadowStyle = {
   shadowOpacity: 0.25,
 };
 
-const styles = RNStyleSheet.create({
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  logoutBtnText: {
+    color: "#ffffff",
+    fontSize: textStyle,
+  },
+  signatureView: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: width,
+    width: height,
+    padding: 10,
+    backgroundColor: "#6A89A7",
+    transform: [{ rotate: "270deg" }],
+  },
+  signatureRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    alignItems: "center",
+  },
   sigClearBtn: {
     width: "25%",
     backgroundColor: "#2C3444",

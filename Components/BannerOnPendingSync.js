@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppState, View, Text } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { selectAttachmentSqlite } from "../Database/AttachmentDatabase";
@@ -31,10 +31,6 @@ export default function BannerOnPendingSync() {
         setBannerText(
           "Offline items pending. Pull down to sync when network restored",
         );
-        //setBannerText(
-        // `Pending sync items: ${total}` +
-        //    `  • Attachments: ${a}  • Check-ins: ${c}  • Final checkouts: ${f}`,
-        //);
         setBannerVisible(true);
       } else {
         setBannerVisible(false);

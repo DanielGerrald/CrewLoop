@@ -3,21 +3,16 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-
-
 export async function getLoginApi(data) {
-
-    const response = await axios.post(
-      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + environment.apikey,
-      {
-        email: data.username,
-        password: data.password,
-        returnSecureToken: true,
-      }
-    )
-  
-    return response.data;
-  
+  const response = await axios.post(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.apikey}`,
+    {
+      email: data.username,
+      password: data.password,
+      returnSecureToken: true,
+    },
+  );
+  return response.data;
 }
 
 export async function getUserProfileApi(data) {
@@ -197,7 +192,6 @@ export async function lastLoggedinUserSqlite(db) {
 
 
 export async function selectUserSqlite(db, data) {
-  
   try {
     return await db.getFirstAsync(
       "SELECT * FROM user WHERE localId = ?",

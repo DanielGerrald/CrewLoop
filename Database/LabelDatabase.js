@@ -3,50 +3,45 @@ import { environment } from "../Config";
 
 //---------------API Functions---------------//
 
-
 export async function getLabelsApi(idToken) {
   try {
-    let response = await axios.get(environment.apiUrl + "/ATTACHMENT_TYPES.json", {
-      params: { auth: idToken },  
-    });
-      const results = response.data;          
-    if (!results) return undefined;  
-    return results
+    const response = await axios.get(
+      environment.apiUrl + "/ATTACHMENT_TYPES.json",
+      { params: { auth: idToken } },
+    );
+    return response.data || undefined;
   } catch (error) {
     console.error("getLabelsApi Error:", error.response?.data ?? error.message);
   }
 }
 
-
-async function logKeyValuePairs(db, values) {
-  for (const obj of values) {
-    const columns = Object.keys(obj).filter(
-      (key) => obj[key] !== undefined && obj[key] !== null,
+async function insertCategoryTypeRows(db, rows) {
+  for (const row of rows) {
+    const columns = Object.keys(row).filter(
+      (key) => row[key] !== undefined && row[key] !== null,
     );
-    if (columns.length === 0) continue; // Skip empty objects
+    if (columns.length === 0) continue;
 
     const placeholders = columns.map(() => "?").join(", ");
-    const values = columns.map((key) => obj[key]);
+    const values = columns.map((key) => row[key]);
 
     try {
       await db.runAsync(
-        `INSERT OR IGNORE INTO  category_type (${columns.join(", ")})
-                 VALUES (${placeholders})`,
-        [...values],
+        `INSERT OR IGNORE INTO category_type (${columns.join(", ")}) VALUES (${placeholders})`,
+        values,
       );
     } catch (error) {
-      console.error("Error inserting data:", error);
+      console.error("Error inserting category type row:", error);
     }
   }
 }
 
-function reduceArray(value, labelType) {
+function reduceLabelArray(value, labelType) {
   // Firebase RTDB omits empty arrays and returns sparse arrays as objects,
   // so `value` may be undefined or a plain object here.
   const arr = Array.isArray(value) ? value : Object.values(value ?? {});
-  return arr.reduce((accumulator, currentObject) => {
-    currentObject = { ...currentObject, type_group: labelType };
-    accumulator[currentObject.type_id] = currentObject;
+  return arr.reduce((accumulator, item) => {
+    accumulator[item.type_id] = { ...item, type_group: labelType };
     return accumulator;
   }, {});
 }
@@ -54,21 +49,14 @@ function reduceArray(value, labelType) {
 //---------------SQLITE Functions---------------//
 
 export async function insertCategoryLabelSqlite(db, labels) {
-  if (!labels) {
-    console.log("insertCategoryLabelSqlite: no labels, skipping");
-    return;
-  }
+  if (!labels) return;
 
-  const documentTypes = reduceArray(labels.document_types, "Document Label");
-  const photoTypes = reduceArray(labels.photo_types, "Photo Label");
-  const commentTypes = reduceArray(labels.comment_types, "Comment Label");
+  const documentTypes = reduceLabelArray(labels.document_types, "Document Label");
+  const photoTypes = reduceLabelArray(labels.photo_types, "Photo Label");
+  const commentTypes = reduceLabelArray(labels.comment_types, "Comment Label");
 
-  const obj = { ...documentTypes, ...photoTypes, ...commentTypes };
-  const data = Object.values(obj);
-
-  await logKeyValuePairs(db, data);
-
-  console.log("Insert category type function ran");
+  const merged = { ...documentTypes, ...photoTypes, ...commentTypes };
+  await insertCategoryTypeRows(db, Object.values(merged));
 }
 
 export async function selectCategoryLabelSqlite(db, key, value) {
@@ -78,6 +66,6 @@ export async function selectCategoryLabelSqlite(db, key, value) {
       [value],
     );
   } catch (error) {
-    console.error("Select SQLITE contacts failed:", error);
+    console.error("Select category labels failed:", error);
   }
 }

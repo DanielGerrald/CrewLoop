@@ -1,10 +1,8 @@
-import * as React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Card, Avatar } from "react-native-paper";
 import moment from "moment";
 import { useState } from "react";
 
-import StyleSheet from "../StyleSheet";
 import JobModal from "./JobDetails/JobModal";
 import { selectWorkOrderSqlite } from "../Database/WorkOrderDatabase";
 import { selectContactSqlite } from "../Database/ContactDatabase";
@@ -35,65 +33,65 @@ export default function JobCard({ jobData }) {
     <>
       {jobData.map((job) => (
         <TouchableOpacity
-          style={StyleSheet.jobCardTouchable}
+          style={styles.jobCardTouchable}
           key={job.id}
           onPress={() => showModal(job.id)}
         >
-          <Card style={StyleSheet.jobCard}>
-            <Card.Content style={StyleSheet.jobCardContent}>
-              <View style={StyleSheet.columnView}>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.columnView}>
-                    <Text style={StyleSheet.jobCardContentTitle}>
+          <Card style={styles.jobCard}>
+            <Card.Content style={styles.jobCardContent}>
+              <View style={styles.columnView}>
+                <View style={styles.rowView}>
+                  <View style={styles.columnView}>
+                    <Text style={styles.jobCardContentTitle}>
                       {`${job.type}#  `}
                       {job.reference_code}
                     </Text>
                   </View>
                 </View>
-                <View style={StyleSheet.columnView}>
-                  <Text style={StyleSheet.jobCardContentTitleSub}>
+                <View style={styles.columnView}>
+                  <Text style={styles.jobCardContentTitleSub}>
                     {job.category}
                   </Text>
                 </View>
               </View>
             </Card.Content>
 
-            <Card.Content style={StyleSheet.jobCardContent}>
+            <Card.Content style={styles.jobCardContent}>
               <Avatar.Icon
-                style={StyleSheet.avatarIcon}
+                style={styles.avatarIcon}
                 icon="office-building-marker"
                 size={40}
               />
-              <View style={StyleSheet.columnView}>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.columnView}>
-                    <Text style={StyleSheet.jobCardContentLabel}>
+              <View style={styles.columnView}>
+                <View style={styles.rowView}>
+                  <View style={styles.columnView}>
+                    <Text style={styles.jobCardContentLabel}>
                       {`${job.name}:`}
                     </Text>
                   </View>
                 </View>
-                <View style={StyleSheet.columnView}>
-                  <Text style={StyleSheet.jobCardContentText}>
+                <View style={styles.columnView}>
+                  <Text style={styles.jobCardContentText}>
                     {job.store_nbr}
                   </Text>
                 </View>
               </View>
             </Card.Content>
 
-            <Card.Content style={StyleSheet.jobCardContent}>
+            <Card.Content style={styles.jobCardContent}>
               <Avatar.Icon
-                style={StyleSheet.avatarIcon}
+                style={styles.avatarIcon}
                 icon="map-marker"
                 size={40}
               />
-              <View style={StyleSheet.columnView}>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.columnView}>
-                    <Text style={StyleSheet.jobCardContentLabel}>Address:</Text>
+              <View style={styles.columnView}>
+                <View style={styles.rowView}>
+                  <View style={styles.columnView}>
+                    <Text style={styles.jobCardContentLabel}>Address:</Text>
                   </View>
                 </View>
-                <View style={StyleSheet.columnView}>
-                  <Text style={StyleSheet.jobCardContentText}>
+                <View style={styles.columnView}>
+                  <Text style={styles.jobCardContentText}>
                     {job.addr_1}
                     {job.addr_2 && (
                       <>
@@ -114,22 +112,22 @@ export default function JobCard({ jobData }) {
               </View>
             </Card.Content>
 
-            <Card.Content style={StyleSheet.jobCardContent}>
+            <Card.Content style={styles.jobCardContent}>
               <Avatar.Icon
-                style={StyleSheet.avatarIcon}
+                style={styles.avatarIcon}
                 icon="calendar-clock"
                 size={40}
               />
-              <View style={StyleSheet.columnView}>
-                <View style={StyleSheet.rowView}>
-                  <View style={StyleSheet.columnView}>
-                    <Text style={StyleSheet.jobCardContentLabel}>
+              <View style={styles.columnView}>
+                <View style={styles.rowView}>
+                  <View style={styles.columnView}>
+                    <Text style={styles.jobCardContentLabel}>
                       Scheduled:
                     </Text>
                   </View>
                 </View>
-                <View style={StyleSheet.columnView}>
-                  <Text style={StyleSheet.jobCardContentText}>
+                <View style={styles.columnView}>
+                  <Text style={styles.jobCardContentText}>
                     {moment(job.scheduled_date).format("MMM Do YYYY")}
                   </Text>
                 </View>
@@ -147,3 +145,57 @@ export default function JobCard({ jobData }) {
     </>
   );
 }
+
+const { width, height } = Dimensions.get("window");
+let textStyle = 12;
+if (width >= 380 && width <= 600) textStyle = 16;
+else if (width > 600) textStyle = 20;
+
+const styles = StyleSheet.create({
+  avatarIcon: {
+    backgroundColor: "#1B3A6B",
+    marginRight: 10,
+  },
+  columnView: { flex: 1, flexDirection: "column" },
+  jobCard: {
+    backgroundColor: "#6A89A7",
+    marginBottom: height * 0.02,
+    width: "100%",
+    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 6,
+    shadowOpacity: 0.25,
+  },
+  jobCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: height * 0.01,
+  },
+  jobCardContentLabel: {
+    fontSize: textStyle,
+    fontWeight: "bold",
+  },
+  jobCardContentTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: textStyle,
+    fontWeight: "bold",
+  },
+  jobCardContentTitleSub: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: textStyle - 1,
+  },
+  jobCardContentText: {
+    fontSize: textStyle - 1,
+  },
+  jobCardTouchable: {
+    width: "100%",
+  },
+  rowView: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});
