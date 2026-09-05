@@ -4,14 +4,14 @@
 
 CrewLoop is a cross-platform iOS/Android field service app that connects subcontractors to a back-office CRM. Technicians use the app to manage their assigned jobs, document their work, and sync completed data back to the office — even when working in areas without internet connectivity.
 
-> This repository is a portfolio demo. It uses a local mock API server with realistic sample data so you can run the full app without any account or backend dependency.
+> This repository is a portfolio showcase of the production codebase — screenshots, architecture, and code are real. It's wired to a private Firebase backend, so it isn't set up to be cloned and run by visitors without their own Firebase project.
 
 ---
 ## Background
 
-This app was originally built for production use at a field services company, where subcontractors use it daily to manage lighting retrofit jobs across warehouse, industrial, and commercial sites. The production version connects to a live CRM backend.
+This app is used in production at a field services company, where subcontractors use it daily to manage lighting retrofit jobs across warehouse, industrial, and commercial sites. It connects to a live Firebase backend (Authentication + Realtime Database) for user accounts and job assignment data, with SQLite as an offline-first local cache.
 
-This demo version replaces the proprietary API with a local mock server and uses fictional company and job data. The core application code — including the offline-first SQLite architecture, job workflow, signature capture, and photo documentation — is identical to the production implementation.
+The code shown here — including the offline-first SQLite architecture, job workflow, signature capture, and photo documentation — is the actual production implementation.
 
 ---
 
@@ -49,7 +49,7 @@ This demo version replaces the proprietary API with a local mock server and uses
   <img src="assets/screenshots/06_photo_upload.png" width="280" alt="Photo documentation" />
 </p>
 
-*Left: Native document picker for attaching PDFs and files to a job record. Right: Photo documentation — select from library or capture directly with the camera.*
+*Left: Native document picker for attaching PDFs and files to a job record. Right: Before/after photo documentation attached to a job.*
 
 ---
 
@@ -61,7 +61,7 @@ This demo version replaces the proprietary API with a local mock server and uses
   <img src="assets/screenshots/08_checkout_form.png" width="280" alt="Final checkout form" />
 </p>
 
-*Left: Work log showing check-in timestamp and comments recorded at the site. Right: Final checkout form — service performed, materials installed, walkthrough confirmation, and misc notes.*
+*Left: Work log showing check-in timestamp and comments recorded at the site. Right: Final checkout summary — service performed, materials installed, and completion timestamp.*
 
 ---
 
@@ -73,7 +73,7 @@ This demo version replaces the proprietary API with a local mock server and uses
   <img src="assets/demo-workflow-2.gif" width="300" alt="CrewLoop job detail demo" />
 </p>
 
-*Full field technician workflow: login → job selection → check-in → documentation → checkout.*
+*Left: navigating an active job — work description, site contacts, file/photo upload, and work log. Right: reviewing a completed job's contacts and final checkout summary.*
 
 ---
 
@@ -93,18 +93,19 @@ CrewLoop handles the full field technician workflow:
 | **Final Checkout** | Multi-step job completion form — tasks performed, materials installed, misc notes |
 | **Manager Signature** | Digital signature capture from onsite manager at job completion |
 | **Offline-First Architecture** | App continues to function without internet using SQLite local storage |
-| **Manual Sync** | Pull-down to sync all offline records back to the CRM when connectivity returns |
+| **Auto & Manual Sync** | Syncs offline records back to Firebase on pull-down and automatically when the app returns to the foreground |
 
 ---
 
 ## Technical Highlights
 
 - **React Native + Expo** — cross-platform iOS and Android from a single codebase
+- **Firebase** — Authentication and Realtime Database as the backend, accessed over their REST APIs
 - **SQLite (expo-sqlite)** — local database for offline-first data persistence
 - **Offline sync queue** — records created offline are stored locally and batch-posted on reconnect
-- **Axios** — API client with environment-based base URL configuration
+- **Axios** — REST client used for both Firebase auth/data calls and environment-based base URL configuration
 - **Context API** — global job state shared across screens without prop drilling
-- **Environment config** — production / staging / demo environments via `Config.js`
+- **Environment config** — production / staging / development release channels via `Config.js`
 - **expo-image-picker** — native camera and photo library access
 - **expo-document-picker** — native document selection
 - **react-native-signature-canvas** — signature pad for manager sign-off
@@ -112,108 +113,14 @@ CrewLoop handles the full field technician workflow:
 
 ---
 
-## Running the Demo Locally
+## Architecture Notes
 
-### Prerequisites
+This build talks to a private Firebase project (Authentication + Realtime Database) that isn't included in this repo, so it isn't set up to be cloned and run out of the box — there's no mock backend or demo login to fall back on. The sections below describe how the pieces fit together for anyone reading the code.
 
-| Tool | Notes |
-|---|---|
-| **Node.js 18+** | [nodejs.org](https://nodejs.org) |
-| **Expo Go** (physical device) | [iOS App Store](https://apps.apple.com/app/expo-go/id982107779) · [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent) |
-| **Xcode** (iOS simulator, Mac only) | Install from the Mac App Store, then open it once to accept the license |
-| **Android Studio** (Android emulator) | Install and create a virtual device via the AVD Manager |
-
----
-
-### Step 1 — Clone the repo
-
-```bash
-git clone https://github.com/DanielGerrald/CrewLoop.git
-cd CrewLoop
-```
-
-### Step 2 — Install dependencies
-
-```bash
-# App dependencies
-npm install
-
-# Mock API dependencies
-cd mock-api && npm install && cd ..
-```
-
-### Step 3 — Start the mock API server
-
-The mock API serves all the data the app needs — 5 realistic job records with contacts, addresses, and full job details.
-
-```bash
-npm run mock-api
-```
-
-You should see:
-
-```
-╔══════════════════════════════════════════╗
-║       CrewLoop Mock API Server           ║
-║       Running at http://localhost:3001   ║
-╚══════════════════════════════════════════╝
-
-Demo credentials:
-  Username: demo
-  Password: any value accepted
-```
-
-Keep this terminal open and running.
-
-### Step 4 — Configure the API URL
-
-> **Simulator / emulator:** `localhost` works out of the box — skip to Step 5.
-
-> **Physical device:** Your phone can't reach your computer's `localhost`. You need to point the app at your machine's local network IP.
-
-Find your IP address:
-
-```bash
-# macOS
-ipconfig getifaddr en0
-
-# Windows (look for "IPv4 Address" under your Wi-Fi adapter)
-ipconfig
-
-# Linux
-hostname -I
-```
-
-Open `Config.js` and update the `apiUrl` in both the `development` and `default` cases:
-
-```js
-apiUrl: "http://YOUR_LOCAL_IP:3001",  // e.g. "http://192.168.1.42:3001"
-```
-
-Make sure your phone and computer are on the **same Wi-Fi network**.
-
-### Step 5 — Start the Expo dev server
-
-Open a new terminal in the project root:
-
-```bash
-npx expo start
-```
-
-Then choose how to run the app:
-
-| Target | How |
-|---|---|
-| **iOS Simulator** | Press `i` in the terminal (Mac + Xcode required) |
-| **Android Emulator** | Press `a` in the terminal (Android Studio AVD required) |
-| **Physical device** | Scan the QR code with the **Expo Go** app |
-
-### Step 6 — Log in
-
-```
-Username: demo
-Password: (any value)
-```
+- **Auth** — email/password via the Firebase Identity Toolkit REST API (`Database/UserDatabase.js`), with the resulting ID token attached to subsequent Realtime Database requests.
+- **Data layer** — job assignments, contacts, check-ins, and checkout data live in Firebase Realtime Database, fetched over its REST interface (`environment.apiUrl` + `.json`, e.g. `Database/WorkOrderDatabase.js`) rather than the Firebase JS SDK, so the same axios-based data layer works identically whether the record came from the network or needs to be queued offline.
+- **Offline cache** — every fetch is mirrored into SQLite (`expo-sqlite`) so the app remains fully usable without connectivity; writes made offline queue locally and sync back to Firebase when the connection returns.
+- **Environments** — `Config.js` switches API targets and feature flags based on the Expo Updates release channel (`production` / `staging` / `development`), all pointed at the same Firebase project today.
 
 ---
 
@@ -222,74 +129,73 @@ Password: (any value)
 ```
 CrewLoop/
 ├── App.js                  # Root component, navigation setup
-├── Config.js               # Environment config (API URLs)
-├── StyleSheet.js           # Global styles
-├── app.config.js           # Expo config
+├── Config.js               # Environment config (release channel → Firebase URL/flags)
+├── firebase.js             # Firebase app init (Auth + Realtime Database)
 │
-├── Screens/                # Top-level screens
+├── screens/                # Top-level screens
 │   ├── Login.js
+│   ├── ForgotPassword.js
 │   ├── Home.js
 │   ├── JobsList.js
 │   ├── CompletedJobs.js
-│   └── Profile.js
+│   ├── Profile.js
+│   └── SignatureScreen.js
 │
-├── Components/             # Reusable UI components
+├── components/             # Reusable UI components
 │   ├── JobCard.js
-│   ├── AppSyncManager.js
+│   ├── JobsListScreen.js
+│   ├── AppSyncManager.js   # Background/pull-to-refresh sync with Firebase
+│   ├── AuthContext.js      # Auth state provider
 │   ├── Context.js          # Global job state via Context API
+│   ├── AlertManager.js
+│   ├── AppFocusRefresh.js
+│   ├── BannerOnPendingSync.js
+│   ├── NavigationRef.js
+│   ├── SyncLock.js
+│   ├── UpdateGate.js
 │   ├── constants.js
+│   ├── ui/                 # Shared presentational components
+│   │   ├── AvatarIcon.js
+│   │   ├── CustomInput.js
+│   │   ├── Loading.js
+│   │   ├── ReauthModal.js
+│   │   ├── SignupButton.js
+│   │   ├── StagingBanner.js
+│   │   └── Version.js
 │   └── JobDetails/         # Job detail sub-screens
+│       ├── Details.js
+│       ├── Contacts.js
+│       ├── CheckInOut.js
+│       ├── Photos.js
+│       ├── Files.js
+│       ├── AttachmentSubmit.js
+│       ├── AttachmentsProcess.js
+│       ├── FinalCheckOut.js
+│       ├── JobModal.js
+│       ├── JobNav.js
+│       └── OpenMap.js
 │
-├── Database/               # Data layer — SQLite + API calls
-│   ├── SetupDatabase.js    # Schema creation and migrations
-│   ├── UserDatabase.js     # Auth and user data
+├── constants/
+│   └── colors.js           # Shared color palette
+│
+├── Database/                # Data layer — SQLite cache + Firebase REST calls
+│   ├── SetupDatabase.js     # Schema creation and migrations
+│   ├── UserDatabase.js      # Firebase auth (Identity Toolkit REST API)
 │   ├── CheckInOutDatabase.js
 │   ├── AttachmentDatabase.js
 │   ├── FinalCheckOutDatabase.js
 │   ├── ContactDatabase.js
-│   ├── WorkOrderDatabase.js
+│   ├── WorkOrderDatabase.js # Job assignments (Realtime Database REST API)
 │   ├── LabelDatabase.js
-│   └── UpdateGateApi.js    # App version check
+│   └── UpdateGateApi.js     # App version check
 │
-├── assets/                 # Images, icons, splash screen, screenshots
-│   ├── screenshots/        # App preview screenshots
-│   ├── demo-workflow.gif   # Workflow demo GIF
-│   └── demo-workflow-2.gif # Job detail demo GIF
-│
-└── mock-api/               # Local mock API server
-    ├── server.js           # Express server with all endpoints
-    └── package.json
+└── assets/                  # Images, icons, splash screen, screenshots
+    ├── screenshots/         # App preview screenshots
+    ├── demo-workflow.gif    # Workflow demo GIF
+    └── demo-workflow-2.gif  # Job detail demo GIF
 ```
 
 ---
-
-## Mock API Endpoints
-
-The mock server at `http://localhost:3001` provides:
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/version` | App version / update gate check |
-| `POST` | `/login` | Authenticate and return user token |
-| `GET` | `/accountProfile` | Fetch logged-in user profile |
-| `POST` | `/recoverPassword` | Send password reset |
-| `GET` | `/assignments` | All open assignments |
-| `GET` | `/assignmentDetails?id=` | Vendor requirements and work description |
-| `GET` | `/completedAssignments` | Completed assignments |
-| `GET` | `/assignmentContacts?id=` | Site and account manager contacts for an assignment |
-| `GET` | `/assignmentVisits?id=` | Check-in/out history for an assignment |
-| `POST` | `/assignmentVisit?id=` | Record a check-in or check-out |
-| `POST` | `/uploadAssignmentPhoto?id=` | Upload a photo attachment |
-| `POST` | `/uploadAssignmentDocument?id=` | Upload a document attachment |
-| `POST` | `/updateAssignmentChecklist?id=` | Submit final checkout checklist |
-| `POST` | `/completeAssignment?id=` | Submit final checkout |
-| `POST` | `/sync` | Batch sync offline records |
-| `POST` | `/updateAccountProfile` | Update user profile |
-
-All data is in-memory. Restarting the server resets to the default sample dataset.
-
----
-
 
 ## What I'd Build Next
 
@@ -297,7 +203,7 @@ All data is in-memory. Restarting the server resets to the default sample datase
 - **Real-time job status** updates using WebSockets
 - **Photo compression** before upload to reduce bandwidth usage
 - **Biometric authentication** (Face ID / fingerprint) for faster login
-- **Automatic background sync** when connectivity is restored, replacing the manual pull-down
+- **Connectivity-triggered sync** — currently syncs on pull-down and app foreground; sync automatically the moment a connection is detected
 
 ---
 
@@ -308,7 +214,7 @@ All data is in-memory. Restarting the server resets to the default sample datase
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 ![SQLite](https://img.shields.io/badge/SQLite-07405E?style=flat&logo=sqlite)
 ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat&logo=axios)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
 
 ---
 
