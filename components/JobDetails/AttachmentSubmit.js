@@ -9,6 +9,7 @@ import {
 
 import { attachmentsProcess } from "./AttachmentsProcess";
 import { useSQLiteContext } from "expo-sqlite";
+import Colors from "../../constants/colors";
 
 export default function AttachmentSubmit({
   token,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   },
   submitBtnAttachment: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",

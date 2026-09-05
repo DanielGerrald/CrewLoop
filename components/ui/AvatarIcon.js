@@ -5,14 +5,14 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as Network from "expo-network";
 import { Avatar } from "react-native-paper";
 
-import profileIcon from "../assets/user.png";
+import profileIcon from "../../assets/user.png";
 import {
   lastLoggedinUserSqlite,
   postUserAvatarApi,
   updateUserSqlite,
-} from "../Database/UserDatabase";
+} from "../../Database/UserDatabase";
 import { useSQLiteContext } from "expo-sqlite";
-import { useJob } from "./Context";
+import { useJob } from "../Context";
 
 export default function AvatarIcon() {
   const db = useSQLiteContext();

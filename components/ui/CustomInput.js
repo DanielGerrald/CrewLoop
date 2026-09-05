@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+import Colors from "../../constants/colors";
 
 const CustomInput = ({
   style,
@@ -158,7 +159,7 @@ const CustomInput = ({
 
 const styles = StyleSheet.create({
   valMessageText: {
-    color: "#FF6B6B",
+    color: Colors.error,
   },
 });
 

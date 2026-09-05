@@ -11,6 +11,7 @@ import { Avatar } from "react-native-paper";
 import * as Linking from "expo-linking";
 
 import OpenMap from "./OpenMap";
+import Colors from "../../constants/colors";
 
 export default function Contacts({ selectedJob, contacts }) {
   const isCompleted = selectedJob[0]?.status_label === "Completed";
@@ -161,11 +162,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   avatarIconBtn: {
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     elevation: 6,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -195,14 +196,14 @@ const styles = StyleSheet.create({
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "#8A95A3",
+    backgroundColor: Colors.muted,
     marginBottom: 10,
     marginTop: 15,
   },
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
 });

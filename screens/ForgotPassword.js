@@ -12,11 +12,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 
-import CustomInput from "../Components/CustomInput";
+import CustomInput from "../components/ui/CustomInput";
 import { useState } from "react";
 import { Avatar } from "react-native-paper";
 import { postRecoverPasswordAPI } from "../Database/UserDatabase";
-import { BLURHASH } from "../Components/constants";
+import { BLURHASH } from "../components/constants";
+import Colors from "../constants/colors";
 
 export default function ForgotPassword({ navigation }) {
   const [formData, setFormData] = useState({
@@ -117,12 +118,12 @@ else if (width > 600) textStyle = 20;
 const styles = StyleSheet.create({
   SafeArea: {
     flex: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     paddingTop: 15,
     paddingBottom: 15,
   },
   avatarIcon: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     marginRight: 10,
   },
   backButton: {
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
   fpSubmitBtn: {
     width: width / 1.5,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     marginTop: height * 0.08,
     marginBottom: 25,
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,

@@ -1,4 +1,5 @@
 import { Dimensions, KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from "react-native";
+import Colors from "../../constants/colors";
 
 const { width, height } = Dimensions.get("window");
 let textStyle = 12;
@@ -38,12 +39,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -58,14 +59,14 @@ const styles = StyleSheet.create({
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "#8A95A3",
+    backgroundColor: Colors.muted,
     marginBottom: 10,
     marginTop: 15,
   },
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
   rowView: {

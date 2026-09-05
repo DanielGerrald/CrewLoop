@@ -1,5 +1,5 @@
-import JobsListScreen from "../Components/JobsListScreen";
-import { getActiveJobs } from "../Components/constants";
+import JobsListScreen from "../components/JobsListScreen";
+import { getActiveJobs } from "../components/constants";
 
 export default function JobsList() {
   return (

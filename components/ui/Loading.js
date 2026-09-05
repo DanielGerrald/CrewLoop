@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import Colors from "../../constants/colors";
 
 const { width } = Dimensions.get("window");
 let textStyle = 12;
@@ -11,7 +12,7 @@ export default function Loading() {
       <View
         style={{ alignContent: "center", justifyContent: "center", flex: 1 }}
       >
-        <ActivityIndicator size={"large"} color={"#01ab52"} />
+        <ActivityIndicator size={"large"} color={Colors.success} />
         <Text style={styles.Text}>Loading...</Text>
       </View>
     </View>
@@ -21,7 +22,7 @@ export default function Loading() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },

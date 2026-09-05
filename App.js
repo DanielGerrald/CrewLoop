@@ -7,20 +7,20 @@ import { SQLiteProvider } from "expo-sqlite";
 import * as ScreenOrientation from "expo-screen-orientation";
 import * as MediaLibrary from "expo-media-library";
 
-import Login from "./Screens/Login";
-import ForgotPassword from "./Screens/ForgotPassword";
-import Home from "./Screens/Home";
-import Loading from "./Components/Loading";
-import { JobProvider } from "./Components/Context";
-import { AuthContextProvider, useAuth } from "./Components/AuthContext";
-import { navigationRef } from "./Components/NavigationRef";
-import StagingBanner from "./Components/StagingBanner";
+import Login from "./screens/Login";
+import ForgotPassword from "./screens/ForgotPassword";
+import Home from "./screens/Home";
+import Loading from "./components/ui/Loading";
+import { JobProvider } from "./components/Context";
+import { AuthContextProvider, useAuth } from "./components/AuthContext";
+import { navigationRef } from "./components/NavigationRef";
+import StagingBanner from "./components/ui/StagingBanner";
 import setupDatabase from "./Database/SetupDatabase";
 import {
   useForcedUpdateGate,
   UpdateRequiredScreen,
   UnsupportedOSScreen,
-} from "./Components/UpdateGate";
+} from "./components/UpdateGate";
 
 const AuthStack = createNativeStackNavigator();
 const AuthenticatedStack = createNativeStackNavigator();

@@ -27,8 +27,8 @@ import {
   selectUserSqlite,
   updateUserSqlite,
 } from "../Database/UserDatabase";
-import CustomInput from "../Components/CustomInput";
-import { SignupButton } from "../Components/SignupButton.js";
+import CustomInput from "../components/ui/CustomInput";
+import { SignupButton } from "../components/ui/SignupButton.js";
 import {
   getAssignmentsApi,
   cleanupWorkOrderSqlite,
@@ -36,7 +36,7 @@ import {
   updateWorkOrderSqlite,
 } from "../Database/WorkOrderDatabase";
 import { getLabelsApi, insertCategoryLabelSqlite } from "../Database/LabelDatabase";
-import { isTokenExpired, useAuth } from "../Components/AuthContext";
+import { isTokenExpired, useAuth } from "../components/AuthContext";
 import { cleanupCheckInOutSqlite } from "../Database/CheckInOutDatabase";
 import {
   getWorkOrderContactsApi,
@@ -55,10 +55,11 @@ import {
   insertFinalCheckOutSqlite,
   selectFinalCheckOutSqlite,
 } from "../Database/FinalCheckOutDatabase";
-import Loading from "../Components/Loading";
-import Version from "../Components/Version";
+import Loading from "../components/ui/Loading";
+import Version from "../components/ui/Version";
 import { useSQLiteContext } from "expo-sqlite";
-import { BLURHASH } from "../Components/constants";
+import { BLURHASH } from "../components/constants";
+import Colors from "../constants/colors";
 
 export default function Login() {
   const { login } = useAuth();
@@ -293,7 +294,7 @@ export default function Login() {
                     />
                     <IconButton
                       icon={showPassword ? "eye-off" : "eye"}
-                      color={"#1E2530"}
+                      color={Colors.background}
                       size={20}
                       onPress={togglePasswordVisibility}
                       style={styles.passwordVisibilityButton}
@@ -332,7 +333,7 @@ else if (width > 600) textStyle = 20;
 const styles = StyleSheet.create({
   SafeArea: {
     flex: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     paddingTop: 15,
     paddingBottom: 15,
   },
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
   },
   loginBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
   },
   loginSubtitle: {
-    color: "#8A95A3",
+    color: Colors.muted,
     fontSize: textStyle,
     textAlign: "center",
     marginTop: -height * 0.015,
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
   },
   signupText: {
-    color: "#F47C20",
+    color: Colors.accent,
     fontSize: textStyle,
     justifyContent: "flex-start",
   },

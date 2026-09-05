@@ -7,6 +7,7 @@ import JobModal from "./JobDetails/JobModal";
 import { selectWorkOrderSqlite } from "../Database/WorkOrderDatabase";
 import { selectContactSqlite } from "../Database/ContactDatabase";
 import { useSQLiteContext } from "expo-sqlite";
+import Colors from "../constants/colors";
 
 export default function JobCard({ jobData }) {
   const db = useSQLiteContext();
@@ -153,12 +154,12 @@ else if (width > 600) textStyle = 20;
 
 const styles = StyleSheet.create({
   avatarIcon: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     marginRight: 10,
   },
   columnView: { flex: 1, flexDirection: "column" },
   jobCard: {
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     marginBottom: height * 0.02,
     width: "100%",
     elevation: 6,

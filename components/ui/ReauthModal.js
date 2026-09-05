@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import CustomInput from "./CustomInput";
+import Colors from "../../constants/colors";
 
 export default function ReauthModal({ visible, onCancel, onConfirm }) {
   const [password, setPassword] = useState("");
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",

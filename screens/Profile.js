@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, StyleSheet, View, Text, Switch, Pressable, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SAFE_AREA_EDGES } from "../Components/constants";
-import AvatarIcon from "../Components/AvatarIcon";
-import ReauthModal from "../Components/ReauthModal";
+import { SAFE_AREA_EDGES } from "../components/constants";
+import AvatarIcon from "../components/ui/AvatarIcon";
+import ReauthModal from "../components/ui/ReauthModal";
 import {
   getLoginApi,
   lastLoggedinUserSqlite,
@@ -12,12 +12,13 @@ import {
   selectUserSqlite,
   updateUserSqlite,
 } from "../Database/UserDatabase";
-import CustomInput from "../Components/CustomInput";
-import Version from "../Components/Version";
+import CustomInput from "../components/ui/CustomInput";
+import Version from "../components/ui/Version";
 import { useSQLiteContext } from "expo-sqlite";
-import AppSyncManager from "../Components/AppSyncManager";
-import { useJob } from "../Components/Context";
-import { useAuth } from "../Components/AuthContext";
+import AppSyncManager from "../components/AppSyncManager";
+import { useJob } from "../components/Context";
+import { useAuth } from "../components/AuthContext";
+import Colors from "../constants/colors";
 
 export default function Profile() {
   const db = useSQLiteContext();
@@ -209,9 +210,9 @@ export default function Profile() {
             <Text style={styles.switchLabel}>Email Notifications</Text>
             <Switch
               style={styles.switch}
-              trackColor={{ false: "#999", true: "#F47C20" }}
+              trackColor={{ false: "#999", true: Colors.accent }}
               ios_backgroundColor="#2C3444"
-              thumbColor={isEnabledEmail ? "#F47C20" : "#f4f3f4"}
+              thumbColor={isEnabledEmail ? Colors.accent : "#f4f3f4"}
               onValueChange={(value) => setIsEnabledEmail(value)}
               value={isEnabledEmail}
             />
@@ -220,9 +221,9 @@ export default function Profile() {
             <Text style={styles.switchLabel}>SMS Notifications</Text>
             <Switch
               style={styles.switch}
-              trackColor={{ false: "#999", true: "#F47C20" }}
+              trackColor={{ false: "#999", true: Colors.accent }}
               ios_backgroundColor="#2C3444"
-              thumbColor={isEnabledSMS ? "#F47C20" : "#f4f3f4"}
+              thumbColor={isEnabledSMS ? Colors.accent : "#f4f3f4"}
               onValueChange={(value) => setIsEnabledSMS(value)}
               value={isEnabledSMS}
             />
@@ -256,7 +257,7 @@ else if (width > 600) textStyle = 20;
 const styles = StyleSheet.create({
   SafeArea: {
     flex: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     paddingTop: 15,
     paddingBottom: 15,
   },
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",

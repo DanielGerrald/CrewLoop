@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Linking,
   Platform,
   Modal,
   KeyboardAvoidingView,
@@ -25,8 +24,9 @@ import {
   updateAttachmentSqlite,
 } from "../../Database/AttachmentDatabase";
 import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 import AttachmentSubmit from "./AttachmentSubmit";
+import Colors from "../../constants/colors";
 
 export default function Files({ selectedJob, fetchFiles, files }) {
   const db = useSQLiteContext();
@@ -155,11 +155,11 @@ export default function Files({ selectedJob, fetchFiles, files }) {
 
   const openFile = async (uri) => {
     try {
-      if (Platform.OS === "ios") {
-        await Sharing.shareAsync(uri);
-      } else {
-        await Linking.openURL(uri);
-      }
+      // A raw file:// URI can't be passed through Linking.openURL on Android —
+      // targeting API 24+ blocks exposing file:// paths via Intent
+      // (FileUriExposedException). expo-sharing wraps the file in a
+      // FileProvider content:// URI on Android, so use it on both platforms.
+      await Sharing.shareAsync(uri);
     } catch (error) {
       console.error("Error opening file:", error);
       Alert.alert("Error", "There was a problem opening the file.");
@@ -206,7 +206,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                       >
                         <Chip
                           icon={() => (
-                            <Icon source="tag" color={"#01ab52"} size={20} />
+                            <Icon source="tag" color={Colors.success} size={20} />
                           )}
                           style={styles.chip}
                         >
@@ -272,7 +272,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                     <View style={styles.labelView}>
                       <Chip
                         icon={() => (
-                          <Icon source="tag" color={"#01ab52"} size={20} />
+                          <Icon source="tag" color={Colors.success} size={20} />
                         )}
                         style={styles.chip}
                       >
@@ -324,7 +324,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                       <View style={styles.labelView}>
                         <Chip
                           icon={() => (
-                            <Icon source="tag" color={"#01ab52"} size={20} />
+                            <Icon source="tag" color={Colors.success} size={20} />
                           )}
                           style={styles.chip}
                         >
@@ -383,7 +383,7 @@ export default function Files({ selectedJob, fetchFiles, files }) {
                   <View style={styles.labelView}>
                     <Chip
                       icon={() => (
-                        <Icon source="tag" color={"#01ab52"} size={20} />
+                        <Icon source="tag" color={Colors.success} size={20} />
                       )}
                       style={styles.chip}
                     >
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   TextTitle: {
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   avatarIconBtn: {
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     elevation: 6,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },
@@ -439,10 +439,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
   },
   avatarIconImage: {
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
   },
   chip: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     margin: "1%",
     borderRadius: 15,
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -460,14 +460,14 @@ const styles = StyleSheet.create({
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "#8A95A3",
+    backgroundColor: Colors.muted,
     marginBottom: 10,
     marginTop: 15,
   },
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
   labelView: {
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",

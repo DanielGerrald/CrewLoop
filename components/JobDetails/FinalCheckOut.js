@@ -15,8 +15,8 @@ import {
 import { Avatar } from "react-native-paper";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 
-import CustomInput from "../CustomInput";
-import SignatureScreen from "../../Screens/SignatureScreen";
+import CustomInput from "../ui/CustomInput";
+import SignatureScreen from "../../screens/SignatureScreen";
 import {
   deleteFinalCheckOutSqlite,
   insertFinalCheckOutSqlite,
@@ -33,6 +33,7 @@ import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
 import { useSQLiteContext } from "expo-sqlite";
 import * as Network from "expo-network";
 import { useJob } from "../Context";
+import Colors from "../../constants/colors";
 
 function SummaryRow({ icon, label, value, secondaryLabel, secondaryValue }) {
   return (
@@ -327,8 +328,8 @@ export default function FinalCheckOut({
               style={styles.switch}
               value={workLog}
               onValueChange={(value) => setWorkLog(value)}
-              trackColor={{ false: "#999", true: "#F47C20" }}
-              thumbColor={workLog ? "#F47C20" : "#f4f3f4"}
+              trackColor={{ false: "#999", true: Colors.accent }}
+              thumbColor={workLog ? Colors.accent : "#f4f3f4"}
             />
           </View>
           {workLog && (
@@ -473,8 +474,8 @@ export default function FinalCheckOut({
                   style={styles.switch}
                   value={servicePerf}
                   onValueChange={(value) => setServicePerf(value)}
-                  trackColor={{ false: "#999", true: "#F47C20" }}
-                  thumbColor={servicePerf ? "#F47C20" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: Colors.accent }}
+                  thumbColor={servicePerf ? Colors.accent : "#f4f3f4"}
                 />
               </View>
               {servicePerf && (
@@ -499,8 +500,8 @@ export default function FinalCheckOut({
                   style={styles.switch}
                   value={materialInst}
                   onValueChange={(value) => setMaterialInst(value)}
-                  trackColor={{ false: "#999", true: "#F47C20" }}
-                  thumbColor={materialInst ? "#F47C20" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: Colors.accent }}
+                  thumbColor={materialInst ? Colors.accent : "#f4f3f4"}
                 />
               </View>
               {materialInst && (
@@ -526,8 +527,8 @@ export default function FinalCheckOut({
                   style={styles.switch}
                   value={walkthrough}
                   onValueChange={(value) => setWalkthrough(value)}
-                  trackColor={{ false: "#999", true: "#F47C20" }}
-                  thumbColor={walkthrough ? "#F47C20" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: Colors.accent }}
+                  thumbColor={walkthrough ? Colors.accent : "#f4f3f4"}
                 />
               </View>
               {forceValidate && !walkthrough && (
@@ -542,8 +543,8 @@ export default function FinalCheckOut({
                 <Text style={styles.switchLabel}>Return Needed</Text>
                 <Switch
                   style={styles.switch}
-                  trackColor={{ false: "#999", true: "#F47C20" }}
-                  thumbColor={returnNeeded ? "#F47C20" : "#f4f3f4"}
+                  trackColor={{ false: "#999", true: Colors.accent }}
+                  thumbColor={returnNeeded ? Colors.accent : "#f4f3f4"}
                   onValueChange={(value) => setReturnNeeded(value)}
                   value={returnNeeded}
                 />
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   TextTitle: {
@@ -646,9 +647,9 @@ const styles = StyleSheet.create({
   textWhite: {
     color: "#ffffff",
   },
-  textMuted: { color: "#8A95A3" },
+  textMuted: { color: Colors.muted },
   avatarIconCheckout: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     marginRight: width * 0.03,
   },
   checkoutFormBtns: {
@@ -662,20 +663,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "#8A95A3",
+    backgroundColor: Colors.muted,
     marginBottom: 10,
     marginTop: 15,
   },
   inputView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     height: height * 0.06,
     paddingLeft: width * 0.05,
@@ -685,7 +686,7 @@ const styles = StyleSheet.create({
   },
   inputAreaView: {
     width: width * 0.8,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     minHeight: height * 0.2,
     paddingLeft: width * 0.05,
@@ -697,12 +698,12 @@ const styles = StyleSheet.create({
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -729,11 +730,11 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",

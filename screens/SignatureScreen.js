@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Dimensions, View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Signature from "react-native-signature-canvas";
+import Colors from "../constants/colors";
 
 export default function SignatureScreen({
   setShowSignatureScreen,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     height: width,
     width: height,
     padding: 10,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     transform: [{ rotate: "270deg" }],
   },
   signatureRow: {
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   sigSaveBtn: {
     width: "25%",
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     marginTop: "5%",
     height: "35%",

@@ -1,5 +1,6 @@
 import { Dimensions, Pressable, StyleSheet, Text } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import Colors from "../../constants/colors";
 
 const { width } = Dimensions.get("window");
 let textStyle = 12;
@@ -20,7 +21,7 @@ export function SignupButton() {
 
 const styles = StyleSheet.create({
   signupText: {
-    color: "#F47C20",
+    color: Colors.accent,
     fontSize: textStyle,
     justifyContent: "flex-start",
   },

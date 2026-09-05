@@ -6,9 +6,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import JobsList from "./JobsList";
 import CompletedJobs from "./CompletedJobs";
 import Profile from "./Profile";
-import { useJob } from "../Components/Context";
-import { getActiveJobs } from "../Components/constants";
+import { useJob } from "../components/Context";
+import { getActiveJobs } from "../components/constants";
 import { useMemo } from "react";
+import Colors from "../constants/colors";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -19,11 +20,11 @@ else if (width > 600) textStyle = 20;
 
 // Not real view styles — a react-navigation screenOptions config object.
 const tabNavIcons = {
-  tabBarIndicatorStyle: { backgroundColor: "#F47C20" },
-  tabBarActiveTintColor: "#F47C20",
-  tabBarInactiveTintColor: "#8A95A3",
+  tabBarIndicatorStyle: { backgroundColor: Colors.accent },
+  tabBarActiveTintColor: Colors.accent,
+  tabBarInactiveTintColor: Colors.muted,
   tabBarStyle: {
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
   },
   tabBarAllowFontScaling: true,
   tabBarLabelStyle: { fontSize: textStyle - 1 },
@@ -32,7 +33,7 @@ const tabNavIcons = {
 const styles = StyleSheet.create({
   tabBarBadge: {
     color: "#ffffff",
-    backgroundColor: "#FF6B6B",
+    backgroundColor: Colors.error,
     paddingHorizontal: textStyle * 0.3,
     borderRadius: 50,
   },

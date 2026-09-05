@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 import { IconButton } from "react-native-paper";
 
-import CustomInput from "../CustomInput";
+import CustomInput from "../ui/CustomInput";
 import {
   insertCheckInOutSqlite,
   postCheckInOutApi,
@@ -24,6 +24,7 @@ import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
 import { useSQLiteContext } from "expo-sqlite";
 import { getUnixTime } from "date-fns";
 import * as Network from "expo-network";
+import Colors from "../../constants/colors";
 
 export default function CheckInOut({
   setShowDetails,
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   logoutBtnText: {
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   },
   checkInOutBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",

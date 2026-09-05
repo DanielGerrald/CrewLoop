@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useJob } from "../../Components/Context";
+import { useJob } from "../../components/Context";
 import JobNav from "./JobNav";
 import Details from "./Details";
 import Contacts from "./Contacts";
@@ -27,6 +27,7 @@ import { selectCheckInOutSqlite } from "../../Database/CheckInOutDatabase";
 import { selectFinalCheckOutSqlite } from "../../Database/FinalCheckOutDatabase";
 import { useSQLiteContext } from "expo-sqlite";
 import { selectAttachmentSqlite } from "../../Database/AttachmentDatabase";
+import Colors from "../../constants/colors";
 
 export default function JobModal({
   visible,
@@ -316,7 +317,7 @@ else if (width > 600) textStyle = 20;
 const styles = StyleSheet.create({
   SafeArea: {
     flex: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     paddingTop: 15,
     paddingBottom: 15,
   },
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   avatarIcon: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     marginRight: 10,
   },
   closeButton: {
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   columnView: { flex: 1, flexDirection: "column" },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.03,
   },
   jobCard: {
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     marginBottom: height * 0.02,
     width: "100%",
     elevation: 6,

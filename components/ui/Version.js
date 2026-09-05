@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import Constants from "expo-constants";
+import Colors from "../../constants/colors";
 
 export default function Version() {
   const version = Constants.expoConfig?.version ?? "—";
@@ -12,7 +13,7 @@ export default function Version() {
 
 const styles = StyleSheet.create({
   TextVersion: {
-    color: "#8A95A3",
+    color: Colors.muted,
     fontSize: 10,
     justifyContent: "flex-start",
   },

@@ -27,8 +27,9 @@ import {
   insertAttachmentSqlite,
 } from "../../Database/AttachmentDatabase";
 import { lastLoggedinUserSqlite } from "../../Database/UserDatabase";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 import AttachmentSubmit from "./AttachmentSubmit";
+import Colors from "../../constants/colors";
 
 function ImageThumbnail({ image, onPress, onLongPress }) {
   return (
@@ -369,8 +370,8 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                   uncheckedColor: "#ffffff",
                   icon: "image",
                   style: {
-                    borderColor: "#F47C20",
-                    backgroundColor: "#F47C20",
+                    borderColor: Colors.accent,
+                    backgroundColor: Colors.accent,
                   },
                   onPress: () => {
                     showModal("select");
@@ -382,7 +383,7 @@ export default function Photos({ selectedJob, fetchPhotos, images }) {
                   checkedColor: "#ffffff",
                   uncheckedColor: "#ffffff",
                   icon: "camera",
-                  style: { borderColor: "#F47C20", backgroundColor: "#F47C20" },
+                  style: { borderColor: Colors.accent, backgroundColor: Colors.accent },
                   onPress: () => {
                     showModal("take");
                   },
@@ -470,7 +471,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   chip: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     margin: "1%",
     borderRadius: 15,
   },
@@ -479,14 +480,14 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },
   horizontalRule: {
     flex: 1,
     height: 1,
-    backgroundColor: "#8A95A3",
+    backgroundColor: Colors.muted,
     marginBottom: 10,
     marginTop: 15,
   },
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
   jobNavContent: {
     marginVertical: height * 0.03,
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
   labelView: {
@@ -509,7 +510,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     width: width * 0.6,
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     height: height * 0.07,
     alignItems: "center",
@@ -535,7 +536,7 @@ const styles = StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -557,9 +558,9 @@ const styles = StyleSheet.create({
   },
   segmentedBtn: {
     width: width * 0.7,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
-    borderColor: "#F47C20",
+    borderColor: Colors.accent,
     elevation: 6,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },

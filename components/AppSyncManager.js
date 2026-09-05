@@ -63,6 +63,7 @@ import {
 } from "../Database/FinalCheckOutDatabase";
 import { getLabelsApi, insertCategoryLabelSqlite } from "../Database/LabelDatabase";
 import BannerOnPendingSync from "./BannerOnPendingSync";
+import Colors from "../constants/colors";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -444,7 +445,7 @@ export default function AppSyncManager({ children, fetchPhotos, fetchFiles }) {
             right: 0,
             paddingVertical: 10,
             paddingHorizontal: 12,
-            backgroundColor: "#01ab52",
+            backgroundColor: Colors.success,
             zIndex: 9999,
           }}
         >
@@ -476,7 +477,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     alignItems: "center",
     paddingHorizontal: width * 0.05,
   },

@@ -5,10 +5,11 @@ import { Avatar, Card, Text } from "react-native-paper";
 import { useMemo } from "react";
 
 import JobCard from "./JobCard";
-import Loading from "./Loading";
+import Loading from "./ui/Loading";
 import { useJob } from "./Context";
 import AppSyncManager from "./AppSyncManager";
 import { BLURHASH, SAFE_AREA_EDGES } from "./constants";
+import Colors from "../constants/colors";
 
 export default function JobsListScreen({
   title,
@@ -65,7 +66,7 @@ else if (width > 600) textStyle = 20;
 const styles = StyleSheet.create({
   SafeArea: {
     flex: 1,
-    backgroundColor: "#1E2530",
+    backgroundColor: Colors.background,
     paddingTop: 15,
     paddingBottom: 15,
   },
@@ -75,11 +76,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   avatarIcon: {
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     marginRight: 10,
   },
   compJobCard: {
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     marginBottom: height * 0.02,
     width: "100%",
     alignItems: "center",

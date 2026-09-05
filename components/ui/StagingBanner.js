@@ -1,5 +1,6 @@
-import { environment } from "../Config";
+import { environment } from "../../Config";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
+import Colors from "../../constants/colors";
 
 const { width, height } = Dimensions.get("window");
 let textStyle = 12;
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   stagingBannerText: { color: "white", fontSize: textStyle },
   stagingBannerView: {
     top: 0,
-    backgroundColor: "#1B3A6B",
+    backgroundColor: Colors.primary,
     paddingTop: height / 20,
     alignItems: "center",
     justifyContent: "center",

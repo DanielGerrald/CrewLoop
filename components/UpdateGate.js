@@ -11,6 +11,7 @@ import {
 import * as Application from "expo-application";
 
 import { getMinimums } from "../Database/UpdateGateApi";
+import Colors from "../constants/colors";
 
 // Update these with your actual App Store / Play Store URLs before publishing
 const IOS_APP_STORE_URL = "https://apps.apple.com/app/crewloop";
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   TextDescript: {
-    color: "#D3D3D3",
+    color: Colors.textSecondary,
     fontSize: textStyle,
   },
   checkoutFormBtns: {
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   },
   modalPopupContent: {
     alignItems: "center",
-    backgroundColor: "#6A89A7",
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     width: "100%",
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     width: width * 0.6,
-    backgroundColor: "#F47C20",
+    backgroundColor: Colors.accent,
     borderRadius: 20,
     elevation: 6,
     shadowColor: "black",
