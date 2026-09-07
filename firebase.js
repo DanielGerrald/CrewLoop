@@ -4,12 +4,14 @@ import { getDatabase } from "firebase/database";
 
 import { environment } from "./Config";
 
+// TODO(rebrand): replace with the new Ohmly Firebase project's config
+// (apiKey via .env, messagingSenderId and appId from Project settings).
 const firebaseConfig = {
   apiKey: environment.apikey,
-  authDomain: "crewloop-9564f.firebaseapp.com",
+  authDomain: "ohmly-xxxxx.firebaseapp.com",
   databaseURL: environment.apiUrl,
-  projectId: "crewloop-9564f",
-  storageBucket: "crewloop-9564f.firebasestorage.app",
+  projectId: "ohmly-xxxxx",
+  storageBucket: "ohmly-xxxxx.firebasestorage.app",
   messagingSenderId: "363196013025",
   appId: "1:363196013025:web:86f3941920ac87e7b39aa0"
 };

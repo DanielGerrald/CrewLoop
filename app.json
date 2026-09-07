@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CrewLoop",
-    "slug": "crewloop",
+    "name": "Ohmly",
+    "slug": "ohmly",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -12,7 +12,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crewloop.fieldops",
+      "bundleIdentifier": "com.ohmly.fieldops",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
@@ -35,8 +35,12 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.crewloop.fieldops",
-      "softwareKeyboardLayoutMode": "pan"
+      "package": "com.ohmly.fieldops",
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B3A6B"
+      }
     },
     "plugins": [
       "expo-asset",

@@ -9,7 +9,7 @@ else if (width > 600) textStyle = 20;
 
 export function SignupButton() {
   const handlePress = async () => {
-    await WebBrowser.openBrowserAsync("https://github.com/DanielGerrald/CrewLoop");
+    await WebBrowser.openBrowserAsync("https://github.com/DanielGerrald/Ohmly");
   };
 
   return (

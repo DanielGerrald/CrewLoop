@@ -8,7 +8,7 @@ function getEnvironment() {
       return {
         envName: "production",
         icon: "✅",
-        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
+        apiUrl: "https://ohmly-xxxxx-default-rtdb.firebaseio.com",
         enableHiddenFeatures: false,
         apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: false,
@@ -18,7 +18,7 @@ function getEnvironment() {
       return {
         envName: "staging",
         icon: "🚧",
-        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
+        apiUrl: "https://ohmly-xxxxx-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
         apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,
@@ -28,7 +28,7 @@ function getEnvironment() {
       return {
         envName: "development",
         icon: "⚙️",
-        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
+        apiUrl: "https://ohmly-xxxxx-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
         apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,
@@ -38,7 +38,7 @@ function getEnvironment() {
       return {
         envName: "demo",
         icon: "🎯",
-        apiUrl: "https://crewloop-9564f-default-rtdb.firebaseio.com",
+        apiUrl: "https://ohmly-xxxxx-default-rtdb.firebaseio.com",
         enableHiddenFeatures: true,
         apikey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
         staging: true,

@@ -262,7 +262,7 @@ export default function Login() {
                   contentFit={"contain"}
                   placeholder={BLURHASH}
                 />
-                <Text style={styles.loginTitle}>CrewLoop</Text>
+                <Text style={styles.loginTitle}>Ohmly</Text>
                 <Text style={styles.loginSubtitle}>
                   Sign in to manage your jobs
                 </Text>

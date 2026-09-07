@@ -1,4 +1,4 @@
-// CrewLoop brand palette — the widely-reused, brand-specific colors.
+// Ohmly brand palette — the widely-reused, brand-specific colors.
 // Generic colors (white, black) and one-off single-component colors stay
 // as local literals in the file that uses them, matching how the example
 // project's own Colors constant only holds brand-specific shades.

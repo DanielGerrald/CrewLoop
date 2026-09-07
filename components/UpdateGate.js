@@ -14,8 +14,8 @@ import { getMinimums } from "../Database/UpdateGateApi";
 import Colors from "../constants/colors";
 
 // Update these with your actual App Store / Play Store URLs before publishing
-const IOS_APP_STORE_URL = "https://apps.apple.com/app/crewloop";
-const ANDROID_PACKAGE = "com.crewloop.fieldops";
+const IOS_APP_STORE_URL = "https://apps.apple.com/app/ohmly";
+const ANDROID_PACKAGE = "com.ohmly.fieldops";
 const ANDROID_PLAY_STORE_WEB = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`;
 const ANDROID_PLAY_STORE_MARKET = `market://details?id=${ANDROID_PACKAGE}`;
 

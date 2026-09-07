@@ -1,8 +1,8 @@
-# CrewLoop
+# Ohmly
 
 **Field operations management for mobile crews — built with React Native + Expo**
 
-CrewLoop is a cross-platform iOS/Android field service app that connects subcontractors to a back-office CRM. Technicians use the app to manage their assigned jobs, document their work, and sync completed data back to the office — even when working in areas without internet connectivity.
+Ohmly is a cross-platform iOS/Android field service app that connects subcontractors to a back-office CRM. Technicians use the app to manage their assigned jobs, document their work, and sync completed data back to the office — even when working in areas without internet connectivity.
 
 > This repository is a portfolio showcase of the production codebase — screenshots, architecture, and code are real. It's wired to a private Firebase backend, so it isn't set up to be cloned and run by visitors without their own Firebase project.
 
@@ -68,9 +68,9 @@ The code shown here — including the offline-first SQLite architecture, job wor
 ### Workflow Demo
 
 <p align="center">
-  <img src="assets/demo-workflow.gif" width="300" alt="CrewLoop workflow demo" />
+  <img src="assets/demo-workflow.gif" width="300" alt="Ohmly workflow demo" />
   &nbsp;&nbsp;
-  <img src="assets/demo-workflow-2.gif" width="300" alt="CrewLoop job detail demo" />
+  <img src="assets/demo-workflow-2.gif" width="300" alt="Ohmly job detail demo" />
 </p>
 
 *Left: navigating an active job — work description, site contacts, file/photo upload, and work log. Right: reviewing a completed job's contacts and final checkout summary.*
@@ -79,7 +79,7 @@ The code shown here — including the offline-first SQLite architecture, job wor
 
 ## What the App Does
 
-CrewLoop handles the full field technician workflow:
+Ohmly handles the full field technician workflow:
 
 | Feature | Description |
 |---|---|
@@ -127,7 +127,7 @@ This build talks to a private Firebase project (Authentication + Realtime Databa
 ## Project Structure
 
 ```
-CrewLoop/
+Ohmly/
 ├── App.js                  # Root component, navigation setup
 ├── Config.js               # Environment config (release channel → Firebase URL/flags)
 ├── firebase.js             # Firebase app init (Auth + Realtime Database)
