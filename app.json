@@ -24,16 +24,12 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "64ef7588-6805-4115-9a72-1b97205dc3f4"
-      }
-    },
     "android": {
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.ohmly.fieldops",
       "softwareKeyboardLayoutMode": "pan",
@@ -47,8 +43,12 @@
       [
         "expo-build-properties",
         {
-          "ios": { "deploymentTarget": "16.0" },
-          "android": { "minSdkVersion": 24 }
+          "ios": {
+            "deploymentTarget": "16.0"
+          },
+          "android": {
+            "minSdkVersion": 24
+          }
         }
       ],
       [
@@ -84,7 +84,11 @@
       "expo-image",
       "expo-sharing"
     ],
-    "runtimeVersion": "1.0.0"
+    "runtimeVersion": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "323fd43a-d252-486c-9dae-30ee98aaa2df"
+      }
+    }
   }
-
 }
